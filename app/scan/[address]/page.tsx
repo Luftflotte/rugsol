@@ -325,8 +325,54 @@ export default function ScanResultPage() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleShareImage = async () => {
-    // Share logic placeholder
-    alert("Share image functionality");
+    if (!result) return;
+    setIsGenerating(true);
+
+    try {
+      const metadata = result.checks.metadata.data;
+      const price = result.price;
+      const liq = result.checks.liquidity.data;
+      const h = result.checks.holders.data;
+      const adv = result.checks.advanced?.data;
+
+      // Prepare tags (top 3 risk factors or safe points)
+      const tags = result.penalties.slice(0, 3).map(p => p.category).join(",") || "Safe,Verified,Low Risk";
+
+      const params = new URLSearchParams({
+        address: result.tokenAddress,
+        name: metadata?.name || "Unknown",
+        symbol: metadata?.symbol || "TOKEN",
+        score: result.score.toString(),
+        grade: result.grade,
+        label: result.gradeLabel,
+        mode: result.scanMode,
+        price: price?.priceUsd ? `$${price.priceUsd < 0.0001 ? price.priceUsd.toFixed(8) : price.priceUsd.toFixed(4)}` : "$0.00",
+        mcap: price?.marketCap ? `$${price.marketCap.toLocaleString()}` : "0",
+        change: price?.priceChange?.h24 ? `${price.priceChange.h24 > 0 ? '+' : ''}${price.priceChange.h24.toFixed(1)}%` : "0%",
+        liq: result.scanMode === 'pump' ? `${result.bondingCurveData?.curveProgressPercent || 0}%` : (liq?.lpSizeUsd ? `$${liq.lpSizeUsd.toLocaleString()}` : "$0"),
+        top10: h ? `${h.topTenPercent.toFixed(1)}%` : "0%",
+        lock: result.scanMode === 'pump' ? (adv?.sniperCount?.toString() || "0") : (liq?.lpBurned ? "Burned" : "No"),
+        sell: result.checks.honeypot.data?.isHoneypot ? "No" : "Yes",
+        mint: result.checks.mintAuthority.data?.status === "pass" ? "Revoked" : "Active",
+        penalty: result.totalPenalties.toString(),
+        tags: tags,
+        image: metadata?.image || ""
+      });
+
+      const url = `/api/og?${params.toString()}`;
+      
+      // Download the image
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `rugsol_${result.tokenAddress.slice(0, 8)}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error("Share error:", err);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -444,6 +490,21 @@ export default function ScanResultPage() {
                     gradeLabel={result.gradeLabel}
                     animate={true}
                   />
+
+                  <div className="mt-6 space-y-3">
+                    <button
+                      onClick={handleShareImage}
+                      disabled={isGenerating}
+                      className="w-full py-3 px-4 bg-primary text-primary-foreground rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+                    >
+                      {isGenerating ? (
+                        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                      )}
+                      {isGenerating ? "Generating..." : "Share Report Card"}
+                    </button>
+                  </div>
                   
                   <div className="mt-6 pt-6 border-t border-border-color">
                      <SidebarLinks 
