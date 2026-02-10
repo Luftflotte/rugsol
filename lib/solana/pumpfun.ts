@@ -47,7 +47,13 @@ export async function getPumpFunCurveState(
 
     const buf = Buffer.from(pdaInfo.data);
     const START_OFFSET = 8; // Anchor discriminator
-    
+    const REQUIRED_SIZE = START_OFFSET + 41; // 8 (discriminator) + 5 * 8 (u64 fields) + 1 (bool) = 49 bytes
+
+    // Guard: If account data is too small, it's not a valid Pump.fun bonding curve
+    if (buf.length < REQUIRED_SIZE) {
+      return { exists: false, pda: pda.toBase58(), virtualTokenReserves: "0", virtualSolReservesLamports: "0", virtualSolReservesSol: 0, realTokenReserves: "0", realSolReservesLamports: "0", realSolReservesSol: 0, tokenTotalSupply: 0, complete: false, pricePerTokenSol: null, marketCapSol: null, curveProgressPercent: null, remainingSolToGraduate: null };
+    }
+
     // Decoding
     const virtualTokenReserves = buf.readBigUInt64LE(START_OFFSET + 0);
     const virtualSolReservesLamports = buf.readBigUInt64LE(START_OFFSET + 8);

@@ -1,6 +1,9 @@
 import { PublicKey } from "@solana/web3.js";
 import { connection } from "./connection";
 
+const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
+const HELIUS_RPC_URL = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}`;
+
 // LP Pool program addresses to filter out
 const LP_PROGRAM_ADDRESSES = new Set([
   "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8", // Raydium
@@ -25,6 +28,43 @@ export interface HoldersAnalysis {
   clustersDetected: number;
 }
 
+/**
+ * Fallback: Use Helius DAS API to get token accounts when getTokenLargestAccounts
+ * fails for tokens with too many holders (e.g. USDC with 21M+ accounts).
+ */
+async function fetchLargestAccountsViaDAS(mintAddress: string) {
+  const response = await fetch(HELIUS_RPC_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "getTokenAccounts",
+      params: {
+        mint: mintAddress,
+        limit: 20,
+        options: { showZeroBalance: false },
+      },
+    }),
+  });
+
+  const data = await response.json();
+  if (!data.result?.token_accounts?.length) {
+    return null;
+  }
+
+  // Sort by amount descending to get largest holders
+  const sorted = data.result.token_accounts.sort(
+    (a: any, b: any) => Number(BigInt(b.amount) - BigInt(a.amount))
+  );
+
+  return sorted.map((acc: any) => ({
+    address: new PublicKey(acc.address),
+    amount: acc.amount,
+    owner: acc.owner,
+  }));
+}
+
 export async function analyzeHolders(
   mintAddress: string,
   totalSupply: bigint,
@@ -44,57 +84,83 @@ export async function analyzeHolders(
 
     // Get top 20 largest accounts
     let largestAccounts;
+    let usedDASFallback = false;
     try {
       // getTokenLargestAccounts only works for valid SPL Token mints
       largestAccounts = await connection.getTokenLargestAccounts(mintPublicKey);
-      
+
       if (!largestAccounts || !largestAccounts.value) {
         throw new Error("No holder data returned from RPC");
       }
     } catch (rpcError: any) {
-      // If the error is -32600 (Invalid Request), it might not be a standard SPL token
-      // or the RPC is having issues. We handle it gracefully.
-      console.warn(`RPC error fetching holders for ${mintAddress}:`, rpcError.message || rpcError);
-      return {
-        topHolders: [],
-        topTenPercent: 0,
-        largestHolder: null,
-        clustersDetected: 0,
-      };
+      const msg = rpcError.message || "";
+      // For tokens with too many accounts, fall back to Helius DAS API
+      if (msg.includes("Too many accounts") || msg.includes("number of accounts")) {
+        console.warn(`Too many holders for ${mintAddress}, falling back to Helius DAS API`);
+        try {
+          const dasAccounts = await fetchLargestAccountsViaDAS(mintAddress);
+          if (dasAccounts && dasAccounts.length > 0) {
+            largestAccounts = { value: dasAccounts };
+            usedDASFallback = true;
+          } else {
+            return { topHolders: [], topTenPercent: 0, largestHolder: null, clustersDetected: 0 };
+          }
+        } catch (dasError) {
+          console.warn(`DAS fallback also failed for ${mintAddress}:`, dasError);
+          return { topHolders: [], topTenPercent: 0, largestHolder: null, clustersDetected: 0 };
+        }
+      } else {
+        console.warn(`RPC error fetching holders for ${mintAddress}:`, msg || rpcError);
+        return { topHolders: [], topTenPercent: 0, largestHolder: null, clustersDetected: 0 };
+      }
     }
 
     const topHolders: HolderInfo[] = [];
-
-    // Get owner info for each account (Batching or limiting to top 10 to save RPC calls)
-    const accountsToProcess = largestAccounts.value.slice(0, 15);
     const excludeSet = new Set(excludeOwners);
 
-    for (const account of accountsToProcess) {
-      try {
-        const accountInfo = await connection.getParsedAccountInfo(account.address);
+    if (usedDASFallback) {
+      // DAS response already includes owner info, no need for extra RPC calls
+      const accountsToProcess = largestAccounts.value.slice(0, 15);
+      for (const account of accountsToProcess) {
+        const owner = account.owner;
+        const amount = account.amount;
+        const addressStr = typeof account.address === "string" ? account.address : account.address.toBase58();
+        const percent = Number((BigInt(amount) * BigInt(10000)) / totalSupply) / 100;
+        const isLpPool = LP_PROGRAM_ADDRESSES.has(owner) || excludeSet.has(owner) || excludeSet.has(addressStr);
 
-        if (!accountInfo.value || !("parsed" in accountInfo.value.data)) {
+        topHolders.push({ address: addressStr, owner, amount, percent, isLpPool });
+      }
+    } else {
+      // Standard path: need to fetch owner info for each account
+      const accountsToProcess = largestAccounts.value.slice(0, 15);
+
+      for (const account of accountsToProcess) {
+        try {
+          const accountInfo = await connection.getParsedAccountInfo(account.address);
+
+          if (!accountInfo.value || !("parsed" in accountInfo.value.data)) {
+            continue;
+          }
+
+          const info = accountInfo.value.data.parsed.info;
+          const owner = info.owner;
+          const amount = account.amount;
+          const percent = Number((BigInt(amount) * BigInt(10000)) / totalSupply) / 100;
+
+          // Mark as LP Pool if it's in our known list OR if it's an excluded address (like Pump Curve)
+          const isLpPool = LP_PROGRAM_ADDRESSES.has(owner) || excludeSet.has(owner) || excludeSet.has(account.address.toBase58());
+
+          topHolders.push({
+            address: account.address.toBase58(),
+            owner,
+            amount,
+            percent,
+            isLpPool,
+          });
+        } catch (e) {
+          console.warn(`Failed to fetch info for account ${account.address.toBase58()}:`, e);
           continue;
         }
-
-        const info = accountInfo.value.data.parsed.info;
-        const owner = info.owner;
-        const amount = account.amount;
-        const percent = Number((BigInt(amount) * BigInt(10000)) / totalSupply) / 100;
-        
-        // Mark as LP Pool if it's in our known list OR if it's an excluded address (like Pump Curve)
-        const isLpPool = LP_PROGRAM_ADDRESSES.has(owner) || excludeSet.has(owner) || excludeSet.has(account.address.toBase58());
-
-        topHolders.push({
-          address: account.address.toBase58(),
-          owner,
-          amount,
-          percent,
-          isLpPool,
-        });
-      } catch (e) {
-        console.warn(`Failed to fetch info for account ${account.address.toBase58()}:`, e);
-        continue;
       }
     }
 

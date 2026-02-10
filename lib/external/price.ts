@@ -62,6 +62,37 @@ export async function getTokenPrice(mintAddress: string): Promise<TokenPrice | n
     "Es9vMFrzaDCSTMdCD8MZAgDQNksFgeBeZcWfbD6Scky": "USDT",
   };
 
+  // Hard override for SOL/wSOL — Jupiter Price API returns 404 for these
+  const SOL_ADDRESSES = [
+    "So11111111111111111111111111111111111111111",
+    "So11111111111111111111111111111111111111112",
+  ];
+
+  if (SOL_ADDRESSES.includes(mintAddress)) {
+    // Fetch SOL price from DexScreener (wSOL pairs) or CoinGecko as fallback
+    try {
+      const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");
+      if (response.ok) {
+        const data = await response.json();
+        const priceUsd = data.solana?.usd || 0;
+        if (priceUsd > 0) {
+          const marketCap = priceUsd * 589_000_000;
+          return {
+            priceUsd,
+            marketCap,
+            liquidity: { usd: 1_000_000_000, base: 0, quote: 0 },
+            priceChange: { m5: 0, h1: 0, h6: 0, h24: 0 },
+            pairCreatedAt: 0,
+          };
+        }
+      }
+    } catch (e) {
+      console.warn("CoinGecko SOL price fetch failed:", e);
+    }
+    // Absolute fallback — return null so the caller handles it
+    return null;
+  }
+
   if (STABLECOINS[mintAddress]) {
     const priceUsd = 1.00;
     const marketCap = await calculateMarketCap(mintAddress, priceUsd);

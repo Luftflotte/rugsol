@@ -57,19 +57,21 @@ function CheckRow({ check }: { check: CheckItem }) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
-    <div className="py-1 sm:py-1.5 md:py-3 px-1.5 sm:px-3 md:px-4 hover:bg-bg-secondary rounded-lg transition-colors group overflow-visible">
+    <div className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 hover:bg-bg-secondary/50 rounded-xl transition-all duration-200 group overflow-visible hover:shadow-sm border border-transparent hover:border-border-color">
       {/* Mobile: Stack vertically, Desktop: Side by side */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-0">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
         {/* Name and status */}
         <div className="flex items-center gap-2 md:gap-3">
-          <StatusIcon status={check.status} />
-          <span className="text-xs md:text-sm text-text-secondary">{check.name}</span>
+          <div className="transition-transform duration-200 group-hover:scale-110">
+            <StatusIcon status={check.status} />
+          </div>
+          <span className="text-xs md:text-sm text-text-secondary font-medium group-hover:text-text-primary transition-colors">{check.name}</span>
         </div>
 
         {/* Value, penalty, tooltip */}
         <div className="flex items-center gap-2 pl-7 md:pl-0 flex-wrap">
           <span
-            className={`text-xs md:text-sm font-mono break-all ${
+            className={`text-xs md:text-sm font-mono font-semibold break-all ${
               check.status === "pass"
                 ? "text-green-400"
                 : check.status === "fail"
@@ -83,7 +85,7 @@ function CheckRow({ check }: { check: CheckItem }) {
           </span>
 
           {check.penalty && check.penalty > 0 ? (
-            <span className="text-[10px] md:text-xs text-red-400 bg-red-500/10 px-1.5 md:px-2 py-0.5 rounded">
+            <span className="text-[10px] md:text-xs font-bold text-red-400 bg-red-500/15 border border-red-500/20 px-1.5 md:px-2 py-0.5 rounded-md">
               -{check.penalty}
             </span>
           ) : null}
@@ -93,13 +95,14 @@ function CheckRow({ check }: { check: CheckItem }) {
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
               onClick={() => setShowTooltip(!showTooltip)}
-              className="p-1 text-text-muted hover:text-text-secondary transition-colors"
+              className="p-1.5 text-text-muted hover:text-text-primary transition-all duration-200 hover:bg-bg-secondary rounded-lg"
             >
               <HelpCircle className="w-3.5 h-3.5 md:w-4 md:h-4" />
             </button>
 
             {showTooltip && (
-              <div className="absolute right-0 top-full mt-2 z-50 w-48 md:w-64 p-2 md:p-3 bg-bg-card border border-border-color rounded-lg shadow-xl text-xs text-text-secondary">
+              <div className="absolute right-0 top-full mt-2 z-50 w-48 md:w-64 p-3 md:p-4 bg-bg-card border border-border-color rounded-xl shadow-2xl text-xs text-text-secondary animate-fade-in-up backdrop-blur-xl">
+                <div className="absolute -top-1 right-4 w-2 h-2 bg-bg-card border-t border-l border-border-color rotate-45" />
                 {check.tooltip}
               </div>
             )}
@@ -119,39 +122,57 @@ function CheckGroupAccordion({ group }: { group: CheckGroup }) {
 
   return (
     <div
-      className={`rounded-xl border ${severityColors[group.severity]} overflow-hidden`}
+      className={`rounded-2xl border ${severityColors[group.severity]} overflow-hidden backdrop-blur-sm transition-all duration-300 hover:shadow-lg`}
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-3 md:p-4 hover:bg-bg-secondary transition-colors"
+        className="w-full flex items-center justify-between p-4 md:p-5 hover:bg-bg-secondary/50 transition-all duration-200 group"
       >
-        <div className="flex items-center gap-2 md:gap-3">
-          <span className={`text-xs md:text-sm font-semibold ${severityLabels[group.severity].color}`}>
+        <div className="flex items-center gap-3 md:gap-4">
+          {/* Severity indicator dot */}
+          <div className={`w-2 h-2 rounded-full ${
+            group.severity === 'critical' ? 'bg-red-500 animate-pulse shadow-lg shadow-red-500/50' :
+            group.severity === 'high' ? 'bg-orange-500 shadow-lg shadow-orange-500/50' :
+            group.severity === 'medium' ? 'bg-yellow-500 shadow-lg shadow-yellow-500/50' :
+            group.severity === 'low' ? 'bg-blue-400 shadow-lg shadow-blue-400/50' :
+            'bg-purple-400 shadow-lg shadow-purple-400/50'
+          }`} />
+          <span className={`text-sm md:text-base font-bold ${severityLabels[group.severity].color}`}>
             {severityLabels[group.severity].text}
           </span>
-          <span className="text-[10px] md:text-xs text-text-muted">
+          <span className="text-[10px] md:text-xs text-text-muted font-medium bg-bg-secondary/50 px-2 py-0.5 rounded-full">
             {group.checks.length} checks
           </span>
           {failedCount > 0 && (
-            <span className="text-[10px] md:text-xs bg-red-500/20 text-red-400 px-1.5 md:px-2 py-0.5 rounded-full">
-              {failedCount} issues
+            <span className="text-[10px] md:text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 px-2 md:px-2.5 py-0.5 rounded-full animate-pulse">
+              {failedCount} {failedCount === 1 ? 'issue' : 'issues'}
             </span>
           )}
         </div>
-        {isOpen ? (
-          <ChevronUp className="w-4 h-4 md:w-5 md:h-5 text-text-muted" />
-        ) : (
-          <ChevronDown className="w-4 h-4 md:w-5 md:h-5 text-text-muted" />
-        )}
+        <div className="transition-transform duration-300 group-hover:scale-110">
+          {isOpen ? (
+            <ChevronUp className="w-5 h-5 text-text-muted" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-text-muted" />
+          )}
+        </div>
       </button>
 
-      {isOpen && (
-        <div className="border-t border-border-color">
-          {group.checks.map((check) => (
-            <CheckRow key={check.id} check={check} />
+      <div className={`transition-all duration-300 ease-in-out ${
+        isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+      } overflow-hidden`}>
+        <div className="border-t border-border-color p-2">
+          {group.checks.map((check, idx) => (
+            <div
+              key={check.id}
+              className="animate-fade-in-up"
+              style={{ animationDelay: `${idx * 30}ms` }}
+            >
+              <CheckRow check={check} />
+            </div>
           ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }

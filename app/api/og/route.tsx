@@ -3,24 +3,26 @@ import { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
-async function fetchAndOptimizeImage(url: string | null): Promise<string | null> {
-  if (!url || url === "") return null;
-  if (url.startsWith("data:")) return url;
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
 
+async function fetchAndOptimizeImage(url: string | null): Promise<string | null> {
+  if (!url || url === "" || url === "undefined" || url === "null") return null;
   let targetUrl = url;
   if (url.includes("ipfs.io")) targetUrl = url.replace("ipfs.io", "gateway.pinata.cloud");
   else if (url.startsWith("ipfs://")) targetUrl = url.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
 
   try {
     const res = await fetch(targetUrl, { next: { revalidate: 3600 } });
-    if (!res.ok) return targetUrl;
+    if (!res.ok) return null;
     const arrayBuffer = await res.arrayBuffer();
     const contentType = res.headers.get("content-type") || "image/png";
-    const base64 = Buffer.from(arrayBuffer).toString("base64");
-    return `data:${contentType};base64,${base64}`;
-  } catch (e) {
-    return targetUrl;
-  }
+    return `data:${contentType};base64,${arrayBufferToBase64(arrayBuffer)}`;
+  } catch (e) { return null; }
 }
 
 export async function GET(request: NextRequest) {
@@ -29,12 +31,11 @@ export async function GET(request: NextRequest) {
     const address = searchParams.get("address") || "";
     const name = searchParams.get("name") || "Unknown";
     const symbol = searchParams.get("symbol") || "TOKEN";
-    const score = parseInt(searchParams.get("score") || "0");
+    const score = Math.max(0, Math.min(100, parseInt(searchParams.get("score") || "0") || 0));
     const grade = searchParams.get("grade") || "F";
     const gradeLabel = searchParams.get("label") || "Likely Scam";
     const image = searchParams.get("image");
     const mode = (searchParams.get("mode") || "dex").toUpperCase();
-    
     const price = searchParams.get("price") || "$0.00";
     const mcap = searchParams.get("mcap") || "0";
     const change = searchParams.get("change") || "0%";
@@ -44,13 +45,13 @@ export async function GET(request: NextRequest) {
     const lock = searchParams.get("lock") || "No";
     const sell = searchParams.get("sell") || "Yes";
     const mint = searchParams.get("mint") || "Active";
-    const penalty = parseInt(searchParams.get("penalty") || "0");
-    const tags = (searchParams.get("tags") || "").split(",").filter(Boolean);
+    const penalty = Math.max(0, parseInt(searchParams.get("penalty") || "0") || 0);
+    const tagsParam = searchParams.get("tags") || "";
+    const tags = tagsParam ? tagsParam.split(",").filter(Boolean) : ["Analyzed"];
 
-    const [interReg, interBold, interBlack, jbMono, jbMonoBold] = await Promise.all([
+    const [interReg, interBold, jbMono, jbMonoBold] = await Promise.all([
       fetch(new URL("https://cdn.jsdelivr.net/fontsource/fonts/inter@5.1.0/latin-400-normal.ttf", import.meta.url)).then(res => res.arrayBuffer()),
       fetch(new URL("https://cdn.jsdelivr.net/fontsource/fonts/inter@5.1.0/latin-700-normal.ttf", import.meta.url)).then(res => res.arrayBuffer()),
-      fetch(new URL("https://cdn.jsdelivr.net/fontsource/fonts/inter@5.1.0/latin-900-normal.ttf", import.meta.url)).then(res => res.arrayBuffer()),
       fetch(new URL("https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@5.1.0/latin-400-normal.ttf", import.meta.url)).then(res => res.arrayBuffer()),
       fetch(new URL("https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@5.1.0/latin-700-normal.ttf", import.meta.url)).then(res => res.arrayBuffer())
     ]);
@@ -61,35 +62,32 @@ export async function GET(request: NextRequest) {
     if (score >= 60) theme = { bg: "linear-gradient(150deg, #080d08 0%, #0b130b 45%, #090f09 100%)", ac: "#22c55e", acDim: "rgba(34,197,94,0.6)", acBg: "rgba(34,197,94,0.1)", acBorder: "rgba(34,197,94,0.18)" };
     else if (score >= 40) theme = { bg: "linear-gradient(150deg, #0d0b08 0%, #13100b 45%, #0f0c09 100%)", ac: "#f59e0b", acDim: "rgba(245,158,11,0.6)", acBg: "rgba(245,158,11,0.1)", acBorder: "rgba(245,158,11,0.18)" };
 
-    // Final Scale Up: r=108, cx=cy=135, circum=~680
     const circum = 680;
     const offset = circum * (1 - score / 100);
     const dateStr = new Date().toLocaleString('en-GB', { timeZone: 'UTC', hour12: false }).replace(',', '') + ' UTC';
 
-    // Advanced 3rd Column Color Logic
-    let m3Color = "#22c55e"; // Default green
+    let m3Color = "#22c55e";
     if (mode === "PUMP") {
         const snipers = parseInt(lock) || 0;
         if (snipers > 5) m3Color = "#ef4444";
         else if (snipers > 0) m3Color = "#f59e0b";
     } else {
-        if (lock === "No" || lock === "Active") m3Color = "#ef4444";
+        if (lock === "No" || lock === "Active" || lock === "0") m3Color = "#ef4444";
     }
 
     return new ImageResponse(
       (
         <div style={{ width: 1200, height: 630, display: "flex", flexDirection: "column", background: theme.bg, fontFamily: "Inter", position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", backgroundImage: "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)", backgroundSize: "64px 64px" }} />
-          <div style={{ position: "absolute", width: 700, height: 700, borderRadius: "50%", background: theme.ac, opacity: 0.045, filter: "blur(140px)", right: -120, top: -120, display: "flex" }} />
-          <div style={{ height: 5, background: `linear-gradient(90deg, transparent 0%, ${theme.ac} 50%, transparent 100%)`, display: "flex" }} />
+          <div style={{ position: "absolute", width: 700, height: 700, borderRadius: "50%", background: theme.ac, opacity: 0.04, filter: "blur(140px)", right: -120, top: -120, display: "flex" }} />
+          <div style={{ height: 5, width: "100%", background: `linear-gradient(90deg, transparent 0%, ${theme.ac} 50%, transparent 100%)`, display: "flex" }} />
 
           <div style={{ flex: 1, display: "flex", padding: "52px 72px 32px", gap: 40, position: "relative" }}>
-            
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-start", gap: 60 }}>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
                   <div style={{ width: 90, height: 90, borderRadius: 22, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                    {tokenImage ? <img src={tokenImage} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 36, fontWeight: 800, color: "rgba(255,255,255,0.18)", display: "flex" }}>{symbol[0]}</span>}
+                    {tokenImage ? <img src={tokenImage} width="90" height="90" style={{ objectFit: "cover" }} /> : <span style={{ fontSize: 36, fontWeight: 800, color: "rgba(255,255,255,0.18)", display: "flex" }}>{symbol[0]}</span>}
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -100,7 +98,6 @@ export async function GET(request: NextRequest) {
                     <span style={{ fontFamily: "JetBrains Mono", fontSize: 15, color: "rgba(255,255,255,0.16)", letterSpacing: "0.5px", display: "flex" }}>{address}</span>
                   </div>
                 </div>
-
                 <div style={{ display: "flex", flexDirection: "column", marginTop: 36 }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 20 }}>
                     <span style={{ fontFamily: "JetBrains Mono", fontSize: 54, fontWeight: 700, color: "#fff", letterSpacing: "-2.5px", display: "flex" }}>{price}</span>
@@ -108,33 +105,29 @@ export async function GET(request: NextRequest) {
                   </div>
                   <div style={{ fontFamily: "JetBrains Mono", fontSize: 18, color: "rgba(255,255,255,0.2)", marginTop: 10, letterSpacing: "0.5px", display: "flex" }}>MC {mcap}</div>
                 </div>
-
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 36 }}>
                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 15, fontWeight: 600, color: theme.acDim, display: "flex" }}>-{penalty} penalty</span>
                    <div style={{ flex: 1, height: 7, background: "rgba(255,255,255,0.04)", borderRadius: 4, overflow: "hidden", display: "flex" }}>
-                      <div style={{ height: "100%", borderRadius: 4, width: `${Math.min(100, penalty)}%`, background: `linear-gradient(90deg, ${theme.ac}, ${theme.ac}bb)`, display: "flex" }} />
+                      <div style={{ height: "100%", borderRadius: 4, width: `${Math.min(100, (penalty / 100) * 100)}%`, background: `linear-gradient(90deg, ${theme.ac}, ${theme.ac}bb)`, display: "flex" }} />
                    </div>
                 </div>
               </div>
-
-              <div style={{ display: "flex", borderRadius: 16, overflow: "hidden" }}>
+              <div style={{ display: "flex", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.04)" }}>
                 {[
-                    { l: mode === "PUMP" ? "Curve" : "Liquidity", v: liq, c: liq === "$0" ? "#ef4444" : "#22c55e" },
+                    { l: mode === "PUMP" ? "Curve" : "Liquidity", v: liq, c: (liq === "$0" || liq === "0" || liq === "0%") ? "#ef4444" : "#22c55e" },
                     { l: "Top 10", v: top10, c: parseInt(top10) > 50 ? "#ef4444" : "#22c55e" },
                     { l: mode === "PUMP" ? "Snipers" : "LP Lock", v: lock, c: m3Color },
                     { l: "Sellable", v: sell, c: sell === "Yes" ? "#22c55e" : "#ef4444" },
                     { l: "Mint", v: mint, c: mint === "Revoked" ? "#22c55e" : "#ef4444" }
                 ].map((m, i) => (
-                    <div key={i} style={{ flex: 1, padding: "22px 20px", background: "rgba(255,255,255,0.015)", border: "1px solid rgba(255,255,255,0.04)", display: "flex", flexDirection: "column", gap: 10, borderLeft: i === 0 ? "1px solid rgba(255,255,255,0.04)" : "none" }}>
+                    <div key={i} style={{ flex: 1, padding: "22px 20px", background: "rgba(255,255,255,0.015)", display: "flex", flexDirection: "column", gap: 10, borderLeft: i === 0 ? "0" : "1px solid rgba(255,255,255,0.04)" }}>
                         <span style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "2px", color: "rgba(255,255,255,0.25)", fontWeight: 600, display: "flex" }}>{m.l}</span>
                         <span style={{ fontFamily: "JetBrains Mono", fontSize: 20, fontWeight: 700, color: m.c, display: "flex" }}>{m.v}</span>
                     </div>
                 ))}
               </div>
             </div>
-
             <div style={{ width: 1, alignSelf: "stretch", background: "linear-gradient(180deg, transparent 5%, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent 95%)", display: "flex" }} />
-
             <div style={{ width: 360, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 }}>
               <div style={{ position: "relative", width: 270, height: 270, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <svg width="270" height="270" viewBox="0 0 270 270" style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)", display: "flex" }}>
@@ -154,7 +147,6 @@ export async function GET(request: NextRequest) {
               </div>
             </div>
           </div>
-
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 72px", background: "rgba(0,0,0,0.4)", borderTop: "1px solid rgba(255,255,255,0.03)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
               <svg width="36" height="32" viewBox="0 0 48 48" fill="none" style={{ display: "flex" }}><path d="M24 4L42 14V34L24 44L6 34V14L24 4Z" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none"/><path d="M24 16C24 16 30 19 30 24C30 28 26 31 24 32.5C22 31 18 28 18 24C18 19 24 16 24 16Z" fill="rgba(255,255,255,0.25)"/></svg>
@@ -163,7 +155,7 @@ export async function GET(request: NextRequest) {
                 <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.15)", letterSpacing: "3.5px", display: "flex" }}>SCANNER</span>
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
               <span style={{ fontFamily: "JetBrains Mono", fontSize: 18, color: "rgba(255,255,255,0.3)", display: "flex" }}>rugsol.info</span>
               <div style={{ width: 5, height: 5, borderRadius: "50%", background: "rgba(255,255,255,0.12)", display: "flex" }} />
               <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, color: "rgba(255,255,255,0.14)", display: "flex" }}>{dateStr}</span>
@@ -172,9 +164,14 @@ export async function GET(request: NextRequest) {
         </div>
       ),
       { width: 1200, height: 630, fonts: [
-        { name: "Inter", data: interReg, weight: 400 }, { name: "Inter", data: interBold, weight: 700 }, { name: "Inter", data: interBlack, weight: 900 },
-        { name: "JetBrains Mono", data: jbMono, weight: 400 }, { name: "JetBrains Mono", data: jbMonoBold, weight: 700 }
+        { name: "Inter", data: interReg, weight: 400 }, 
+        { name: "Inter", data: interBold, weight: 700 },
+        { name: "JetBrains Mono", data: jbMono, weight: 400 },
+        { name: "JetBrains Mono", data: jbMonoBold, weight: 700 }
       ]}
     );
-  } catch (error) { return new Response("Error generating image", { status: 500 }); }
+  } catch (error) { 
+    console.error("OG Generation Error:", error);
+    return new Response("Error generating image", { status: 500 }); 
+  }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface ScoreDisplayProps {
   score: number;
@@ -107,23 +108,33 @@ export function ScoreDisplay({
   const strokeDashoffset = circumference - (displayScore / 100) * circumference;
 
   return (
-    <div className="flex flex-col items-center gap-3 sm:gap-4">
-      {/* Circular score display */}
-      <div className="relative w-28 h-28 sm:w-32 sm:h-32 overflow-hidden">
-        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 128 128" preserveAspectRatio="xMidYMid meet">
+    <div className="flex flex-col items-center gap-4 sm:gap-5">
+      {/* Circular score display with enhanced effects */}
+      <div className="relative w-32 h-32 sm:w-36 sm:h-36 overflow-visible">
+        {/* Outer glow effect */}
+        <div
+          className="absolute inset-0 rounded-full blur-2xl opacity-30 animate-pulse"
+          style={{ background: displayColor }}
+        />
+
+        <svg className="w-full h-full transform -rotate-90 relative z-10" viewBox="0 0 128 128" preserveAspectRatio="xMidYMid meet">
           <defs>
             <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feGaussianBlur stdDeviation="5" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style={{ stopColor: displayColor, stopOpacity: 1 }} />
+              <stop offset="100%" style={{ stopColor: displayColor, stopOpacity: 0.7 }} />
+            </linearGradient>
           </defs>
           {/* Soft inner ring for depth */}
           <circle cx="64" cy="64" r={r} stroke="currentColor" strokeWidth={strokeWidth - 4} fill="transparent" className="text-border-color/40" />
           {/* Glow ring */}
-          <circle cx="64" cy="64" r={r} stroke={displayColor} strokeWidth={2} fill="transparent" opacity={0.14} filter="url(#glow)" />
+          <circle cx="64" cy="64" r={r} stroke={displayColor} strokeWidth={3} fill="transparent" opacity={0.2} filter="url(#glow)" />
           {/* Background circle */}
           <circle
             cx="64"
@@ -133,53 +144,74 @@ export function ScoreDisplay({
             strokeWidth={strokeWidth}
             fill="transparent"
             className="text-border-color"
-            strokeOpacity={0.14}
+            strokeOpacity={0.15}
           />
-          {/* Progress circle */}
+          {/* Progress circle with gradient */}
           <circle
             cx="64"
             cy="64"
             r={r}
-            stroke={displayColor}
+            stroke="url(#scoreGradient)"
             strokeWidth={strokeWidth}
             fill="transparent"
             strokeLinecap="round"
             style={{
               strokeDasharray: circumference,
               strokeDashoffset: strokeDashoffset,
-              transition: "stroke-dashoffset 100ms linear", // Faster transition for smoother sync
+              transition: "stroke-dashoffset 100ms linear",
             }}
           />
         </svg>
         {/* Score number */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span
-            className="text-2xl sm:text-3xl font-extrabold"
-            style={{ color: displayColor, textShadow: "0 2px 6px rgba(0,0,0,0.6)" }}
+            className="text-3xl sm:text-4xl font-extrabold tracking-tight"
+            style={{
+              color: displayColor,
+              textShadow: `0 2px 8px ${displayColor}40, 0 0 20px ${displayColor}20`
+            }}
           >
             {displayScore}
           </span>
-          <span className="text-xs text-text-secondary mt-0.5">/ 100</span>
+          <span className="text-xs text-text-secondary mt-1 font-medium">/ 100</span>
         </div>
       </div>
 
-      {/* Grade badge */}
-      <div
-        className={`px-3 py-1.5 rounded-full font-semibold text-xs sm:text-sm shadow-md transition-colors duration-500`}
-        style={{
-          background: `linear-gradient(90deg, ${displayColor}22, ${displayColor}08)`,
-          color: displayColor,
-          boxShadow: `0 6px 20px ${displayColor}14`,
-          border: `1px solid ${displayColor}30`,
-        }}
-      >
-        Grade {grade} • {gradeLabel}
+      {/* Enhanced Grade badge */}
+      <div className="flex items-center gap-2">
+        <div
+          className={`px-4 py-2 rounded-xl font-bold text-sm sm:text-base shadow-lg transition-all duration-500 border-2 backdrop-blur-sm`}
+          style={{
+            background: `linear-gradient(135deg, ${displayColor}18, ${displayColor}08)`,
+            color: displayColor,
+            boxShadow: `0 8px 24px ${displayColor}20, inset 0 1px 0 ${displayColor}20`,
+            borderColor: `${displayColor}40`,
+          }}
+        >
+          Grade {grade} • {gradeLabel}
+        </div>
+        <InfoTooltip
+          content={
+            <div className="space-y-2">
+              <p className="font-bold text-text-primary">Token Safety Score</p>
+              <div className="space-y-1 text-[11px]">
+                <p><strong className="text-green-400">A (90-100):</strong> Excellent - Very Safe</p>
+                <p><strong className="text-green-400">B (80-89):</strong> Good - Low Risk</p>
+                <p><strong className="text-yellow-400">C (70-79):</strong> Fair - Medium Risk</p>
+                <p><strong className="text-orange-400">D (60-69):</strong> Poor - High Risk</p>
+                <p><strong className="text-red-400">F (&lt;60):</strong> Fail - Very High Risk</p>
+              </div>
+              <p className="text-[10px] opacity-70 mt-2">Score starts at 100 and decreases based on detected risk factors.</p>
+            </div>
+          }
+          position="bottom"
+        />
       </div>
-      
+
       {/* Severity Sub-label for F grade */}
       {grade === 'F' && (
-         <div className="text-[10px] sm:text-xs font-mono text-red-400 opacity-75">
-            Check Risk Factors for details
+         <div className="text-xs font-medium text-red-400 opacity-80 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20">
+            ⚠️ Check Risk Factors for details
          </div>
       )}
     </div>

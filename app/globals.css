@@ -203,6 +203,28 @@
   }
 }
 
+@keyframes slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @keyframes score-count {
   0% {
     transform: scale(0.5);
@@ -236,6 +258,14 @@
   animation: fade-in-up 0.5s ease-out forwards;
 }
 
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 .animate-score {
   animation: score-count 0.6s ease-out forwards;
 }
@@ -259,21 +289,34 @@
   50% { background-position: 100% 50%; }
 }
 
-/* Premium glass card */
+/* Premium glass card with enhanced effects */
 .glass-card {
   background: var(--bg-card);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-color);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .glass-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.1),
-    0 0 0 1px var(--border-color);
+  transform: translateY(-4px);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.12),
+    0 0 0 1px var(--border-color),
+    0 0 20px rgba(255, 255, 255, 0.05);
   border-color: var(--silver-accent);
+}
+
+/* Enhanced glass card variant */
+.glass-card-enhanced {
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(var(--bg-secondary), 0.8) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-color);
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 /* Card hover effect */

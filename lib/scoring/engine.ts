@@ -182,9 +182,8 @@ async function detectTokenMode(
     if (!pumpState.complete) {
       return { mode: "pump", dexData: null };
     }
-    if (pumpState.complete) {
-      return { mode: "dex", dexData: null };
-    }
+    // Graduated from bonding curve → now on DEX
+    return { mode: "dex", dexData: null };
   }
 
   // Method 2: Check for DEX pools via DexScreener (Fallback)
@@ -228,7 +227,9 @@ export function calculatePenalties(
   // -- Critical Checks (Auto-F triggers) --
   
   // 1. Honeypot (Critical)
-  if (!skip.liquidity && checks.honeypot.data?.isHoneypot) {
+  // Skip for Pump.fun tokens — Jupiter has no routes for bonding curve tokens,
+  // so sell simulation always fails (false positive).
+  if (!skip.liquidity && mode !== "pump" && checks.honeypot.data?.isHoneypot) {
     penalties.push({ 
       category: "Critical", 
       reason: `Sell simulation failed: ${checks.honeypot.data.reason || "Unable to sell"}`, 
@@ -238,7 +239,9 @@ export function calculatePenalties(
   }
 
   // 2. Mint Authority (Critical)
-  if (!skip.mintAuthority && checks.mintAuthority.data?.status === "fail") {
+  // Skip for Pump.fun tokens — on the bonding curve, the Mint Authority is always
+  // the Bonding Curve PDA. This is expected and not a risk.
+  if (!skip.mintAuthority && mode !== "pump" && checks.mintAuthority.data?.status === "fail") {
     penalties.push({ 
       category: "Critical", 
       reason: "Mint authority is NOT revoked", 
@@ -248,7 +251,9 @@ export function calculatePenalties(
   }
 
   // 3. Freeze Authority (Critical)
-  if (!skip.freezeAuthority && checks.freezeAuthority.data?.status === "fail") {
+  // Skip for Pump.fun tokens — Pump.fun tokens typically have freeze authority
+  // set to the program, which is expected behavior.
+  if (!skip.freezeAuthority && mode !== "pump" && checks.freezeAuthority.data?.status === "fail") {
     penalties.push({ 
       category: "Critical", 
       reason: "Freeze authority is NOT revoked", 
@@ -456,7 +461,30 @@ export function calculatePenalties(
 
 // --- Main Function ---
 
+// Short-lived in-flight/result cache to prevent duplicate scans
+// (layout generateMetadata + client POST + React Strict Mode)
+const scanInflight = new Map<string, { promise: Promise<ScanResult>; ts: number }>();
+const INFLIGHT_TTL_MS = 30_000; // 30 seconds
+
 export async function scanToken(tokenAddress: string): Promise<ScanResult> {
+  const now = Date.now();
+  const existing = scanInflight.get(tokenAddress);
+  if (existing && now - existing.ts < INFLIGHT_TTL_MS) {
+    return existing.promise;
+  }
+
+  const promise = _scanTokenImpl(tokenAddress);
+  scanInflight.set(tokenAddress, { promise, ts: now });
+
+  // Clean up after TTL
+  promise.finally(() => {
+    setTimeout(() => scanInflight.delete(tokenAddress), INFLIGHT_TTL_MS);
+  });
+
+  return promise;
+}
+
+async function _scanTokenImpl(tokenAddress: string): Promise<ScanResult> {
   // 1. Whitelist Check
   let whitelist = getWhitelistedToken(tokenAddress);
   let jupiterVerified = false;
@@ -479,7 +507,10 @@ export async function scanToken(tokenAddress: string): Promise<ScanResult> {
   // 2. Fetch Initial Data
   const WSOL_ADDRESS = "So11111111111111111111111111111111111111112";
   const pumpStatePromise = getPumpFunCurveState(tokenAddress);
-  const pricePromise = getTokenPrice(tokenAddress);
+  const pricePromise = getTokenPrice(tokenAddress).catch(e => {
+    console.warn("Price fetch failed:", e);
+    return null;
+  });
   const solPricePromise = getTokenPrice(WSOL_ADDRESS);
   const contextPromise = fetchTokenContext(tokenAddress);
 
@@ -531,17 +562,26 @@ export async function scanToken(tokenAddress: string): Promise<ScanResult> {
   let finalPumpState = pumpState;
   if (mode === 'pump' && (!finalPumpState || !finalPumpState.exists)) {
       const currentMc = price.data?.marketCap || 0;
-      const solPrice = solPriceData?.priceUsd || 600; 
-      
-      // On Pump.fun, graduation happens at ~85 SOL real collected.
-      // Total MC at graduation is approx (30 virtual + 85 real) * SOL_PRICE / 0.273 (if MC is based on total supply)
-      // Actually, easier: Pump.fun MC at graduation is always around $60k - $100k depending on SOL price.
-      // Let's use a more robust estimate for fallback:
-      const PUMP_GRADUATION_TARGET_SOL = 85; 
-      const graduationTargetUsd = solPrice * PUMP_GRADUATION_TARGET_SOL * 1.2; // Adjusted for curve
-      
+      const solPrice = solPriceData?.priceUsd || 600;
+
+      // Pump.fun Graduation Math:
+      // - Real SOL collected at graduation: 85 SOL
+      // - Virtual SOL at graduation: ~30-40 SOL (initial virtual liquidity)
+      // - Virtual tokens remaining: ~280M (after selling 793M of 1.073B)
+      // - Market Cap = (virtualSol / virtualTokens) × totalSupply
+      // - At graduation: MC ≈ (35 / (280M / 1e6)) × 1B ≈ 125 SOL
+      // - In USD: 125 SOL × $600 ≈ $75k (varies with SOL price)
+      const PUMP_GRADUATION_MC_SOL = 115; // Empirical MC at graduation (in SOL)
+      const PUMP_GRADUATION_REAL_SOL = 85; // Real SOL collected at graduation
+      const graduationTargetUsd = solPrice * PUMP_GRADUATION_MC_SOL;
+
+      const currentMcInSol = currentMc / solPrice;
       const fallbackProgress = Math.min(100, Math.round((currentMc / graduationTargetUsd) * 100));
-      
+
+      // Estimate remaining SOL using the ratio: realSOL ≈ (MC_SOL / 115) × 85
+      const estimatedRealSol = (currentMcInSol / PUMP_GRADUATION_MC_SOL) * PUMP_GRADUATION_REAL_SOL;
+      const remainingSolEstimate = Math.max(0, PUMP_GRADUATION_REAL_SOL - estimatedRealSol);
+
       finalPumpState = {
           exists: true,
           pda: "Estimated from MC",
@@ -550,13 +590,13 @@ export async function scanToken(tokenAddress: string): Promise<ScanResult> {
           virtualSolReservesSol: 0,
           realTokenReserves: "0",
           realSolReservesLamports: "0",
-          realSolReservesSol: 0,
+          realSolReservesSol: estimatedRealSol,
           tokenTotalSupply: 1_000_000_000,
           complete: fallbackProgress >= 100,
           pricePerTokenSol: null,
-          marketCapSol: currentMc / solPrice,
+          marketCapSol: currentMcInSol,
           curveProgressPercent: fallbackProgress,
-          remainingSolToGraduate: Math.max(0, PUMP_GRADUATION_TARGET_SOL - ((currentMc / solPrice) / 1.5)), // Very rough estimation
+          remainingSolToGraduate: fallbackProgress >= 100 ? 0 : remainingSolEstimate,
       };
   }
 
