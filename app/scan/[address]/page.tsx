@@ -2,7 +2,7 @@
 
 /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-explicit-any */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
@@ -15,8 +15,10 @@ import { BondingCurveProgress } from "@/components/BondingCurveProgress";
 import { HolderChart } from "@/components/HolderChart";
 import { RiskList } from "@/components/RiskList";
 import { ActivityTimeline } from "@/components/ActivityTimeline";
+import { DevHistory } from "@/components/DevHistory";
 import { ScanResult } from "@/lib/scoring/engine";
 import { InfoTooltip } from "@/components/InfoTooltip";
+import { RateLimitModal } from "@/components/RateLimitModal";
 
 interface ScanResponse {
   success: boolean;
@@ -265,6 +267,26 @@ function transformToCheckGroups(result: ScanResult): CheckGroup[] {
   return groups;
 }
 
+const RATE_LIMIT_KEY = "rugsol_last_scan";
+const RATE_LIMIT_SECONDS = 60;
+
+function getRateLimitSecondsLeft(): number {
+  try {
+    const last = localStorage.getItem(RATE_LIMIT_KEY);
+    if (!last) return 0;
+    const elapsed = Math.floor((Date.now() - parseInt(last, 10)) / 1000);
+    return Math.max(0, RATE_LIMIT_SECONDS - elapsed);
+  } catch {
+    return 0;
+  }
+}
+
+function markScanTime() {
+  try {
+    localStorage.setItem(RATE_LIMIT_KEY, Date.now().toString());
+  } catch { /* ignore */ }
+}
+
 export default function ScanResultPage() {
   const params = useParams();
   const address = params.address as string;
@@ -273,52 +295,74 @@ export default function ScanResultPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [cached, setCached] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
+  const [rateLimitSeconds, setRateLimitSeconds] = useState(0);
   const [metadata, setMetadata] = useState<{
     name: string | null;
     symbol: string | null;
     image: string | null;
   }>({ name: null, symbol: null, image: null });
 
-  useEffect(() => {
-    async function fetchScan() {
-      setLoading(true);
-      setError(null);
+  const handleRateLimitClose = useCallback(() => {
+    setRateLimited(false);
+    // Re-check: if timer expired, trigger scan
+    const left = getRateLimitSecondsLeft();
+    if (left <= 0) {
+      fetchScanData(address);
+    }
+  }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
-      try {
-        const response = await fetch("/api/scan", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ address }),
-        });
+  async function fetchScanData(addr: string) {
+    setLoading(true);
+    setError(null);
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to scan token");
-        }
+    try {
+      const response = await fetch("/api/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: addr }),
+      });
 
-        const data: ScanResponse = await response.json();
-
-        setResult(data.data);
-        setCached(data.cached);
-
-        // Extract metadata
-        if (data.data.checks.metadata.data) {
-          setMetadata({
-            name: data.data.checks.metadata.data.name,
-            symbol: data.data.checks.metadata.data.symbol,
-            image: data.data.checks.metadata.data.image,
-          });
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to scan token");
       }
+
+      const data: ScanResponse = await response.json();
+
+      // Mark scan time only after successful fetch
+      markScanTime();
+
+      setResult(data.data);
+      setCached(data.cached);
+
+      // Extract metadata
+      if (data.data.checks.metadata.data) {
+        setMetadata({
+          name: data.data.checks.metadata.data.name,
+          symbol: data.data.checks.metadata.data.symbol,
+          image: data.data.checks.metadata.data.image,
+        });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!address) return;
+
+    const secondsLeft = getRateLimitSecondsLeft();
+    if (secondsLeft > 0) {
+      setRateLimited(true);
+      setRateLimitSeconds(secondsLeft);
+      setLoading(false);
+      return;
     }
 
-    if (address) {
-      fetchScan();
-    }
+    fetchScanData(address);
   }, [address]);
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -484,7 +528,15 @@ export default function ScanResultPage() {
                     />
                 )}
 
-                {/* 3. Security Analysis Checklist */}
+                {/* 3. Developer History (Teaser) */}
+                <DevHistory
+                  score={result.score}
+                  grade={result.grade}
+                  isWhitelisted={result.isWhitelisted}
+                  marketCap={result.price?.marketCap}
+                />
+
+                {/* 4. Security Analysis Checklist */}
                 <div>
                    <div className="flex items-center gap-3 mb-6">
                     <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--silver-accent)]/30 to-transparent" />
@@ -558,12 +610,12 @@ export default function ScanResultPage() {
                     </div>
                 )}
 
-                {/* 5. Risk Factors List */}
+                {/* 6. Risk Factors List */}
                 {result.penalties.length > 0 && (
                     <RiskList penalties={result.penalties} />
                 )}
 
-                {/* 6. Timeline */}
+                {/* 7. Timeline */}
                 <ActivityTimeline scanResult={result} />
 
               </div>
@@ -643,6 +695,14 @@ export default function ScanResultPage() {
         </div>
       </main>
       <Footer />
+
+      {/* Rate Limit Modal */}
+      {rateLimited && (
+        <RateLimitModal
+          secondsLeft={rateLimitSeconds}
+          onClose={handleRateLimitClose}
+        />
+      )}
     </div>
   );
 }

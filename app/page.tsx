@@ -3,6 +3,7 @@ import { SearchInput } from "@/components/SearchInput";
 import { RecentScans } from "@/components/RecentScans";
 import { Stats } from "@/components/Stats";
 import { Footer } from "@/components/Footer";
+import { PricingTiers } from "@/components/PricingTiers";
 
 export default function Home() {
   return (
@@ -52,6 +53,11 @@ export default function Home() {
               <h2 className="text-xl font-semibold text-text-primary">Recent Scans</h2>
             </div>
             <RecentScans />
+          </div>
+
+          {/* Pricing Tiers */}
+          <div className="mb-20 px-4">
+            <PricingTiers />
           </div>
 
           {/* Features Grid */}
