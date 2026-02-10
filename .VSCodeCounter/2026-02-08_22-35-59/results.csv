@@ -1,0 +1,60 @@
+"filename", "language", "JSON", "JSON with Comments", "Markdown", "TypeScript", "JavaScript", "XML", "TypeScript JSX", "PostCSS", "comment", "blank", "total"
+"c:\Users\user\Desktop\rug\.agent-preference.json", "JSON", 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"c:\Users\user\Desktop\rug\.github\copilot-instructions.md", "Markdown", 0, 0, 20, 0, 0, 0, 0, 0, 0, 5, 25
+"c:\Users\user\Desktop\rug\README.md", "Markdown", 0, 0, 31, 0, 0, 0, 0, 0, 0, 12, 43
+"c:\Users\user\Desktop\rug\app\about\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 67, 0, 0, 13, 80
+"c:\Users\user\Desktop\rug\app\api\og\route.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 344, 0, 20, 26, 390
+"c:\Users\user\Desktop\rug\app\api\recent\route.ts", "TypeScript", 0, 0, 0, 100, 0, 0, 0, 0, 10, 17, 127
+"c:\Users\user\Desktop\rug\app\api\scan\route.ts", "TypeScript", 0, 0, 0, 207, 0, 0, 0, 0, 16, 32, 255
+"c:\Users\user\Desktop\rug\app\api\stats\route.ts", "TypeScript", 0, 0, 0, 19, 0, 0, 0, 0, 0, 2, 21
+"c:\Users\user\Desktop\rug\app\api\telegram\route.ts", "TypeScript", 0, 0, 0, 34, 0, 0, 0, 0, 3, 6, 43
+"c:\Users\user\Desktop\rug\app\globals.css", "PostCSS", 0, 0, 0, 0, 0, 0, 0, 318, 14, 35, 367
+"c:\Users\user\Desktop\rug\app\layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 58, 0, 0, 5, 63
+"c:\Users\user\Desktop\rug\app\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 81, 0, 9, 12, 102
+"c:\Users\user\Desktop\rug\app\scan\[address]\layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 40, 0, 0, 6, 46
+"c:\Users\user\Desktop\rug\app\scan\[address]\page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 562, 0, 40, 63, 665
+"c:\Users\user\Desktop\rug\components.json", "JSON", 23, 0, 0, 0, 0, 0, 0, 0, 0, 1, 24
+"c:\Users\user\Desktop\rug\components\Checklist.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 143, 0, 3, 20, 166
+"c:\Users\user\Desktop\rug\components\Footer.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 74, 0, 4, 5, 83
+"c:\Users\user\Desktop\rug\components\Logo.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 108, 0, 9, 10, 127
+"c:\Users\user\Desktop\rug\components\Navbar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 78, 0, 4, 7, 89
+"c:\Users\user\Desktop\rug\components\RecentScans.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 285, 0, 19, 29, 333
+"c:\Users\user\Desktop\rug\components\ScoreDisplay.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 114, 0, 9, 13, 136
+"c:\Users\user\Desktop\rug\components\SearchInput.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 108, 0, 3, 11, 122
+"c:\Users\user\Desktop\rug\components\ShareCard.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 207, 0, 9, 18, 234
+"c:\Users\user\Desktop\rug\components\SidebarLinks.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 173, 0, 14, 18, 205
+"c:\Users\user\Desktop\rug\components\Stats.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 41, 0, 0, 9, 50
+"c:\Users\user\Desktop\rug\components\ThemeProvider.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 42, 0, 5, 12, 59
+"c:\Users\user\Desktop\rug\components\ThemeToggle.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 34, 0, 3, 8, 45
+"c:\Users\user\Desktop\rug\components\TokenHeader.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 82, 0, 4, 9, 95
+"c:\Users\user\Desktop\rug\components\ui\button.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 59, 0, 0, 6, 65
+"c:\Users\user\Desktop\rug\components\ui\card.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 83, 0, 0, 10, 93
+"c:\Users\user\Desktop\rug\components\ui\input.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 18, 0, 0, 4, 22
+"c:\Users\user\Desktop\rug\eslint.config.mjs", "JavaScript", 0, 0, 0, 0, 14, 0, 0, 0, 2, 3, 19
+"c:\Users\user\Desktop\rug\lib\external\jupiter-tokens.ts", "TypeScript", 0, 0, 0, 76, 0, 0, 0, 0, 26, 21, 123
+"c:\Users\user\Desktop\rug\lib\external\liquidity.ts", "TypeScript", 0, 0, 0, 170, 0, 0, 0, 0, 11, 33, 214
+"c:\Users\user\Desktop\rug\lib\external\metadata.ts", "TypeScript", 0, 0, 0, 270, 0, 0, 0, 0, 29, 43, 342
+"c:\Users\user\Desktop\rug\lib\scoring\engine.ts", "TypeScript", 0, 0, 0, 354, 0, 0, 0, 0, 47, 46, 447
+"c:\Users\user\Desktop\rug\lib\scoring\whitelist.ts", "TypeScript", 0, 0, 0, 154, 0, 0, 0, 0, 11, 9, 174
+"c:\Users\user\Desktop\rug\lib\solana\authority.ts", "TypeScript", 0, 0, 0, 52, 0, 0, 0, 0, 0, 16, 68
+"c:\Users\user\Desktop\rug\lib\solana\connection.ts", "TypeScript", 0, 0, 0, 38, 0, 0, 0, 0, 0, 12, 50
+"c:\Users\user\Desktop\rug\lib\solana\holders.ts", "TypeScript", 0, 0, 0, 80, 0, 0, 0, 0, 7, 17, 104
+"c:\Users\user\Desktop\rug\lib\solana\pumpfun.ts", "TypeScript", 0, 0, 0, 109, 0, 0, 0, 0, 21, 18, 148
+"c:\Users\user\Desktop\rug\lib\solana\tokenAge.ts", "TypeScript", 0, 0, 0, 105, 0, 0, 0, 0, 22, 20, 147
+"c:\Users\user\Desktop\rug\lib\storage\recent-scans.ts", "TypeScript", 0, 0, 0, 42, 0, 0, 0, 0, 11, 12, 65
+"c:\Users\user\Desktop\rug\lib\telegram\bot.ts", "TypeScript", 0, 0, 0, 160, 0, 0, 0, 0, 14, 28, 202
+"c:\Users\user\Desktop\rug\lib\telegram\templates.ts", "TypeScript", 0, 0, 0, 135, 0, 0, 0, 0, 9, 20, 164
+"c:\Users\user\Desktop\rug\lib\utils.ts", "TypeScript", 0, 0, 0, 5, 0, 0, 0, 0, 0, 2, 7
+"c:\Users\user\Desktop\rug\next.config.ts", "TypeScript", 0, 0, 0, 4, 0, 0, 0, 0, 1, 3, 8
+"c:\Users\user\Desktop\rug\package-lock.json", "JSON", 13340, 0, 0, 0, 0, 0, 0, 0, 0, 1, 13341
+"c:\Users\user\Desktop\rug\package.json", "JSON", 43, 0, 0, 0, 0, 0, 0, 0, 0, 1, 44
+"c:\Users\user\Desktop\rug\postcss.config.mjs", "JavaScript", 0, 0, 0, 0, 6, 0, 0, 0, 0, 2, 8
+"c:\Users\user\Desktop\rug\public\file.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+"c:\Users\user\Desktop\rug\public\globe.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+"c:\Users\user\Desktop\rug\public\next.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+"c:\Users\user\Desktop\rug\public\vercel.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+"c:\Users\user\Desktop\rug\public\window.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+"c:\Users\user\Desktop\rug\scripts\run-bot.ts", "TypeScript", 0, 0, 0, 311, 0, 0, 0, 0, 28, 46, 385
+"c:\Users\user\Desktop\rug\scripts\setup-telegram.ts", "TypeScript", 0, 0, 0, 89, 0, 0, 0, 0, 16, 22, 127
+"c:\Users\user\Desktop\rug\tsconfig.json", "JSON with Comments", 0, 34, 0, 0, 0, 0, 0, 0, 0, 1, 35
+"Total", "-", 13409, 34, 51, 2514, 20, 5, 2801, 318, 453, 801, 20406
