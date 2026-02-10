@@ -4,6 +4,7 @@ import { RecentScans } from "@/components/RecentScans";
 import { Stats } from "@/components/Stats";
 import { Footer } from "@/components/Footer";
 import { PricingTiers } from "@/components/PricingTiers";
+import { ConnectWalletButton } from "@/components/ConnectWalletButton";
 
 export default function Home() {
   return (
@@ -40,6 +41,11 @@ export default function Home() {
 
             {/* Search Input */}
             <SearchInput />
+
+            {/* Connect Wallet Button */}
+            <div className="mt-8 flex justify-center">
+              <ConnectWalletButton />
+            </div>
           </div>
 
           {/* Stats Section */}
