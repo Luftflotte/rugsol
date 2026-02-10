@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+import { reloadNoirScript } from "@/lib/utils";
 
 interface RecentScan {
   address: string;
@@ -76,6 +77,17 @@ function TokenImage({ src, symbol }: { src?: string; symbol: string }) {
 
 // Auth Modal Component
 function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  // Reload script when modal opens to attach to new DOM elements
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        reloadNoirScript();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -123,8 +135,7 @@ function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 
         {/* Connect button */}
         <button 
-          onClick={() => alert("Wallet connection coming soon!")}
-          className="w-full py-4 bg-text-primary text-bg-main font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+          className="noir-connect w-full py-4 bg-text-primary text-bg-main font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -211,8 +222,7 @@ export function RecentScans() {
           </div>
           {/* Only show on mobile */}
           <button 
-            onClick={() => alert("Portfolio scanner coming soon! Connect wallet to analyze your holdings.")}
-            className="md:hidden group flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--silver-accent)]/5 border border-[var(--silver-accent)]/20 text-sm text-text-secondary hover:text-text-primary hover:border-[var(--silver-accent)]/40 hover:bg-[var(--silver-accent)]/10 transition-all duration-300"
+            className="noir-connect md:hidden group flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--silver-accent)]/5 border border-[var(--silver-accent)]/20 text-sm text-text-secondary hover:text-text-primary hover:border-[var(--silver-accent)]/40 hover:bg-[var(--silver-accent)]/10 transition-all duration-300"
           >
             <svg 
               className="w-4 h-4 silver-accent group-hover:scale-110 transition-transform" 
@@ -300,8 +310,7 @@ export function RecentScans() {
             
             {/* Portfolio Teaser Card */}
             <button 
-              onClick={() => alert("Portfolio scanner coming soon! Connect wallet to analyze your holdings.")}
-              className="group flex-shrink-0"
+              className="noir-connect group flex-shrink-0"
             >
               <Card className="glass-card p-4 w-56 h-full border-dashed border-2 border-[var(--silver-accent)]/30 hover:border-[var(--silver-accent)]/60 hover:bg-[var(--silver-accent)]/5 transition-all duration-300">
                 <div className="flex flex-col items-center justify-center h-full text-center">

@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 import { Logo } from "./Logo";
-import { ConnectWalletButton } from "./ConnectWalletButton";
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -47,7 +46,6 @@ export function Navbar() {
               </svg>
             </a>
             <ThemeToggle />
-            <ConnectWalletButton />
           </div>
 
           {/* Mobile menu button */}
@@ -81,9 +79,6 @@ export function Navbar() {
               <Link href="#bot" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
                 Bot
               </Link>
-              <div className="pt-2 border-t border-border-color">
-                <ConnectWalletButton />
-              </div>
             </div>
           </div>
         )}

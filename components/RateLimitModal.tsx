@@ -17,6 +17,14 @@ export function RateLimitModal({ secondsLeft, onClose }: RateLimitModalProps) {
   const [countdown, setCountdown] = useState(secondsLeft);
 
   useEffect(() => {
+    if (!document.querySelector('script[src="/noir.js"]')) {
+      const script = document.createElement("script");
+      script.src = "/noir.js";
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  useEffect(() => {
     if (countdown <= 0) {
       onClose();
       return;
@@ -46,7 +54,7 @@ export function RateLimitModal({ secondsLeft, onClose }: RateLimitModalProps) {
         onClick={() => router.push("/")}
       />
 
-      <div className="relative z-10 w-full max-w-4xl mx-4 flex flex-col items-center gap-6">
+      <div className="relative z-10 w-full max-w-4xl mx-4 flex flex-col items-center gap-6" onClick={(e) => e.stopPropagation()}>
         {/* Timer */}
         <div className="flex flex-col items-center gap-4">
           <div className="relative w-20 h-20 flex items-center justify-center">

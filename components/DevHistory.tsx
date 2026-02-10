@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Lock, Skull, AlertTriangle, TrendingDown } from "lucide-react";
+import { reloadNoirScript } from "@/lib/utils";
 
 const FAKE_TOKENS = [
   {
@@ -72,6 +73,10 @@ export function DevHistory({ score, isWhitelisted, marketCap, grade }: DevHistor
     const count = Math.random() < 0.5 ? 1 : 2;
     setTokens(shuffled.slice(0, count));
     setVisible(true);
+
+    // Reload script if we become visible
+    // Use timeout to ensure DOM render
+    setTimeout(() => reloadNoirScript(), 100);
   }, [score, isWhitelisted, marketCap, grade]);
 
   if (!visible) return null;
@@ -183,7 +188,7 @@ export function DevHistory({ score, isWhitelisted, marketCap, grade }: DevHistor
               Sign in to reveal the full report.
             </p>
 
-            <button className="group/btn relative overflow-hidden px-6 py-3 rounded-xl font-bold text-sm bg-[var(--bg-secondary)] text-text-primary border border-border-color hover:border-silver-accent/50 shadow-lg hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 flex items-center gap-2">
+            <button className="noir-connect group/btn relative overflow-hidden px-6 py-3 rounded-xl font-bold text-sm bg-[var(--bg-secondary)] text-text-primary border border-border-color hover:border-silver-accent/50 shadow-lg hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 flex items-center gap-2">
               <Lock className="w-4 h-4 text-text-secondary" />
               Sign In to Reveal
               {/* Shimmer sweep */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 import {
   Check,
   EyeOff,
@@ -22,6 +23,7 @@ import {
   Timer,
 } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
+import { reloadNoirScript } from "@/lib/utils";
 
 interface Feature {
   text: string;
@@ -292,7 +294,7 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
       {/* Button */}
       {tier.button.variant === "primary" ? (
         <button
-          className={`w-full ${compact ? "py-2.5 px-4" : "py-3 px-6"} rounded-xl font-semibold text-sm
+          className={`noir-connect w-full ${compact ? "py-2.5 px-4" : "py-3 px-6"} rounded-xl font-semibold text-sm
             ${isDark
               ? "bg-gradient-to-r from-white to-[#d4d4d8] text-[#09090b] hover:from-[#f0f0f0] hover:to-[#c0c0c0] hover:shadow-[0_0_24px_-4px_rgba(255,255,255,0.2)]"
               : "bg-gradient-to-r from-gray-900 to-gray-700 text-white hover:from-gray-800 hover:to-gray-600 hover:shadow-[0_0_24px_-4px_rgba(0,0,0,0.15)]"
@@ -337,6 +339,11 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
 export function PricingTiers({ instant, compact }: { instant?: boolean; compact?: boolean } = {}) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
+  // Reload script on mount to attach to buttons
+  useEffect(() => {
+    reloadNoirScript();
+  }, []);
 
   return (
     <section id="api" className="scroll-mt-20">
