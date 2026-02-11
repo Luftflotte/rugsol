@@ -58,6 +58,7 @@ interface BirdeyeResponse {
 export async function fetchDexScreener(mintAddress: string): Promise<{
   lpSizeUsd: number;
   dexName: string | null;
+  dexId: string | null;
   pairAddress: string | null;
   name?: string;
   symbol?: string;
@@ -113,6 +114,7 @@ export async function fetchDexScreener(mintAddress: string): Promise<{
     return {
       lpSizeUsd: topPair.liquidity?.usd || 0,
       dexName,
+      dexId: topPair.dexId,
       pairAddress: topPair.pairAddress,
       name: topPair.baseToken.name,
       symbol: topPair.baseToken.symbol,
@@ -254,6 +256,70 @@ async function fetchPumpFunMarketCap(mintAddress: string): Promise<number> {
     }
 }
 
+// Check if token has graduated from Pump.fun to DEX and fetch DEX liquidity
+async function checkGraduatedPumpToken(mintAddress: string): Promise<{
+  lpSizeUsd: number;
+  dexName: string | null;
+  dexId: string | null;
+  pairAddress: string | null;
+} | null> {
+    try {
+        // Retry DexScreener with exponential backoff for newly graduated tokens
+        const response = await fetch(
+            `https://api.dexscreener.com/latest/dex/tokens/${mintAddress}`,
+            {
+                headers: {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                }
+            }
+        );
+
+        if (!response.ok) return null;
+
+        const data: DexScreenerResponse = await response.json();
+
+        if (!data.pairs || data.pairs.length === 0) return null;
+
+        // Find ALL Solana pairs (not just Pump.fun)
+        const solanaPairs = data.pairs.filter((p) => p.chainId === "solana");
+        if (solanaPairs.length === 0) return null;
+
+        // Sort by liquidity USD descending and pick the highest
+        solanaPairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0));
+        const topPair = solanaPairs[0];
+
+        // Normalize DEX name
+        let dexName = topPair.dexId;
+        if (dexName === "pump" || dexName === "pumpswap") {
+            dexName = "Pump.fun";
+        } else if (dexName === "raydium") {
+            dexName = "Raydium";
+        } else if (dexName === "orca") {
+            dexName = "Orca";
+        } else if (dexName === "meteora") {
+            dexName = "Meteora";
+        }
+
+        const lpSize = topPair.liquidity?.usd || 0;
+
+        // Only return if we found significant liquidity or DEX is not Pump.fun
+        if (lpSize > 0 || (dexName && dexName !== "Pump.fun")) {
+            console.log(`[Liquidity] Graduated token found on ${dexName}: $${lpSize}`);
+            return {
+                lpSizeUsd: lpSize,
+                dexName,
+                dexId: topPair.dexId,
+                pairAddress: topPair.pairAddress,
+            };
+        }
+
+        return null;
+    } catch (error) {
+        console.error("Error checking graduated Pump token:", error);
+        return null;
+    }
+}
+
 // Fallback: Check Jupiter Token Search API for liquidity
 async function fetchJupiterLiquidity(mintAddress: string): Promise<number> {
     if (!process.env.JUPITER_API_KEY) return 0;
@@ -334,6 +400,7 @@ export async function checkLiquidity(
   prefetchedDexData?: {
     lpSizeUsd: number;
     dexName: string | null;
+    dexId?: string | null;
     pairAddress: string | null;
     name?: string;
     symbol?: string;
@@ -345,14 +412,16 @@ export async function checkLiquidity(
     let liquidityUsd = 0;
     let dexName: string | null = null;
     let pairAddress: string | null = null;
+    let rawDexId: string | null = null;
 
     // Step 1: Try DexScreener
-    const dexData = prefetchedDexData !== undefined ? prefetchedDexData : await fetchDexScreener(mintAddress);
+    const dexData = prefetchedDexData ?? await fetchDexScreener(mintAddress);
 
     if (dexData) {
       liquidityUsd = dexData.lpSizeUsd;
       dexName = dexData.dexName;
       pairAddress = dexData.pairAddress;
+      rawDexId = dexData.dexId || null;
 
       // Sanity Check 1: If DexScreener has price but 0 liquidity, flag as Unknown (-1)
       if (liquidityUsd === 0 && dexData.priceUsd > 0) {
@@ -396,7 +465,21 @@ export async function checkLiquidity(
         }
     }
 
-    // Step 4: Fallback to Pump.fun API (Last Resort)
+    // Step 4: Graduated Pump.fun Token Check (Special Handling)
+    // If we have 0 liquidity but the address suggests it's a Pump token,
+    // check if it has graduated to DEX
+    if (liquidityUsd === 0 && mintAddress.toLowerCase().endsWith("pump")) {
+        const graduatedData = await checkGraduatedPumpToken(mintAddress);
+        if (graduatedData && graduatedData.lpSizeUsd > 0) {
+            liquidityUsd = graduatedData.lpSizeUsd;
+            dexName = graduatedData.dexName;
+            pairAddress = graduatedData.pairAddress;
+            rawDexId = graduatedData.dexId;
+            console.log(`[Liquidity] Graduated Pump token found on ${dexName}: $${liquidityUsd}`);
+        }
+    }
+
+    // Step 5: Fallback to Pump.fun API (Last Resort)
     // If even Jupiter fails, check if Pump.fun API reports a market cap.
     if (liquidityUsd === 0) {
         const pumpMC = await fetchPumpFunMarketCap(mintAddress);
@@ -407,7 +490,7 @@ export async function checkLiquidity(
         }
     }
 
-    // Step 5: Nuclear Option - Check Raydium via RPC (Helius)
+    // Step 6: Nuclear Option - Check Raydium via RPC (Helius)
     // If all APIs are blocked/failing, check on-chain directly.
     if (liquidityUsd === 0) {
         const hasRaydiumPool = await findRaydiumPoolViaRPC(mintAddress);
@@ -418,9 +501,14 @@ export async function checkLiquidity(
         }
     }
 
-    // Check if LP is burned (only if we have a pair address from DexScreener)
+    // Check if LP is burned
     let lpBurned = false;
-    if (pairAddress) {
+
+    // PumpSwap pools always have LP burned — pump.fun graduation process burns LP tokens
+    if (rawDexId === "pump" || rawDexId === "pumpswap") {
+      lpBurned = true;
+      console.log(`[Liquidity] PumpSwap detected (dexId: ${rawDexId}). LP is burned by protocol.`);
+    } else if (pairAddress) {
       lpBurned = await checkLpBurned(pairAddress);
     }
 

@@ -48,6 +48,9 @@ export async function GET(request: NextRequest) {
     const penalty = Math.max(0, parseInt(searchParams.get("penalty") || "0") || 0);
     const tagsParam = searchParams.get("tags") || "";
     const tags = tagsParam ? tagsParam.split(",").filter(Boolean) : ["Analyzed"];
+    const tagPointsParam = searchParams.get("tagPoints") || "";
+    const tagPointsList = tagPointsParam ? tagPointsParam.split(",").map(Number) : [];
+    const isLight = searchParams.get("theme") === "light";
 
     const [interReg, interBold, jbMono, jbMonoBold] = await Promise.all([
       fetch(new URL("https://cdn.jsdelivr.net/fontsource/fonts/inter@5.1.0/latin-400-normal.ttf", import.meta.url)).then(res => res.arrayBuffer()),
@@ -61,6 +64,50 @@ export async function GET(request: NextRequest) {
     let theme = { bg: "linear-gradient(150deg, #0d0808 0%, #130b0b 45%, #0f0909 100%)", ac: "#ef4444", acDim: "rgba(239,68,68,0.6)", acBg: "rgba(239,68,68,0.1)", acBorder: "rgba(239,68,68,0.18)" };
     if (score >= 60) theme = { bg: "linear-gradient(150deg, #080d08 0%, #0b130b 45%, #090f09 100%)", ac: "#22c55e", acDim: "rgba(34,197,94,0.6)", acBg: "rgba(34,197,94,0.1)", acBorder: "rgba(34,197,94,0.18)" };
     else if (score >= 40) theme = { bg: "linear-gradient(150deg, #0d0b08 0%, #13100b 45%, #0f0c09 100%)", ac: "#f59e0b", acDim: "rgba(245,158,11,0.6)", acBg: "rgba(245,158,11,0.1)", acBorder: "rgba(245,158,11,0.18)" };
+
+    if (isLight) {
+      if (score >= 60) theme.bg = "linear-gradient(150deg, #f7faf7 0%, #eef6ee 45%, #f4faf4 100%)";
+      else if (score >= 40) theme.bg = "linear-gradient(150deg, #faf8f5 0%, #f7f2eb 45%, #faf6f1 100%)";
+      else theme.bg = "linear-gradient(150deg, #faf5f5 0%, #f7ebeb 45%, #faf2f2 100%)";
+    }
+
+    const c = isLight ? {
+      text: "#0a0a0a",
+      textSoft: "rgba(0,0,0,0.5)",
+      textDim: "rgba(0,0,0,0.35)",
+      textGhost: "rgba(0,0,0,0.18)",
+      textMuted: "rgba(0,0,0,0.25)",
+      cardBg: "rgba(0,0,0,0.025)",
+      subtle: "rgba(0,0,0,0.06)",
+      subtler: "rgba(0,0,0,0.04)",
+      grid: "rgba(0,0,0,0.03)",
+      footerBg: "rgba(240,240,240,0.95)",
+      footerBorder: "rgba(0,0,0,0.06)",
+      svgStroke: "rgba(0,0,0,0.3)",
+      svgFill: "rgba(0,0,0,0.08)",
+      svgShield: "rgba(0,0,0,0.3)",
+      svgCheck: "rgba(255,255,255,0.9)",
+      svgLine: "rgba(0,0,0,0.12)",
+      glow: 0.06,
+    } : {
+      text: "#ffffff",
+      textSoft: "rgba(255,255,255,0.3)",
+      textDim: "rgba(255,255,255,0.25)",
+      textGhost: "rgba(255,255,255,0.18)",
+      textMuted: "rgba(255,255,255,0.16)",
+      cardBg: "rgba(255,255,255,0.015)",
+      subtle: "rgba(255,255,255,0.04)",
+      subtler: "rgba(255,255,255,0.04)",
+      grid: "rgba(255,255,255,0.02)",
+      footerBg: "rgba(0,0,0,0.4)",
+      footerBorder: "rgba(255,255,255,0.03)",
+      svgStroke: "rgba(255,255,255,0.25)",
+      svgFill: "rgba(255,255,255,0.06)",
+      svgShield: "rgba(255,255,255,0.25)",
+      svgCheck: "rgba(0,0,0,0.7)",
+      svgLine: "rgba(255,255,255,0.12)",
+      glow: 0.04,
+    };
 
     const circum = 680;
     const offset = circum * (1 - score / 100);
@@ -78,41 +125,41 @@ export async function GET(request: NextRequest) {
     return new ImageResponse(
       (
         <div style={{ width: 1200, height: 630, display: "flex", flexDirection: "column", background: theme.bg, fontFamily: "Inter", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", backgroundImage: "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)", backgroundSize: "64px 64px" }} />
-          <div style={{ position: "absolute", width: 700, height: 700, borderRadius: "50%", background: theme.ac, opacity: 0.04, filter: "blur(140px)", right: -120, top: -120, display: "flex" }} />
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", backgroundImage: `linear-gradient(${c.grid} 1px, transparent 1px), linear-gradient(90deg, ${c.grid} 1px, transparent 1px)`, backgroundSize: "64px 64px" }} />
+          <div style={{ position: "absolute", width: 700, height: 700, borderRadius: "50%", background: theme.ac, opacity: c.glow, filter: "blur(140px)", right: -120, top: -120, display: "flex" }} />
           <div style={{ height: 5, width: "100%", background: `linear-gradient(90deg, transparent 0%, ${theme.ac} 50%, transparent 100%)`, display: "flex" }} />
 
           <div style={{ flex: 1, display: "flex", padding: "52px 72px 32px", gap: 40, position: "relative" }}>
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-start", gap: 60 }}>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-                  <div style={{ width: 90, height: 90, borderRadius: 22, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                    {tokenImage ? <img src={tokenImage} width="90" height="90" style={{ objectFit: "cover" }} /> : <span style={{ fontSize: 36, fontWeight: 800, color: "rgba(255,255,255,0.18)", display: "flex" }}>{symbol[0]}</span>}
+                  <div style={{ width: 90, height: 90, borderRadius: 22, background: c.subtler, border: `1px solid ${c.subtle}`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                    {tokenImage ? <img src={tokenImage} width="90" height="90" style={{ objectFit: "cover" }} /> : <span style={{ fontSize: 36, fontWeight: 800, color: c.textGhost, display: "flex" }}>{symbol[0]}</span>}
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                      <span style={{ fontSize: 44, fontWeight: 800, color: "#fff", letterSpacing: "-1px", display: "flex" }}>{name}</span>
+                      <span style={{ fontSize: 44, fontWeight: 800, color: c.text, letterSpacing: "-1px", display: "flex" }}>{name}</span>
                       <span style={{ fontSize: 12, fontWeight: 700, padding: "5px 14px", borderRadius: 7, textTransform: "uppercase", background: mode === "PUMP" ? "rgba(249,115,22,0.14)" : "rgba(34,197,94,0.14)", color: mode === "PUMP" ? "#fb923c" : "#4ade80", border: `1px solid ${mode === "PUMP" ? "rgba(249,115,22,0.25)" : "rgba(34,197,94,0.25)"}`, display: "flex" }}>{mode === "PUMP" ? "PUMP.FUN" : "DEX"}</span>
-                      <span style={{ fontSize: 22, color: "rgba(255,255,255,0.3)", fontWeight: 500, display: "flex" }}>${symbol}</span>
+                      <span style={{ fontSize: 22, color: c.textSoft, fontWeight: 500, display: "flex" }}>${symbol}</span>
                     </div>
-                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 15, color: "rgba(255,255,255,0.16)", letterSpacing: "0.5px", display: "flex" }}>{address}</span>
+                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 15, color: c.textMuted, letterSpacing: "0.5px", display: "flex" }}>{address}</span>
                   </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", marginTop: 36 }}>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 20 }}>
-                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 54, fontWeight: 700, color: "#fff", letterSpacing: "-2.5px", display: "flex" }}>{price}</span>
+                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 54, fontWeight: 700, color: c.text, letterSpacing: "-2.5px", display: "flex" }}>{price}</span>
                     <span style={{ fontFamily: "JetBrains Mono", fontSize: 24, fontWeight: 600, color: change.startsWith("-") ? "#ef4444" : "#22c55e", display: "flex" }}>{change}</span>
                   </div>
-                  <div style={{ fontFamily: "JetBrains Mono", fontSize: 18, color: "rgba(255,255,255,0.2)", marginTop: 10, letterSpacing: "0.5px", display: "flex" }}>MC {mcap}</div>
+                  <div style={{ fontFamily: "JetBrains Mono", fontSize: 18, color: c.textDim, marginTop: 10, letterSpacing: "0.5px", display: "flex" }}>MC {mcap}</div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 36 }}>
                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 15, fontWeight: 600, color: theme.acDim, display: "flex" }}>-{penalty} penalty</span>
-                   <div style={{ flex: 1, height: 7, background: "rgba(255,255,255,0.04)", borderRadius: 4, overflow: "hidden", display: "flex" }}>
+                   <div style={{ flex: 1, height: 7, background: c.subtle, borderRadius: 4, overflow: "hidden", display: "flex" }}>
                       <div style={{ height: "100%", borderRadius: 4, width: `${Math.min(100, (penalty / 100) * 100)}%`, background: `linear-gradient(90deg, ${theme.ac}, ${theme.ac}bb)`, display: "flex" }} />
                    </div>
                 </div>
               </div>
-              <div style={{ display: "flex", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.04)" }}>
+              <div style={{ display: "flex", borderRadius: 16, overflow: "hidden", border: `1px solid ${c.subtle}` }}>
                 {[
                     { l: mode === "PUMP" ? "Curve" : "Liquidity", v: liq, c: (liq === "$0" || liq === "0" || liq === "0%") ? "#ef4444" : "#22c55e" },
                     { l: "Top 10", v: top10, c: parseInt(top10) > 50 ? "#ef4444" : "#22c55e" },
@@ -120,45 +167,50 @@ export async function GET(request: NextRequest) {
                     { l: "Sellable", v: sell, c: sell === "Yes" ? "#22c55e" : "#ef4444" },
                     { l: "Mint", v: mint, c: mint === "Revoked" ? "#22c55e" : "#ef4444" }
                 ].map((m, i) => (
-                    <div key={i} style={{ flex: 1, padding: "22px 20px", background: "rgba(255,255,255,0.015)", display: "flex", flexDirection: "column", gap: 10, borderLeft: i === 0 ? "0" : "1px solid rgba(255,255,255,0.04)" }}>
-                        <span style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "2px", color: "rgba(255,255,255,0.25)", fontWeight: 600, display: "flex" }}>{m.l}</span>
+                    <div key={i} style={{ flex: 1, padding: "22px 20px", background: c.cardBg, display: "flex", flexDirection: "column", gap: 10, borderLeft: i === 0 ? "0" : `1px solid ${c.subtle}` }}>
+                        <span style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "2px", color: c.textDim, fontWeight: 600, display: "flex" }}>{m.l}</span>
                         <span style={{ fontFamily: "JetBrains Mono", fontSize: 20, fontWeight: 700, color: m.c, display: "flex" }}>{m.v}</span>
                     </div>
                 ))}
               </div>
             </div>
-            <div style={{ width: 1, alignSelf: "stretch", background: "linear-gradient(180deg, transparent 5%, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.06) 70%, transparent 95%)", display: "flex" }} />
+            <div style={{ width: 1, alignSelf: "stretch", background: `linear-gradient(180deg, transparent 5%, ${c.subtle} 30%, ${c.subtle} 70%, transparent 95%)`, display: "flex" }} />
             <div style={{ width: 360, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 }}>
               <div style={{ position: "relative", width: 270, height: 270, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <svg width="270" height="270" viewBox="0 0 270 270" style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)", display: "flex" }}>
-                  <circle cx="135" cy="135" r="108" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="12" />
+                  <circle cx="135" cy="135" r="108" fill="none" stroke={c.subtle} strokeWidth="12" />
                   <circle cx="135" cy="135" r="108" fill="none" stroke={theme.ac} strokeWidth="14" strokeLinecap="round" strokeDasharray={circum} strokeDashoffset={offset} style={{ opacity: 0.85 }} />
                 </svg>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                   <span style={{ fontSize: score === 100 ? 86 : 92, fontWeight: 900, color: theme.ac, letterSpacing: "-4px", lineHeight: 1, display: "flex" }}>{score}</span>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 18, color: "rgba(255,255,255,0.18)", marginTop: 6, display: "flex" }}>/ 100</span>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 18, color: c.textGhost, marginTop: 6, display: "flex" }}>/ 100</span>
                 </div>
               </div>
               <div style={{ fontSize: 18, fontWeight: 700, padding: "12px 32px", borderRadius: 100, background: theme.acBg, border: `1px solid ${theme.acBorder}`, color: theme.ac, letterSpacing: "0.5px", display: "flex" }}>Grade {grade} · {gradeLabel}</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", maxWidth: 340 }}>
-                {tags.map((t, i) => (
-                    <span key={i} style={{ fontSize: 13, fontWeight: 600, padding: "7px 16px", borderRadius: 100, background: theme.acBg, border: `1px solid ${theme.acBorder}`, color: theme.acDim, display: "flex" }}>{t}</span>
-                ))}
+                {tags.map((t, i) => {
+                    const pts = tagPointsList[i] || 0;
+                    const tagColor = pts >= 30 ? "#ef4444" : pts >= 15 ? "#f59e0b" : "#eab308";
+                    return (
+                      <span key={i} style={{ fontSize: 13, fontWeight: 600, padding: "7px 16px", borderRadius: 100, background: `${tagColor}18`, border: `1px solid ${tagColor}30`, color: `${tagColor}cc`, display: "flex" }}>{t}</span>
+                    );
+                })}
               </div>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 72px", background: "rgba(0,0,0,0.4)", borderTop: "1px solid rgba(255,255,255,0.03)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 72px", background: c.footerBg, borderTop: `1px solid ${c.footerBorder}` }}>
             <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-              <svg width="36" height="32" viewBox="0 0 48 48" fill="none" style={{ display: "flex" }}><path d="M24 4L42 14V34L24 44L6 34V14L24 4Z" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none"/><path d="M24 16C24 16 30 19 30 24C30 28 26 31 24 32.5C22 31 18 28 18 24C18 19 24 16 24 16Z" fill="rgba(255,255,255,0.25)"/></svg>
+              <svg width="36" height="36" viewBox="0 0 48 48" fill="none" style={{ display: "flex" }}><path d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z" stroke={c.svgStroke} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><path d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z" fill={c.svgFill} stroke={c.svgStroke} strokeWidth="1" strokeLinejoin="round"/><path d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z" fill={c.svgShield}/><path d="M20.5 23.5L23 26L28 20.5" stroke={c.svgCheck} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
               <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontSize: 22, fontWeight: 800, color: "rgba(255,255,255,0.45)", display: "flex" }}>RugSol</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.15)", letterSpacing: "3.5px", display: "flex" }}>SCANNER</span>
+                <span style={{ fontSize: 22, fontWeight: 800, color: isLight ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.45)", display: "flex" }}>RugSol</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: isLight ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.15)", letterSpacing: "3.5px", display: "flex" }}>SCANNER</span>
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-              <span style={{ fontFamily: "JetBrains Mono", fontSize: 18, color: "rgba(255,255,255,0.3)", display: "flex" }}>rugsol.info</span>
-              <div style={{ width: 5, height: 5, borderRadius: "50%", background: "rgba(255,255,255,0.12)", display: "flex" }} />
-              <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, color: "rgba(255,255,255,0.14)", display: "flex" }}>{dateStr}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+              <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, color: c.textMuted, display: "flex" }}>{dateStr}</span>
+              <div style={{ display: "flex", alignItems: "center", padding: "10px 24px", borderRadius: 100, background: `${theme.acBg}`, border: `1px solid ${theme.acBorder}` }}>
+                <span style={{ fontFamily: "JetBrains Mono", fontSize: 20, fontWeight: 700, color: theme.ac, letterSpacing: "0.5px", display: "flex" }}>rugsol.info</span>
+              </div>
             </div>
           </div>
         </div>

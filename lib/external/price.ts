@@ -71,17 +71,18 @@ export async function getTokenPrice(mintAddress: string): Promise<TokenPrice | n
   if (SOL_ADDRESSES.includes(mintAddress)) {
     // Fetch SOL price from DexScreener (wSOL pairs) or CoinGecko as fallback
     try {
-      const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");
+      const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd&include_24hr_change=true");
       if (response.ok) {
         const data = await response.json();
         const priceUsd = data.solana?.usd || 0;
+        const h24Change = data.solana?.usd_24h_change || 0;
         if (priceUsd > 0) {
           const marketCap = priceUsd * 589_000_000;
           return {
             priceUsd,
             marketCap,
             liquidity: { usd: 1_000_000_000, base: 0, quote: 0 },
-            priceChange: { m5: 0, h1: 0, h6: 0, h24: 0 },
+            priceChange: { m5: 0, h1: 0, h6: 0, h24: parseFloat(h24Change.toFixed(2)) },
             pairCreatedAt: 0,
           };
         }

@@ -135,6 +135,7 @@ function analyzeDevWallet(
 type DexData = {
   lpSizeUsd: number;
   dexName: string | null;
+  dexId?: string | null;
   pairAddress: string | null;
   name?: string;
   symbol?: string;
@@ -166,7 +167,7 @@ async function detectTokenMode(
 
     if (context) {
         const authority = context.mintAuthority;
-        
+
         // Pump.fun tokens on the curve ALWAYS have the Bonding Curve PDA as the Mint Authority
         if (authority === bondingCurvePda.toBase58()) {
             console.log(`[Mode] Mint Authority matches Bonding Curve PDA. Force PUMP mode.`);
@@ -183,19 +184,33 @@ async function detectTokenMode(
       return { mode: "pump", dexData: null };
     }
     // Graduated from bonding curve → now on DEX
+    console.log(`[Mode] Bonding curve is complete. Switching to DEX mode.`);
     return { mode: "dex", dexData: null };
   }
 
   // Method 2: Check for DEX pools via DexScreener (Fallback)
   try {
     const dexData = await fetchDexScreener(tokenAddress);
-    
-    if (dexData && dexData.dexName === "Pump.fun") {
-        return { mode: "pump", dexData };
-    }
 
-    if (dexData && dexData.pairAddress) {
-      return { mode: "dex", dexData };
+    if (dexData) {
+      // If DexScreener found it on Pump.fun and the address ends with "pump",
+      // but we couldn't confirm bonding curve is active, treat as graduated
+      if (dexData.dexName === "Pump.fun" && tokenAddress.toLowerCase().endsWith("pump")) {
+        // Token address ends with "pump" but DexScreener shows it on Pump.fun (PumpSwap)
+        // This is a graduated token trading on Pump.fun DEX
+        console.log(`[Mode] Pump.fun address trading on PumpSwap DEX. DEX mode.`);
+        return { mode: "dex", dexData };
+      }
+
+      // If DexScreener reports Pump.fun and NO bonding curve state found, it's graduated
+      if (dexData.dexName === "Pump.fun" && !pumpState?.exists) {
+        console.log(`[Mode] Found on Pump.fun DEX with no active bonding curve. DEX mode.`);
+        return { mode: "dex", dexData };
+      }
+
+      if (dexData.pairAddress) {
+        return { mode: "dex", dexData };
+      }
     }
 
   } catch (err) {
@@ -207,6 +222,7 @@ async function detectTokenMode(
   // it's almost certainly a Pump.fun token (likely new/unindexed).
   // defaulting to DEX here would cause a "No Liquidity" panic.
   if (tokenAddress.toLowerCase().endsWith("pump")) {
+      console.log(`[Mode] Address ends with 'pump'. Defaulting to PUMP mode.`);
       return { mode: "pump", dexData: null };
   }
 
@@ -436,7 +452,7 @@ export function calculatePenalties(
   // Metadata
   if (mode !== "pump" && !skip.metadata) {
     if (checks.metadata.data?.isMutable) {
-      penalties.push({ category: "Metadata", reason: "Metadata is mutable", points: 10 });
+      penalties.push({ category: "Metadata", reason: "Metadata is mutable", points: 5 });
     }
   }
   

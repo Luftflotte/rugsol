@@ -19,6 +19,7 @@ import { DevHistory } from "@/components/DevHistory";
 import { ScanResult } from "@/lib/scoring/engine";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { RateLimitModal } from "@/components/RateLimitModal";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface ScanResponse {
   success: boolean;
@@ -113,13 +114,16 @@ function transformToCheckGroups(result: ScanResult): CheckGroup[] {
             penalty: liq.lpSizeUsd === -1 ? 10 : liq.lpSizeUsd < 1000 ? 30 : liq.lpSizeUsd < 10000 ? 20 : liq.lpSizeUsd < 50000 ? 10 : 0,
         });
 
-        // Forced N/A for LP Lock as per request
         liquidityChecks.push({
             id: "lp-lock",
             name: "LP Burned/Locked",
-            status: "unknown" as const,
-            value: "N/A",
-            tooltip: "LP Lock check is temporarily disabled.",
+            status: liq.lpBurned ? "pass" as const : liq.lpLocked ? "pass" as const : "warning" as const,
+            value: liq.lpBurned ? "Burned" : liq.lpLocked ? `Locked${liq.lockDuration ? ` (${liq.lockDuration})` : ''}` : "No",
+            tooltip: liq.lpBurned
+                ? "LP tokens have been burned. Liquidity cannot be removed."
+                : liq.lpLocked
+                    ? "LP tokens are locked. Liquidity cannot be removed during the lock period."
+                    : "LP is not burned or locked. Developer could potentially remove liquidity.",
             penalty: 0,
         });
       }
@@ -247,7 +251,7 @@ function transformToCheckGroups(result: ScanResult): CheckGroup[] {
         status: m.isMutable ? "warning" as const : "pass" as const,
         value: m.isMutable ? "Yes" : "Immutable",
         tooltip: "Can the developer change the token name/image later?",
-        penalty: m.isMutable ? 10 : 0
+        penalty: m.isMutable ? 5 : 0
         });
     }
     const hasSocials = m.twitter || m.telegram || m.website;
@@ -290,6 +294,7 @@ function markScanTime() {
 export default function ScanResultPage() {
   const params = useParams();
   const address = params.address as string;
+  const { theme } = useTheme();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -397,7 +402,9 @@ export default function ScanResultPage() {
       const adv = result.checks.advanced?.data;
 
       // Prepare tags (top 3 risk factors or safe points)
-      const tags = result.penalties.slice(0, 3).map(p => p.category).join(",") || "Safe,Verified,Low Risk";
+      const topPenalties = result.penalties.slice(0, 3);
+      const tags = topPenalties.map(p => p.category).join(",") || "Safe,Verified,Low Risk";
+      const tagPoints = topPenalties.map(p => p.points).join(",");
 
       const params = new URLSearchParams({
         address: result.tokenAddress,
@@ -417,7 +424,9 @@ export default function ScanResultPage() {
         mint: result.checks.mintAuthority.data?.status === "pass" ? "Revoked" : "Active",
         penalty: result.totalPenalties.toString(),
         tags: tags,
-        image: metadata?.image || ""
+        tagPoints: tagPoints,
+        image: metadata?.image || "",
+        theme: theme,
       });
 
       const url = `/api/og?${params.toString()}`;

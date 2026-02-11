@@ -36,7 +36,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       const symbol = meta?.symbol || "TOKEN";
       tokenName = `${name} ($${symbol})`;
 
-      const tags = result.penalties.slice(0, 3).map(p => p.category).join(",") || "Safe,Verified,Low Risk";
+      const topPenalties = result.penalties.slice(0, 3);
+      const tags = topPenalties.map(p => p.category).join(",") || "Safe,Verified,Low Risk";
+      const tagPoints = topPenalties.map(p => p.points).join(",");
 
       const ogParams = new URLSearchParams({
         address: result.tokenAddress,
@@ -56,6 +58,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         mint: result.checks.mintAuthority.data?.status === "pass" ? "Revoked" : "Active",
         penalty: result.totalPenalties.toString(),
         tags,
+        tagPoints,
         image: meta?.image || "",
       });
 

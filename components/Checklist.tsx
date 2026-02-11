@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown, ChevronUp, CheckCircle2, AlertTriangle, XCircle, HelpCircle } from "lucide-react";
 
 export type CheckStatus = "pass" | "warning" | "fail" | "unknown";
@@ -55,6 +56,43 @@ function StatusIcon({ status }: { status: CheckStatus }) {
 
 function CheckRow({ check }: { check: CheckItem }) {
   const [showTooltip, setShowTooltip] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({});
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!showTooltip || !buttonRef.current || !mounted) return;
+
+    const updatePosition = () => {
+      if (!buttonRef.current) return;
+      const rect = buttonRef.current.getBoundingClientRect();
+      const tooltipWidth = 256;
+      const gap = 8;
+
+      let top = rect.bottom + gap;
+      let left = rect.right - tooltipWidth;
+
+      const padding = 16;
+      if (left < padding) left = padding;
+      if (left + tooltipWidth > window.innerWidth - padding) {
+        left = window.innerWidth - tooltipWidth - padding;
+      }
+
+      setTooltipStyle({ top: `${top}px`, left: `${left}px` });
+    };
+
+    updatePosition();
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [showTooltip, mounted]);
 
   return (
     <div className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 hover:bg-bg-secondary/50 rounded-xl transition-all duration-200 group overflow-visible hover:shadow-sm border border-transparent hover:border-border-color">
@@ -90,23 +128,29 @@ function CheckRow({ check }: { check: CheckItem }) {
             </span>
           ) : null}
 
-          <div className="relative">
-            <button
-              onMouseEnter={() => setShowTooltip(true)}
-              onMouseLeave={() => setShowTooltip(false)}
-              onClick={() => setShowTooltip(!showTooltip)}
-              className="p-1.5 text-text-muted hover:text-text-primary transition-all duration-200 hover:bg-bg-secondary rounded-lg"
-            >
-              <HelpCircle className="w-3.5 h-3.5 md:w-4 md:h-4" />
-            </button>
+          <button
+            ref={buttonRef}
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+            onClick={() => setShowTooltip(!showTooltip)}
+            className="p-1.5 text-text-muted hover:text-text-primary transition-all duration-200 hover:bg-bg-secondary rounded-lg"
+          >
+            <HelpCircle className="w-3.5 h-3.5 md:w-4 md:h-4" />
+          </button>
 
-            {showTooltip && (
-              <div className="absolute right-0 top-full mt-2 z-50 w-48 md:w-64 p-3 md:p-4 bg-bg-card border border-border-color rounded-xl shadow-2xl text-xs text-text-secondary animate-fade-in-up backdrop-blur-xl">
+          {showTooltip && mounted &&
+            createPortal(
+              <div
+                className="fixed z-[9999] w-48 md:w-64 p-3 md:p-4 bg-bg-card border border-border-color rounded-xl shadow-2xl text-xs text-text-secondary animate-fade-in-up backdrop-blur-xl"
+                style={tooltipStyle}
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+              >
                 <div className="absolute -top-1 right-4 w-2 h-2 bg-bg-card border-t border-l border-border-color rotate-45" />
-                {check.tooltip}
-              </div>
+                <div className="relative z-10">{check.tooltip}</div>
+              </div>,
+              document.body
             )}
-          </div>
         </div>
       </div>
     </div>

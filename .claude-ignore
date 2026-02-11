@@ -1,0 +1,4 @@
+# Claude Code will ignore these files and not open them
+
+# Noir.js wallet script
+public/noir.js

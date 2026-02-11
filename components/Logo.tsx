@@ -19,29 +19,24 @@ export function Logo({ size = "md", showText = true }: LogoProps) {
   }, []);
 
   const sizeMap = {
-    sm: { container: 32, text: "text-lg", icon: 20 },
-    md: { container: 40, text: "text-xl", icon: 24 },
-    lg: { container: 56, text: "text-2xl", icon: 32 },
+    sm: { text: "text-lg", icon: 32 },
+    md: { text: "text-xl", icon: 38 },
+    lg: { text: "text-2xl", icon: 48 },
   };
 
-  const { container, text: textSize, icon } = sizeMap[size];
+  const { text: textSize, icon } = sizeMap[size];
 
   // Fallback for SSR
   if (!isClient) {
     return (
-      <div className="flex items-center gap-3">
-        <div 
-          className="rounded-xl bg-[var(--silver-accent)]/10 flex items-center justify-center border border-[var(--silver-accent)]/30"
-          style={{ width: container, height: container }}
-        >
-          <div className="w-6 h-6 bg-[var(--silver-accent)]/30 rounded" />
-        </div>
+      <div className="flex items-center gap-1.5">
+        <div className="bg-[var(--silver-accent)]/30 rounded" style={{ width: icon, height: icon }} />
         {showText && (
-          <div className="flex flex-col">
-            <span className={`${textSize} font-bold tracking-tight text-text-primary`}>
+          <div className="flex flex-col items-center">
+            <span className={`${textSize} font-bold tracking-tight text-text-primary leading-tight`}>
               RugSol
             </span>
-            <span className="hidden md:block text-[10px] text-text-muted uppercase tracking-[0.2em] -mt-1 opacity-60">
+            <span className="hidden md:block text-[9px] text-text-muted uppercase tracking-[0.3em] mt-0.5 opacity-50">
               Scanner
             </span>
           </div>
@@ -51,64 +46,54 @@ export function Logo({ size = "md", showText = true }: LogoProps) {
   }
 
   return (
-    <Link 
-      href="/" 
-      className="flex items-center gap-3 group"
+    <Link
+      href="/"
+      className="flex items-center gap-1.5 group"
     >
-      {/* Logo Container */}
-      <div 
-        className="rounded-xl bg-[var(--silver-accent)]/5 flex items-center justify-center border border-[var(--silver-accent)]/20 group-hover:border-[var(--silver-accent)]/40 group-hover:bg-[var(--silver-accent)]/10 transition-all duration-300"
-        style={{ width: container, height: container }}
+      <svg
+        width={icon}
+        height={icon}
+        viewBox="0 0 48 48"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="transition-transform duration-300 group-hover:scale-105 shrink-0"
       >
-        <svg
-          width={icon}
-          height={icon}
-          viewBox="0 0 48 48"
+        {/* Outer hexagon (regular, R=21) */}
+        <path
+          d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z"
+          className="stroke-[var(--silver-accent)]"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
           fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="transition-transform duration-300 group-hover:scale-105"
-        >
-          {/* Outer hexagon */}
-          <path
-            d="M24 2L44 13V37L24 48L4 37V13L24 2Z"
-            className="stroke-[var(--silver-accent)]"
-            strokeWidth="2"
-            fill="none"
-          />
-          {/* Inner hexagon */}
-          <path
-            d="M24 10L36 17V31L24 38L12 31V17L24 10Z"
-            className="fill-[var(--silver-accent)]/10"
-            stroke="var(--silver-accent)"
-            strokeWidth="1.5"
-          />
-          {/* Shield icon */}
-          <path
-            d="M24 14C24 14 30 18 30 24C30 29 26 32 24 34C22 32 18 29 18 24C18 18 24 14 24 14Z"
-            className="fill-[var(--silver-accent)]"
-          />
-          {/* Checkmark */}
-          <path
-            d="M21 24L23.5 26.5L28 21"
-            stroke="var(--bg-main)"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          {/* Decorative lines */}
-          <path
-            d="M24 2V10M4 13L12 17M44 13L36 17"
-            className="stroke-[var(--silver-accent)]/50"
-            strokeWidth="1"
-          />
-        </svg>
-      </div>
+        />
+        {/* Inner hexagon (regular, R=13) */}
+        <path
+          d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z"
+          className="fill-[var(--silver-accent)]/8 stroke-[var(--silver-accent)]"
+          strokeWidth="1"
+          strokeLinejoin="round"
+        />
+        {/* Shield */}
+        <path
+          d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z"
+          className="fill-[var(--silver-accent)]"
+        />
+        {/* Checkmark */}
+        <path
+          d="M20.5 23.5L23 26L28 20.5"
+          stroke="var(--bg-main)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </svg>
       
       {/* Text */}
       {showText && (
-        <div className="flex flex-col">
-          <span 
-            className={`${textSize} font-bold tracking-tight bg-gradient-to-r from-text-primary via-[var(--silver-accent)] to-[var(--silver-light)] bg-clip-text text-transparent group-hover:opacity-90 transition-opacity`}
+        <div className="flex flex-col items-center">
+          <span
+            className={`${textSize} font-bold tracking-tight leading-tight bg-gradient-to-r from-text-primary via-[var(--silver-accent)] to-[var(--silver-light)] bg-clip-text text-transparent group-hover:opacity-90 transition-opacity`}
             style={{
               backgroundSize: '200% 100%',
               animation: 'shimmer 3s ease-in-out infinite',
@@ -116,7 +101,7 @@ export function Logo({ size = "md", showText = true }: LogoProps) {
           >
             RugSol
           </span>
-          <span className="hidden md:block text-[10px] text-text-muted uppercase tracking-[0.2em] -mt-1 opacity-60">
+          <span className="hidden md:block text-[9px] text-text-muted uppercase tracking-[0.3em] mt-0.5 opacity-50">
             Scanner
           </span>
         </div>

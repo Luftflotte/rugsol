@@ -8,7 +8,15 @@
       "Bash(npx next build)",
       "Bash(npx next lint:*)",
       "Bash(npm run lint:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git checkout:*)",
+      "Bash(npx next build:*)",
+      "Bash(git -C \"c:\\\\Users\\\\user\\\\Desktop\\\\rug\" remote -v)",
+      "Bash(git -C \"c:\\\\Users\\\\user\\\\Desktop\\\\rug\" status -s)",
+      "Bash(git -C \"c:\\\\Users\\\\user\\\\Desktop\\\\rug\" log --oneline -5)",
+      "Bash(git -C \"c:\\\\Users\\\\user\\\\Desktop\\\\rug\" diff --stat)",
+      "Bash(git -C \"c:\\\\Users\\\\user\\\\Desktop\\\\rug\" status --short -- \"app/alerts/\" \"app/api-docs/\" \"app/blog/\" \"app/disclaimer/\" \"app/docs/\" \"app/privacy/\" \"app/scoring/\" \"app/security/\" \"app/terms/\" \".claude-ignore\" \"bot-logo.svg\")",
+      "Bash(git -C \"c:\\\\Users\\\\user\\\\Desktop\\\\rug\" add -A)"
     ]
   }
 }
