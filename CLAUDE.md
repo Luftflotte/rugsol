@@ -1,270 +1,142 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Critical Rules
+
+- **NEVER hallucinate or invent code, files, APIs, functions, or variables that don't exist in this codebase.** Always read the actual file before referencing or modifying it. If unsure whether something exists — check first with Glob/Grep/Read. Do not assume file contents, function signatures, or component props. When in doubt, explore — don't guess.
+- Do not create files unless absolutely necessary. Prefer editing existing files.
+- Do not add features, refactor, or "improve" code beyond what was explicitly requested.
+- Preserve existing patterns and conventions. Match the style of surrounding code.
 
 ## Project Overview
 
-**rug** is a Solana token security analysis tool that detects rug pulls and analyzes token risk. Users enter a token address and receive an instant security assessment with a score (0-100) and letter grade (A-F).
+**rug** — Solana token security analyzer. Users enter a token address → get a risk score (0-100), letter grade (A-F), and detailed security breakdown. Supports DEX tokens and Pump.fun bonding curve tokens.
 
-**Key Features:**
-- Real-time on-chain analysis (authorities, holders, liquidity, age)
-- Honeypot detection via transaction simulation
-- Rug pull risk scoring
-- Support for both DEX tokens and Pump.fun bonding curve tokens
-- Social sharing with generated report cards
-- Telegram bot for alerts (via scripts)
+**Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · shadcn/ui · @solana/web3.js · Framer Motion
 
-## Architecture
-
-### High-Level Flow
+## Directory Structure
 
 ```
-User enters token address → /api/scan endpoint → Scoring engine
-  ↓
-  Multiple parallel security checks:
-  - Authority checks (mint/freeze)
-  - Holder distribution analysis
-  - Liquidity analysis (DEX pools or Pump.fun curve)
-  - Honeypot detection (sell simulation via Jupiter)
-  - Token metadata & age
-  - Advanced: dev wallet, sniper detection, linked wallets
-  ↓
-Scoring formula calculates 0-100 score → Letter grade (A-F)
-  ↓
-Result displayed on scan/[address] page with interactive components
-```
+app/
+  page.tsx                     # Home (search + recent scans)
+  layout.tsx                   # Root layout
+  globals.css                  # Global styles & CSS variables
+  scan/[address]/page.tsx      # Scan result page (client component)
+  api/
+    scan/route.ts              # POST — main security analysis
+    recent/route.ts            # GET — recent scans
+    stats/route.ts             # GET — global statistics
+    og/route.tsx               # GET — OG image generation
+    telegram/route.ts          # POST — Telegram webhook
+  about/page.tsx               # Static pages: about, alerts, api-docs,
+  alerts/page.tsx              #   blog, disclaimer, docs, privacy,
+  api-docs/page.tsx            #   scoring, security, terms
+  blog/page.tsx
+  disclaimer/page.tsx
+  docs/page.tsx
+  privacy/page.tsx
+  scoring/page.tsx
+  security/page.tsx
+  terms/page.tsx
 
-### Technology Stack
-
-- **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui
-- **Backend:** Next.js API routes, Solana RPC (Helius), external APIs (Birdeye, Jupiter, DexScreener)
-- **Blockchain:** @solana/web3.js, @solana/spl-token
-- **Utilities:** clsx, class-variance-authority, lucide-react icons
-
-### Directory Structure
-
-```
-app/                        # Next.js App Router
-  scan/[address]/          # Scan result page (client component)
-    page.tsx             # Displays token analysis & interactive components
-    layout.tsx
-  api/                     # API routes
-    scan                   # POST endpoint that performs security analysis
-    og                     # Open Graph image generation for sharing
-  page.tsx                 # Home page (search & recent scans)
-  layout.tsx               # Root layout
-  globals.css              # Global styles
-
-components/                # React UI components
-  Checklist.tsx           # Security check groups display
-  ScoreDisplay.tsx        # Score circle & grade badge
-  HolderChart.tsx         # Top 10 holders visualization
-  BondingCurveProgress.tsx # Pump.fun progress bar
-  RiskList.tsx            # Penalties/risk factors list
-  ActivityTimeline.tsx    # Transaction timeline
-  TokenHeader.tsx         # Token metadata display
-  InfoTooltip.tsx         # Helper tooltips
-  (and more UI components)
+components/
+  Navbar.tsx, Logo.tsx, Footer.tsx          # Layout
+  ThemeProvider.tsx, ThemeToggle.tsx        # Theme (dark/light)
+  SearchInput.tsx                          # Token address input
+  RecentScans.tsx, Stats.tsx               # Home page widgets
+  ScoreDisplay.tsx                         # Score circle + grade
+  Checklist.tsx                            # Security check groups
+  TokenHeader.tsx                          # Token metadata header
+  RiskList.tsx                             # Risk factors list
+  HolderChart.tsx                          # Top holders chart
+  BondingCurveProgress.tsx                 # Pump.fun progress
+  ActivityTimeline.tsx                     # Tx timeline
+  DevHistory.tsx                           # Dev wallet history
+  InfoTooltip.tsx                          # Tooltips
+  RateLimitModal.tsx                       # Rate limit modal
+  SidebarLinks.tsx                         # Sidebar nav
+  PricingTiers.tsx                         # Pricing display
+  ui/button.tsx, card.tsx, input.tsx       # shadcn/ui base
 
 lib/
+  utils.ts                                # cn() class merger
   scoring/
-    engine.ts             # Main scoring logic - aggregates checks & calculates score
-    constants.ts          # Grade thresholds & scoring config
-    whitelist.ts          # Known good tokens
+    engine.ts                             # Scoring engine (main logic)
+    constants.ts                          # Grade thresholds
+    whitelist.ts                          # Known good tokens
   solana/
-    connection.ts         # RPC connection & token context
-    authority.ts          # Mint/freeze authority checks
-    holders.ts            # Top holder analysis
-    pumpfun.ts            # Pump.fun bonding curve state
-    tokenAge.ts           # Token creation time
+    connection.ts                         # Helius RPC connection
+    authority.ts                          # Mint/freeze authority checks
+    holders.ts                            # Holder analysis & clustering
+    pumpfun.ts                            # Pump.fun bonding curve
+    tokenAge.ts                           # Token creation time
   external/
-    price.ts              # Token price (Birdeye)
-    metadata.ts           # Token metadata (Jupiter)
-    liquidity.ts          # LP pool size (DexScreener)
-    jupiter-swap.ts       # Honeypot detection (sell simulation)
-    jupiter-tokens.ts     # Token type detection
-  utils.ts                # Utility functions (cn class merger)
+    price.ts                              # Birdeye — price data
+    metadata.ts                           # Jupiter — token metadata
+    liquidity.ts                          # DexScreener — LP pools
+    jupiter-swap.ts                       # Jupiter — honeypot detection
+    jupiter-tokens.ts                     # Jupiter — token type
+  storage/
+    recent-scans.ts                       # Recent scans cache
+  telegram/
+    bot.ts                                # Bot command handlers
+    templates.ts                          # Message templates
 
-scripts/                    # CLI scripts
-  run-bot.ts              # Telegram bot (uses grammy)
-  setup-telegram.ts       # Webhook setup
+scripts/
+  run-bot.ts                              # Telegram bot runner
+  setup-telegram.ts                       # Webhook setup
+
+public/
+  noir.js                                 # Wallet connection script
+  logo-dark.png, logo-light.png           # Theme logos
 ```
 
-## Scanning Logic
+## Scoring Engine
 
-### Security Checks (Modular Design)
+`lib/scoring/engine.ts` runs parallel security checks and calculates a score:
 
-The scoring engine (`lib/scoring/engine.ts`) runs 8+ independent checks and combines results:
+1. **Authority** — mint/freeze authority status
+2. **Holders** — top 10 concentration, dev wallet, snipers, linked wallets
+3. **Liquidity** — pool size (DEX) or bonding curve progress (Pump.fun)
+4. **Honeypot** — sell simulation via Jupiter (fail = honeypot)
+5. **Metadata** — mutability, social links
+6. **Token age** — newer = riskier
+7. **Price/market** — current price, 24h change, market cap
 
-1. **Authority Checks** (`lib/solana/authority.ts`)
-   - Mint Authority: Can tokens be printed? (revoke = safe)
-   - Freeze Authority: Can wallets be frozen? (revoke = safe)
+**Score:** starts at 100, penalties deducted per risk. Critical fails (honeypot, active mint authority) → automatic F.
 
-2. **Holder Analysis** (`lib/solana/holders.ts`)
-   - Top 10 concentration
-   - Largest holder percentage
-   - Wallet type identification
+**Grades:** A ≥80 · B 60-79 · C 40-59 · D 20-39 · E 1-19 · F 0/critical
 
-3. **Liquidity** (`lib/external/liquidity.ts`)
-   - Pool size (DEX) or bonding curve progress (Pump.fun)
-   - LP locked/burned status
-   - Different logic for Pump vs DEX mode
+**Pump vs DEX:** auto-detected. Pump mode uses bonding curve instead of LP checks.
 
-4. **Honeypot Detection** (`lib/external/jupiter-swap.ts`)
-   - Simulates a sell transaction
-   - If tx fails → honeypot detected (user can't sell)
+## Key Patterns
 
-5. **Token Metadata** (`lib/external/metadata.ts`)
-   - Immutability status
-   - Social links (Twitter, Telegram, website)
-   - Token name/symbol/image
+- Security checks use `safeCheck()` wrapper — errors don't crash the scanner
+- Pages are `"use client"` for interactivity, logic lives in `lib/`
+- All RPC through `connection.ts` (single Helius endpoint)
+- CSS variables for theming: `--bg-primary`, `--text-primary`, `--silver-accent`
+- Custom classes: `glass-card`, `gradient-text`, `silver-accent`
+- Path alias: `@/*` → project root
 
-6. **Token Age** (`lib/solana/tokenAge.ts`)
-   - Time since creation
-   - Recent = higher risk
-
-7. **Advanced Analysis** (`lib/solana/holders.ts` + `engine.ts`)
-   - Dev wallet tracking & sell-out detection
-   - Sniper identification (bought in same block as deployment)
-   - Jito bundle detection (coordinated buys)
-   - Linked wallet clusters (wallets funded from same source)
-
-8. **Price & Market Data** (`lib/external/price.ts`)
-   - Current price, 24h change, market cap
-
-### Scoring Formula
-
-- **Base:** Start at 100 points
-- **Penalties:** Each risk category deducts points:
-  - Honeypot: -50
-  - No mint authority: -25
-  - No freeze authority: -15
-  - High holder concentration: -50 (top 80%) down to -10 (top 30%)
-  - Low liquidity: -30 (< $1k) down to 0 (> $50k)
-  - And more...
-- **Critical Failures:** If honeypot or mint authority active → automatic F grade
-- **Grades:**
-  - A: ≥ 80 points
-  - B: 60-79 points
-  - C: 40-59 points
-  - D: 20-39 points
-  - E: 1-19 points
-  - F: 0 or critical fail
-
-### Pump.fun vs DEX Modes
-
-The scanner detects which platform a token uses and adjusts checks:
-
-- **Pump Mode:** Bonding curve progress replaces LP checks, LP lock check shows N/A, metadata always mutable
-- **DEX Mode:** Full liquidity & authority analysis, mutable metadata flagged as risk
-
-## Key Data Flows
-
-### Scanning a Token (POST /api/scan)
-
-1. User sends token address
-2. Fetch token context (metadata, supply, decimals)
-3. Detect if Pump.fun or DEX (via program ID)
-4. Run 8+ security checks in parallel
-5. Calculate penalties & score
-6. Return comprehensive `ScanResult` object
-
-### Displaying Results (GET /scan/[address])
-
-1. Client loads page with token address
-2. useEffect triggers fetch to /api/scan
-3. Skeleton loading state shown
-4. Transform `ScanResult` → check groups → UI components
-5. Interactive elements: hover tooltips, share buttons, links
-
-### Caching
-
-Results may be cached (indicated by `cached` flag in response). Check `SidebarLinks.tsx` for cache timestamp display.
-
-## Development Commands
+## Commands
 
 ```bash
-npm run dev         # Start dev server (http://localhost:3000)
-npm run build       # Production build
-npm run start       # Run production build locally
-npm run lint        # Run ESLint
-npm run bot         # Run Telegram bot (requires .env.local)
-npm run bot:setup   # Set up Telegram webhook
-npm run bot:delete-webhook  # Remove webhook
+npm run dev          # Dev server (localhost:3000)
+npm run build        # Production build
+npm run start        # Run production build
+npm run lint         # ESLint
+npm run bot          # Telegram bot
+npm run bot:setup    # Setup Telegram webhook
 ```
 
-## Environment Variables
-
-Create `.env.local`:
+## Environment (.env.local)
 
 ```
-HELIUS_API_KEY=<your-helius-rpc-key>
-BIRDEYE_API_KEY=<your-birdeye-api-key>
-# Optional for Telegram bot:
-TELEGRAM_BOT_TOKEN=<your-telegram-bot-token>
-TELEGRAM_BOT_SECRET=<your-bot-secret>
+HELIUS_API_KEY=
+BIRDEYE_API_KEY=
+TELEGRAM_BOT_TOKEN=      # optional
+TELEGRAM_BOT_SECRET=     # optional
 ```
 
-## Important Patterns & Conventions
+## External APIs
 
-### Error Handling
-
-- Security checks use `safeCheck()` wrapper to catch errors gracefully
-- Returns `CheckResult<T>` with status ("success" | "error" | "unknown")
-- Failed checks don't crash the scanner; results are marked as unknown/error
-
-### Component Structure
-
-- Pages are "use client" (client components) for interactivity
-- Complex data transformations happen in utility functions (e.g., `transformToCheckGroups`)
-- UI components are presentational, logic in lib/
-
-### API Safety
-
-- All RPC calls go through `connection.ts` (single Helius endpoint)
-- External APIs wrapped in utility functions with error handling
-- Token address validated before processing
-
-### Styling
-
-- CSS variables for theme: `--silver-accent`, `--bg-primary`, `--text-primary`, etc.
-- Utility classes: `glass-card`, `gradient-text`, `silver-accent`
-- Responsive design with Tailwind breakpoints (sm, md, lg)
-
-## Common Tasks
-
-### Adding a New Security Check
-
-1. Create check function in appropriate `lib/` module
-2. Add interface for return type
-3. Call via `safeCheck()` in `engine.ts`
-4. Add penalty logic in penalty calculation section
-5. Update UI component to display result
-
-### Modifying Scoring Formula
-
-Edit `lib/scoring/engine.ts`:
-- Adjust penalty points for each check
-- Modify grade thresholds in `constants.ts`
-- Run tests to ensure grades align with expectations
-
-### Updating UI for New Data
-
-1. Add new data to `ScanResult` interface
-2. Pass to component via props
-3. Use `InfoTooltip` for explanatory context
-4. Add check group in `transformToCheckGroups()`
-
-## External API Dependencies
-
-- **Helius:** Solana RPC for token data
-- **Birdeye:** Token price & market data
-- **Jupiter:** Token metadata, sell simulation
-- **DexScreener:** Liquidity pool info
-- **Metaplex:** Token metadata on-chain
-
-## Git Workflow
-
-- Main branch is `main`
-- Recent commits focused on UI improvements and component refactoring
-- Changes include new `InfoTooltip` component and improved visuals
+Helius (Solana RPC) · Birdeye (price) · Jupiter (metadata, honeypot sim) · DexScreener (liquidity) · Metaplex (on-chain metadata)
