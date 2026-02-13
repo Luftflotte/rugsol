@@ -62,8 +62,8 @@ const securityChecks = [
 
 const grades = [
   { grade: "A", range: "80 — 100", label: "Safe", color: "#22c55e" },
-  { grade: "B", range: "60 — 79", label: "Caution", color: "#84cc16" },
-  { grade: "C", range: "40 — 59", label: "Risky", color: "#eab308" },
+  { grade: "B", range: "60 — 79", label: "Low Risk", color: "#84cc16" },
+  { grade: "C", range: "40 — 59", label: "Moderate Risk", color: "#eab308" },
   { grade: "D", range: "20 — 39", label: "High Risk", color: "#f97316" },
   { grade: "F", range: "0 — 19", label: "Likely Scam", color: "#ef4444" },
 ];
@@ -88,7 +88,8 @@ export default function AboutPage() {
             </h1>
             <p className="text-base sm:text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
               RugSol analyzes Solana tokens in real-time, running 8+ independent security checks
-              to produce a risk score from 0 to 100. No sign-up required.
+              to produce a risk score from 0 to 100. No sign-up required — full scanning and scoring
+              is available without creating an account or logging in.
             </p>
           </div>
 
