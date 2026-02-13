@@ -82,7 +82,7 @@ export function DevHistory({ score, isWhitelisted, marketCap, grade }: DevHistor
   if (!visible) return null;
 
   return (
-    <div className="glass-card rounded-3xl border border-border-color overflow-hidden relative group">
+    <div className="glass-card rounded-2xl border border-border-color overflow-hidden relative group">
       {/* Section header */}
       <div className="flex items-center gap-3 p-5 md:p-6 border-b border-border-color">
         <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/20">

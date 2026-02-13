@@ -230,7 +230,7 @@ export async function GET(request: NextRequest) {
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", maxWidth: 340 }}>
                 {tags.map((t, i) => {
                     const pts = tagPointsList[i] || 0;
-                    const tagColor = pts >= 30 ? "#ef4444" : pts >= 15 ? "#f59e0b" : "#eab308";
+                    const tagColor = pts >= 30 ? "#ef4444" : pts >= 15 ? "#f59e0b" : pts > 0 ? "#eab308" : "#22c55e";
                     return (
                       <span key={i} style={{ fontSize: 13, fontWeight: 600, padding: "7px 16px", borderRadius: 100, background: `${tagColor}18`, border: `1px solid ${tagColor}30`, color: `${tagColor}cc`, display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ width: 7, height: 7, borderRadius: "50%", background: tagColor, display: "flex" }} />

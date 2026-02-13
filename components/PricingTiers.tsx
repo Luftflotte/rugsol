@@ -179,10 +179,7 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
       custom={index}
       variants={cardVariants}
       initial="hidden"
-      {...(instant
-        ? { animate: "visible" }
-        : { whileInView: "visible", viewport: { once: true, amount: 0.2 } }
-      )}
+      animate="visible"
       className={`
         relative flex flex-col rounded-2xl ${compact ? "p-4 sm:p-5" : "p-6 sm:p-8"} backdrop-blur-xl
         ${cardBg}

@@ -237,11 +237,13 @@ export function RecentScans() {
           </button>
         </div>
 
-        <div 
-          className="w-full overflow-x-auto recent-scans-container"
-          style={{ 
-            msOverflowStyle: 'none', 
-            scrollbarWidth: 'none'
+        <div
+          className="w-full overflow-x-auto recent-scans-container relative"
+          style={{
+            msOverflowStyle: 'none',
+            scrollbarWidth: 'none',
+            maskImage: 'linear-gradient(to right, black 85%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent 100%)',
           }}
         >
           <div className="flex gap-4 min-w-max px-4 py-2">

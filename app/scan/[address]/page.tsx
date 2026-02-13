@@ -479,29 +479,29 @@ export default function ScanResultPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col premium-bg text-text-primary">
       <Navbar />
 
       <main className="flex-1 pt-16 sm:pt-20 md:pt-28 pb-8 sm:pb-10 md:pb-20 overflow-x-hidden">
-        <div className="mx-auto w-full max-w-xl sm:max-w-2xl md:max-w-5xl lg:max-w-7xl px-2 sm:px-3 md:px-4 lg:px-8">
+        <div className="mx-auto w-full max-w-5xl lg:max-w-6xl px-4 sm:px-6 lg:px-8">
           
           {/* Back Link */}
-          <Link href="/" className="inline-flex items-center gap-2 text-xs text-text-secondary hover:text-text-primary mb-6 group">
+          <Link href="/" className="inline-flex items-center gap-2 text-xs text-text-secondary hover:text-text-primary mb-8 transition-colors duration-200 group">
             <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
             <span>Back to Home</span>
           </Link>
 
           {loading && (
-             <div className="flex flex-col items-center justify-center py-12 space-y-8">
+             <div className="flex flex-col items-center justify-center py-12 space-y-8 animate-fade-in-up">
                 {/* Enhanced Loading Animation */}
                 <div className="relative">
-                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-bg-secondary to-bg-card flex items-center justify-center border border-border-color shadow-2xl">
-                     <svg className="w-10 h-10 text-text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-bg-secondary to-bg-card flex items-center justify-center border border-border-color shadow-2xl">
+                     <svg className="w-10 h-10 text-[var(--silver-accent)] animate-spin" fill="none" viewBox="0 0 24 24">
                        <circle className="opacity-15" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                      </svg>
                   </div>
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 animate-pulse blur-xl" />
+                  <div className="absolute inset-0 rounded-2xl bg-[var(--silver-accent)]/20 animate-pulse blur-xl" />
                 </div>
                 <div className="text-center space-y-2">
                   <p className="text-text-primary font-semibold text-lg">Analyzing Token Security</p>
@@ -510,7 +510,7 @@ export default function ScanResultPage() {
 
                 {/* Skeleton Loaders */}
                 <div className="w-full max-w-3xl space-y-4 mt-8">
-                  <div className="glass-card p-6 rounded-3xl animate-pulse">
+                  <div className="glass-card p-6 rounded-2xl animate-pulse">
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 bg-bg-secondary rounded-full" />
                       <div className="flex-1 space-y-3">
@@ -519,7 +519,7 @@ export default function ScanResultPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="glass-card p-6 rounded-3xl animate-pulse">
+                  <div className="glass-card p-6 rounded-2xl animate-pulse">
                     <div className="space-y-3">
                       <div className="h-3 bg-bg-secondary rounded w-full" />
                       <div className="h-3 bg-bg-secondary rounded w-5/6" />
@@ -531,21 +531,67 @@ export default function ScanResultPage() {
           )}
 
           {error && (
-            <div className="text-center py-20">
+            <div className="glass-card rounded-2xl p-8 sm:p-12 text-center animate-fade-in-up">
+              <div className="flex justify-center mb-6">
+                <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+                </div>
+              </div>
               <h2 className="text-2xl font-bold text-red-500 mb-2">Analysis Failed</h2>
-              <p className="text-text-secondary mb-4">{error}</p>
-              <Link href="/" className="px-6 py-2 bg-bg-secondary rounded-lg">Try Another</Link>
+              <p className="text-text-secondary mb-6">{error}</p>
+              <Link href="/" className="btn-premium px-6 py-2.5 rounded-xl font-semibold text-sm inline-block">Try Another</Link>
             </div>
           )}
 
           {result && !loading && (
-            <div className="flex flex-col lg:grid lg:grid-cols-[1fr_340px] gap-8 animate-fade-in-up">
+            <div className="flex flex-col lg:grid lg:grid-cols-[1fr_340px] gap-8">
+
+              {/* Mobile Score Summary - visible only on small screens */}
+              <div className="lg:hidden glass-card p-4 rounded-2xl border border-border-color animate-fade-in-up flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl border-2"
+                    style={{
+                      color: result.gradeColor,
+                      borderColor: result.gradeColor,
+                      backgroundColor: `${result.gradeColor}15`,
+                    }}
+                  >
+                    {result.score}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="text-lg font-bold"
+                        style={{ color: result.gradeColor }}
+                      >
+                        Grade {result.grade}
+                      </span>
+                    </div>
+                    <p className="text-xs text-text-secondary">{result.gradeLabel}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleShareImage}
+                    disabled={isGenerating}
+                    className="p-2.5 btn-premium rounded-xl text-sm disabled:opacity-50"
+                    title="Share Report Card"
+                  >
+                    {isGenerating ? (
+                      <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin block" />
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                    )}
+                  </button>
+                </div>
+              </div>
 
               {/* Left Column: Header, Charts, Analysis */}
-              <div className="space-y-8">
+              <div className="space-y-10">
 
                 {/* 1. Header Card - Enhanced */}
-                <div className="glass-card p-6 md:p-8 rounded-3xl relative overflow-hidden border border-border-color hover:border-silver-accent/50 transition-all duration-500 group">
+                <div className="glass-card p-6 md:p-8 rounded-2xl relative overflow-hidden border border-border-color hover:border-silver-accent/50 transition-all duration-500 group animate-fade-in-up">
                   {/* Subtle gradient overlay */}
                   <div className="absolute inset-0 bg-gradient-to-br from-bg-secondary/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                   <div className="relative z-10">
@@ -562,48 +608,56 @@ export default function ScanResultPage() {
 
                 {/* 2. Bonding Curve Progress (Pump only) */}
                 {result.scanMode === 'pump' && result.bondingCurveData && (
+                    <div className="animate-fade-in-up" style={{ animationDelay: '50ms' }}>
                     <BondingCurveProgress
                         progressPercent={result.bondingCurveData.curveProgressPercent || 0}
                         marketCapSol={result.bondingCurveData.marketCapSol}
                         remainingSol={result.bondingCurveData.remainingSolToGraduate}
                         solPrice={result.solPrice}
                     />
+                    </div>
                 )}
 
                 {/* 3. Developer History (Teaser) */}
+                <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
                 <DevHistory
                   score={result.score}
                   grade={result.grade}
                   isWhitelisted={result.isWhitelisted}
                   marketCap={result.price?.marketCap}
                 />
+                </div>
 
                 {/* 4. Security Analysis Checklist */}
-                <div>
-                   <div className="flex items-center gap-3 mb-6">
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--silver-accent)]/30 to-transparent" />
-                    <h2 className="text-xl font-bold text-text-primary tracking-wide flex items-center gap-2">
-                      <svg className="w-5 h-5 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                      Security Analysis
-                      <InfoTooltip
-                        content={
-                          <div className="space-y-2">
-                            <p className="font-bold text-text-primary">Comprehensive Security Analysis</p>
-                            <p>Detailed verification of token safety across multiple risk categories.</p>
-                            <div className="space-y-1 text-[11px] mt-2">
-                              <p><strong className="text-red-400">Critical:</strong> Honeypot detection, authority status</p>
-                              <p><strong className="text-orange-400">High Risk:</strong> Liquidity analysis & lock status</p>
-                              <p><strong className="text-purple-400">Insider Activity:</strong> Dev wallet, snipers, linked wallets</p>
-                              <p><strong className="text-yellow-400">Medium:</strong> Holder distribution & concentration</p>
-                              <p><strong className="text-blue-400">Low:</strong> Metadata & social presence</p>
+                <div className="animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+                  <div className="divider-premium mb-8" />
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--silver-accent)]/10 flex items-center justify-center shrink-0 silver-accent">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-semibold text-text-primary flex items-center gap-2">
+                        Security Analysis
+                        <InfoTooltip
+                          content={
+                            <div className="space-y-2">
+                              <p className="font-bold text-text-primary">Comprehensive Security Analysis</p>
+                              <p>Detailed verification of token safety across multiple risk categories.</p>
+                              <div className="space-y-1 text-[11px] mt-2">
+                                <p><strong className="text-red-400">Critical:</strong> Honeypot detection, authority status</p>
+                                <p><strong className="text-orange-400">High Risk:</strong> Liquidity analysis & lock status</p>
+                                <p><strong className="text-purple-400">Insider Activity:</strong> Dev wallet, snipers, linked wallets</p>
+                                <p><strong className="text-yellow-400">Medium:</strong> Holder distribution & concentration</p>
+                                <p><strong className="text-blue-400">Low:</strong> Metadata & social presence</p>
+                              </div>
+                              <p className="text-[10px] opacity-70 mt-2">Click any check for detailed explanation</p>
                             </div>
-                            <p className="text-[10px] opacity-70 mt-2">Click any check for detailed explanation</p>
-                          </div>
-                        }
-                        position="bottom"
-                      />
-                    </h2>
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--silver-accent)]/30 to-transparent" />
+                          }
+                          position="bottom"
+                        />
+                      </h2>
+                      <p className="text-sm text-text-secondary">Detailed verification across multiple risk categories.</p>
+                    </div>
                   </div>
 
                   {/* Pump Mode Info Banner */}
@@ -617,31 +671,34 @@ export default function ScanResultPage() {
                   <Checklist groups={transformToCheckGroups(result)} />
                 </div>
 
-                {/* 4. Holder Distribution Chart - Enhanced */}
+                {/* 5. Holder Distribution Chart - Enhanced */}
                 {result.checks.holders.data && (
-                    <div className="glass-card p-6 md:p-8 rounded-3xl border border-border-color hover:border-silver-accent/50 transition-all duration-500">
+                    <div className="glass-card p-6 md:p-8 rounded-2xl border border-border-color hover:border-silver-accent/50 transition-all duration-500 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
                         <div className="flex items-center gap-3 mb-6">
-                          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--silver-accent)]/30 to-transparent" />
-                          <h3 className="text-base font-bold text-text-primary flex items-center gap-2">
-                              <svg className="w-5 h-5 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
-                              Top Holders Distribution
-                              <InfoTooltip
-                                content={
-                                  <div className="space-y-2">
-                                    <p className="font-bold text-text-primary">Token Holder Distribution</p>
-                                    <p>Visual breakdown of the top 10 wallets holding this token.</p>
-                                    <div className="space-y-1 text-[11px] mt-2">
-                                      <p>• High concentration = Higher risk</p>
-                                      <p>• Healthy tokens have distributed ownership</p>
-                                      <p>• Color coding identifies wallet types</p>
-                                    </div>
-                                    <p className="text-[10px] opacity-70 mt-2">Hover over bars for wallet details</p>
-                                  </div>
-                                }
-                                position="bottom"
-                              />
-                          </h3>
-                          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--silver-accent)]/30 to-transparent" />
+                          <div className="w-10 h-10 rounded-xl bg-[var(--silver-accent)]/10 flex items-center justify-center shrink-0 silver-accent">
+                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                          </div>
+                          <div>
+                              <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2">
+                                  Top Holders Distribution
+                                  <InfoTooltip
+                                    content={
+                                      <div className="space-y-2">
+                                        <p className="font-bold text-text-primary">Token Holder Distribution</p>
+                                        <p>Visual breakdown of the top 10 wallets holding this token.</p>
+                                        <div className="space-y-1 text-[11px] mt-2">
+                                          <p>• High concentration = Higher risk</p>
+                                          <p>• Healthy tokens have distributed ownership</p>
+                                          <p>• Color coding identifies wallet types</p>
+                                        </div>
+                                        <p className="text-[10px] opacity-70 mt-2">Hover over bars for wallet details</p>
+                                      </div>
+                                    }
+                                    position="bottom"
+                                  />
+                              </h3>
+                              <p className="text-sm text-text-secondary">Ownership breakdown of the top 10 wallets.</p>
+                          </div>
                         </div>
                         <HolderChart
                             holders={result.checks.holders.data.topHolders}
@@ -654,17 +711,21 @@ export default function ScanResultPage() {
 
                 {/* 6. Risk Factors List */}
                 {result.penalties.length > 0 && (
+                    <div className="animate-fade-in-up" style={{ animationDelay: '250ms' }}>
                     <RiskList penalties={result.penalties} />
+                    </div>
                 )}
 
                 {/* 7. Timeline */}
+                <div className="animate-fade-in-up" style={{ animationDelay: '300ms' }}>
                 <ActivityTimeline scanResult={result} />
+                </div>
 
               </div>
 
               {/* Right Column: Score, Sticky Actions - Enhanced */}
               <div className="space-y-6">
-                <div className="glass-card p-6 md:p-8 rounded-3xl sticky top-24 border border-border-color hover:border-silver-accent/50 transition-all duration-500">
+                <div className="glass-card p-6 md:p-8 rounded-2xl sticky top-24 border border-border-color hover:border-silver-accent/50 transition-all duration-500 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
                   <ScoreDisplay
                     score={result.score}
                     grade={result.grade}
@@ -677,18 +738,14 @@ export default function ScanResultPage() {
                     <button
                       onClick={handleShareImage}
                       disabled={isGenerating}
-                      className="w-full py-3.5 px-4 bg-primary text-primary-foreground rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl relative overflow-hidden group"
+                      className="w-full py-3.5 px-4 btn-premium rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                     >
-                      {/* Shine effect */}
-                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                      <span className="relative z-10 flex items-center gap-2">
-                        {isGenerating ? (
-                          <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
-                        )}
-                        {isGenerating ? "Generating..." : "Share Report Card"}
-                      </span>
+                      {isGenerating ? (
+                        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                      )}
+                      {isGenerating ? "Generating..." : "Share Report Card"}
                     </button>
 
                     {/* Quick Actions */}

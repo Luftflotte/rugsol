@@ -146,83 +146,93 @@ export function ActivityTimeline({ scanResult }: ActivityTimelineProps) {
   if (sortedEvents.length === 0) return null;
 
   return (
-    <div className="mt-8">
-       <div className="flex items-center gap-3 mb-6">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--silver-accent)]/30 to-transparent" />
-        <h2 className="text-base font-bold text-text-primary tracking-wide flex items-center gap-2">
-          Activity Timeline
-          <InfoTooltip
-            content={
-              <div className="space-y-2">
-                <p className="font-bold text-text-primary">Token Activity History</p>
-                <p>Chronological timeline of important events related to this token.</p>
-                <div className="space-y-1 text-[11px] mt-2">
-                  <p><span className="text-blue-400">●</span> Token creation & deployment</p>
-                  <p><span className="text-purple-400">●</span> DEX listings & graduations</p>
-                  <p><span className="text-green-400">●</span> Security milestones</p>
-                  <p><span className="text-red-400">●</span> Risk events detected</p>
+    <div>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-xl bg-[var(--silver-accent)]/10 flex items-center justify-center shrink-0 silver-accent">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold text-text-primary flex items-center gap-2">
+            Activity Timeline
+            <InfoTooltip
+              content={
+                <div className="space-y-2">
+                  <p className="font-bold text-text-primary">Token Activity History</p>
+                  <p>Chronological timeline of important events related to this token.</p>
+                  <div className="space-y-1 text-[11px] mt-2">
+                    <p><span className="text-blue-400">●</span> Token creation & deployment</p>
+                    <p><span className="text-purple-400">●</span> DEX listings & graduations</p>
+                    <p><span className="text-green-400">●</span> Security milestones</p>
+                    <p><span className="text-red-400">●</span> Risk events detected</p>
+                  </div>
                 </div>
-              </div>
-            }
-            position="bottom"
-          />
-        </h2>
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--silver-accent)]/30 to-transparent" />
+              }
+              position="bottom"
+            />
+          </h2>
+          <p className="text-sm text-text-secondary">Key events and milestones for this token.</p>
+        </div>
       </div>
 
-      <div className="relative border-l-2 border-border-color/60 ml-4 space-y-8 before:absolute before:inset-0 before:border-l-2 before:border-[var(--silver-accent)]/10 before:blur-sm">
+      <div className="relative border-l border-border-color/40 ml-4 space-y-8 before:absolute before:inset-0 before:border-l before:border-[var(--silver-accent)]/8 before:blur-sm">
         {sortedEvents.map((event, idx) => (
           <div
             key={idx}
             className="ml-10 relative group animate-fade-in-up"
             style={{ animationDelay: `${idx * 50}ms` }}
           >
-            {/* Enhanced timeline dot with icon */}
-            <div className={`absolute -left-[49px] top-1 w-8 h-8 rounded-full border-2 border-bg-main flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${
-              event.type === 'create' ? 'bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg shadow-blue-500/50' :
-              event.type === 'success' ? 'bg-gradient-to-br from-purple-400 to-purple-600 shadow-lg shadow-purple-500/50' :
-              event.type === 'safety' ? 'bg-gradient-to-br from-green-400 to-green-600 shadow-lg shadow-green-500/50' :
-              event.type === 'danger' ? 'bg-gradient-to-br from-red-400 to-red-600 shadow-lg shadow-red-500/50 group-hover:animate-pulse' :
-              event.type === 'warning' ? 'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg shadow-yellow-500/50' :
-              event.type === 'critical' ? 'bg-gradient-to-br from-red-500 to-red-700 shadow-lg shadow-red-600/60 animate-pulse' :
-              'bg-gradient-to-br from-gray-400 to-gray-600 shadow-lg shadow-gray-500/30'
+            {/* Enhanced timeline dot with icon — glass-card style */}
+            <div className={`absolute -left-[49px] top-1 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 backdrop-blur-sm ${
+              event.type === 'create' ? 'bg-blue-500/10 border border-blue-500/30 shadow-[0_0_12px_rgba(59,130,246,0.15)] group-hover:border-blue-400/50 group-hover:shadow-[0_0_16px_rgba(59,130,246,0.25)]' :
+              event.type === 'success' ? 'bg-purple-500/10 border border-purple-500/30 shadow-[0_0_12px_rgba(168,85,247,0.15)] group-hover:border-purple-400/50 group-hover:shadow-[0_0_16px_rgba(168,85,247,0.25)]' :
+              event.type === 'safety' ? 'bg-green-500/10 border border-green-500/30 shadow-[0_0_12px_rgba(34,197,94,0.15)] group-hover:border-green-400/50 group-hover:shadow-[0_0_16px_rgba(34,197,94,0.25)]' :
+              event.type === 'danger' ? 'bg-red-500/10 border border-red-500/30 shadow-[0_0_12px_rgba(239,68,68,0.15)] group-hover:border-red-400/50 group-hover:shadow-[0_0_16px_rgba(239,68,68,0.25)]' :
+              event.type === 'warning' ? 'bg-yellow-500/10 border border-yellow-500/30 shadow-[0_0_12px_rgba(234,179,8,0.15)] group-hover:border-yellow-400/50 group-hover:shadow-[0_0_16px_rgba(234,179,8,0.25)]' :
+              event.type === 'critical' ? 'bg-red-500/15 border border-red-500/40 shadow-[0_0_16px_rgba(239,68,68,0.2)] animate-pulse group-hover:border-red-400/60 group-hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]' :
+              'bg-[var(--bg-secondary)] border border-border-color shadow-[0_0_8px_rgba(255,255,255,0.03)] group-hover:border-[var(--silver-accent)]/30'
             }`}>
-              {/* SVG Icons */}
+              {/* SVG Icons — using muted accent colors instead of white */}
               {event.type === 'create' && (
-                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="w-3.5 h-3.5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"/>
                   <line x1="12" y1="8" x2="12" y2="16"/>
                   <line x1="8" y1="12" x2="16" y2="12"/>
                 </svg>
               )}
               {event.type === 'success' && (
-                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="w-3.5 h-3.5 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12"/>
                 </svg>
               )}
               {event.type === 'safety' && (
-                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 17.93c-3.95-.97-7-5.11-7-9.93V6.3l7-3.11v15.74z"/>
-                  <path d="M13 11.59l3.54-3.54 1.41 1.41L13 14.41l-3.54-3.54 1.41-1.41L13 11.59z" fill="white"/>
+                <svg className="w-3.5 h-3.5 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  <polyline points="9 12 11 14 15 10"/>
                 </svg>
               )}
               {event.type === 'danger' && (
-                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                <svg className="w-3.5 h-3.5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
               )}
               {event.type === 'critical' && (
-                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                <svg className="w-3.5 h-3.5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="15" y1="9" x2="9" y2="15"/>
+                  <line x1="9" y1="9" x2="15" y2="15"/>
                 </svg>
               )}
               {event.type === 'warning' && (
-                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2v-2zm0-6h2v4h-2v-4z"/>
+                <svg className="w-3.5 h-3.5 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
               )}
               {event.type === 'info' && (
-                <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="w-3.5 h-3.5 text-[var(--silver-accent)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"/>
                   <line x1="12" y1="16" x2="12" y2="12"/>
                   <line x1="12" y1="8" x2="12.01" y2="8"/>

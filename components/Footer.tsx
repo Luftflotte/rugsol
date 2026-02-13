@@ -8,7 +8,7 @@ export function Footer() {
         {/* Main Footer Grid */}
         <div className="py-12 grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
           {/* Brand Column */}
-          <div className="col-span-2 md:col-span-4 lg:col-span-2">
+          <div className="col-span-2 lg:col-span-2">
             <Logo size="md" />
             <p className="mt-4 text-sm text-text-secondary leading-relaxed max-w-sm">
               Industry-leading Solana token security analysis platform.

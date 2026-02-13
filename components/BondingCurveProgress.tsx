@@ -35,7 +35,7 @@ export function BondingCurveProgress({
   }, [remainingSol]);
 
   return (
-    <div className="w-full glass-card p-6 md:p-7 rounded-3xl border border-border-color overflow-hidden relative hover:border-pink-500/30 transition-all duration-500 group">
+    <div className="w-full glass-card p-6 md:p-7 rounded-2xl border border-border-color overflow-hidden relative hover:border-pink-500/30 transition-all duration-500 group">
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 

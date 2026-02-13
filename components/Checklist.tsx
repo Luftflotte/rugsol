@@ -42,15 +42,32 @@ const severityLabels = {
 };
 
 function StatusIcon({ status }: { status: CheckStatus }) {
+  const baseClasses = "w-7 h-7 rounded-lg flex items-center justify-center backdrop-blur-sm transition-all duration-200";
   switch (status) {
     case "pass":
-      return <CheckCircle2 className="w-5 h-5 text-green-500" />;
+      return (
+        <div className={`${baseClasses} bg-green-500/10 border border-green-500/25`}>
+          <CheckCircle2 className="w-4 h-4 text-green-400" />
+        </div>
+      );
     case "warning":
-      return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
+      return (
+        <div className={`${baseClasses} bg-yellow-500/10 border border-yellow-500/25`}>
+          <AlertTriangle className="w-4 h-4 text-yellow-400" />
+        </div>
+      );
     case "fail":
-      return <XCircle className="w-5 h-5 text-red-500" />;
+      return (
+        <div className={`${baseClasses} bg-red-500/10 border border-red-500/25`}>
+          <XCircle className="w-4 h-4 text-red-400" />
+        </div>
+      );
     default:
-      return <HelpCircle className="w-5 h-5 text-gray-500" />;
+      return (
+        <div className={`${baseClasses} bg-[var(--bg-secondary)] border border-border-color`}>
+          <HelpCircle className="w-4 h-4 text-text-muted" />
+        </div>
+      );
   }
 }
 
@@ -223,7 +240,7 @@ function CheckGroupAccordion({ group }: { group: CheckGroup }) {
 
 export function Checklist({ groups }: ChecklistProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {groups.map((group, index) => (
         <CheckGroupAccordion key={index} group={group} />
       ))}

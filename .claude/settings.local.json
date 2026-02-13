@@ -38,7 +38,9 @@
       "mcp__playwright__browser_wait_for",
       "Bash(python:*)",
       "Bash(powershell:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(findstr:*)",
+      "mcp__playwright__browser_resize"
     ]
   }
 }

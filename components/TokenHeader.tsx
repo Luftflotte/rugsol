@@ -76,7 +76,7 @@ export function TokenHeader({ name, symbol, image, address, priceData, mode }: T
               </h1>
               {mode && (
                 <div className="flex items-center gap-1 shrink-0">
-                  <span className={`px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold border uppercase tracking-wide ${
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold border uppercase tracking-wider backdrop-blur-sm ${
                     mode === 'pump'
                       ? 'bg-orange-500/10 text-orange-400 border-orange-500/30'
                       : 'bg-green-500/10 text-green-400 border-green-500/30'
@@ -129,7 +129,7 @@ export function TokenHeader({ name, symbol, image, address, priceData, mode }: T
         {/* Right: Price */}
         {priceData && (
           <div className="flex flex-col items-end gap-2 shrink-0">
-            <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-text-primary font-mono tracking-tight leading-none">
+            <div className={`font-extrabold text-text-primary font-mono tracking-tight leading-none sm:text-3xl md:text-4xl ${priceData.priceUsd < 0.01 ? 'text-lg' : 'text-2xl'}`}>
               {priceData.priceUsd < 0.01
                 ? `$${priceData.priceUsd.toFixed(10).replace(/0+$/, "").replace(/\.$/, "")}`
                 : `$${priceData.priceUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`}
