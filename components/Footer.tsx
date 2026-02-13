@@ -3,7 +3,7 @@ import { Logo } from "./Logo";
 
 export function Footer() {
   return (
-    <footer className="border-t border-border-color/50 bg-bg-main/80 backdrop-blur-sm">
+    <footer className="border-t border-border-color/50 bg-bg-main">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Main Footer Grid */}
         <div className="py-12 grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-5">
@@ -223,7 +223,7 @@ export function Footer() {
             </p>
             <div className="flex items-center gap-1.5">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="md:animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 max-md:opacity-50" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
               <span className="text-xs text-text-muted">All systems operational</span>

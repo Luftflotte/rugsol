@@ -181,7 +181,7 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
       initial="hidden"
       animate="visible"
       className={`
-        relative flex flex-col rounded-2xl ${compact ? "p-4 sm:p-5" : "p-6 sm:p-8"} backdrop-blur-xl
+        relative flex flex-col rounded-2xl ${compact ? "p-4 sm:p-5" : "p-6 sm:p-8"}
         ${cardBg}
       `}
     >
@@ -197,7 +197,7 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
       {/* Badge */}
       {tier.badge && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className={`inline-flex items-center gap-1.5 px-4 py-1 rounded-full text-xs font-semibold tracking-wider uppercase backdrop-blur-sm ${
+          <span className={`inline-flex items-center gap-1.5 px-4 py-1 rounded-full text-xs font-semibold tracking-wider uppercase ${
             isDark
               ? "bg-white/[0.07] border border-[#c0c0c0]/30 text-[#d4d4d8]"
               : "bg-gray-900/[0.06] border border-gray-300/50 text-gray-600"

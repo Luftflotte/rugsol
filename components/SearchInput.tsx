@@ -51,7 +51,7 @@ export function SearchInput() {
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="flex items-center gap-2 p-2 bg-bg-secondary/50 backdrop-blur-sm border border-border-color rounded-2xl focus-within:border-[var(--silver-accent)]/50 focus-within:ring-1 focus-within:ring-[var(--silver-accent)]/20 transition-all duration-300">
+      <div className="flex items-center gap-2 p-2 bg-bg-secondary/50 border border-border-color rounded-2xl focus-within:border-[var(--silver-accent)]/50 focus-within:ring-1 focus-within:ring-[var(--silver-accent)]/20 transition-colors duration-300">
         <Input
           type="text"
           placeholder="Paste token address..."

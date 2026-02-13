@@ -174,21 +174,20 @@ export function ActivityTimeline({ scanResult }: ActivityTimelineProps) {
         </div>
       </div>
 
-      <div className="relative border-l border-border-color/40 ml-4 space-y-8 before:absolute before:inset-0 before:border-l before:border-[var(--silver-accent)]/8 before:blur-sm">
+      <div className="relative border-l border-border-color/40 ml-4 space-y-8">
         {sortedEvents.map((event, idx) => (
           <div
             key={idx}
-            className="ml-10 relative group animate-fade-in-up"
-            style={{ animationDelay: `${idx * 50}ms` }}
+            className="ml-10 relative group"
           >
             {/* Enhanced timeline dot with icon — glass-card style */}
-            <div className={`absolute -left-[49px] top-1 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 backdrop-blur-sm ${
+            <div className={`absolute -left-[49px] top-1 w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-200 ${
               event.type === 'create' ? 'bg-blue-500/10 border border-blue-500/30 shadow-[0_0_12px_rgba(59,130,246,0.15)] group-hover:border-blue-400/50 group-hover:shadow-[0_0_16px_rgba(59,130,246,0.25)]' :
               event.type === 'success' ? 'bg-purple-500/10 border border-purple-500/30 shadow-[0_0_12px_rgba(168,85,247,0.15)] group-hover:border-purple-400/50 group-hover:shadow-[0_0_16px_rgba(168,85,247,0.25)]' :
               event.type === 'safety' ? 'bg-green-500/10 border border-green-500/30 shadow-[0_0_12px_rgba(34,197,94,0.15)] group-hover:border-green-400/50 group-hover:shadow-[0_0_16px_rgba(34,197,94,0.25)]' :
               event.type === 'danger' ? 'bg-red-500/10 border border-red-500/30 shadow-[0_0_12px_rgba(239,68,68,0.15)] group-hover:border-red-400/50 group-hover:shadow-[0_0_16px_rgba(239,68,68,0.25)]' :
               event.type === 'warning' ? 'bg-yellow-500/10 border border-yellow-500/30 shadow-[0_0_12px_rgba(234,179,8,0.15)] group-hover:border-yellow-400/50 group-hover:shadow-[0_0_16px_rgba(234,179,8,0.25)]' :
-              event.type === 'critical' ? 'bg-red-500/15 border border-red-500/40 shadow-[0_0_16px_rgba(239,68,68,0.2)] animate-pulse group-hover:border-red-400/60 group-hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]' :
+              event.type === 'critical' ? 'bg-red-500/15 border border-red-500/40 shadow-[0_0_16px_rgba(239,68,68,0.2)] md:animate-pulse group-hover:border-red-400/60 group-hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]' :
               'bg-[var(--bg-secondary)] border border-border-color shadow-[0_0_8px_rgba(255,255,255,0.03)] group-hover:border-[var(--silver-accent)]/30'
             }`}>
               {/* SVG Icons — using muted accent colors instead of white */}

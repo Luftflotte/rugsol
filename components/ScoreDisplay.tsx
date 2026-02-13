@@ -3,6 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import { InfoTooltip } from "@/components/InfoTooltip";
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setIsMobile(window.innerWidth <= 768);
+  }, []);
+  return isMobile;
+}
+
 interface ScoreDisplayProps {
   score: number;
   grade: string;
@@ -18,9 +26,11 @@ export function ScoreDisplay({
   gradeLabel,
   animate = true,
 }: ScoreDisplayProps) {
-  const [displayScore, setDisplayScore] = useState(animate ? 0 : score);
-  const [displayColor, setDisplayColor] = useState(animate ? "#ef4444" : gradeColor); // Start with red if animating
-  const [, setIsAnimating] = useState(animate);
+  const isMobile = useIsMobile();
+  const shouldAnimate = animate && !isMobile;
+  const [displayScore, setDisplayScore] = useState(shouldAnimate ? 0 : score);
+  const [displayColor, setDisplayColor] = useState(shouldAnimate ? "#ef4444" : gradeColor);
+  const [, setIsAnimating] = useState(shouldAnimate);
   const animationRef = useRef<number | undefined>(undefined);
 
   // Helper to interpolate colors
@@ -41,7 +51,7 @@ export function ScoreDisplay({
   };
 
   useEffect(() => {
-    if (!animate) {
+    if (!shouldAnimate) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setDisplayScore(score);
       setDisplayColor(gradeColor);
@@ -50,7 +60,7 @@ export function ScoreDisplay({
 
     setIsAnimating(true);
     const startTime = Date.now();
-    const duration = 1500; // Increased duration for better color perception
+    const duration = 1500;
 
     // Colors for interpolation
     const startColor = "#ef4444"; // Red
@@ -99,7 +109,7 @@ export function ScoreDisplay({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [score, animate, gradeColor]);
+  }, [score, shouldAnimate, gradeColor]);
 
   // Circle geometry (larger on mobile, scales with container)
   const r = 52;
@@ -111,21 +121,25 @@ export function ScoreDisplay({
     <div className="flex flex-col items-center gap-4 sm:gap-5">
       {/* Circular score display with enhanced effects */}
       <div className="relative w-32 h-32 sm:w-36 sm:h-36 overflow-visible">
-        {/* Outer glow effect */}
-        <div
-          className="absolute inset-0 rounded-full blur-2xl opacity-30 animate-pulse"
-          style={{ background: displayColor }}
-        />
+        {/* Outer glow effect — hidden on mobile for performance */}
+        {!isMobile && (
+          <div
+            className="absolute inset-0 rounded-full blur-2xl opacity-30 animate-pulse"
+            style={{ background: displayColor }}
+          />
+        )}
 
         <svg className="w-full h-full transform -rotate-90 relative z-10" viewBox="0 0 128 128" preserveAspectRatio="xMidYMid meet">
           <defs>
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
+            {!isMobile && (
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            )}
             <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" style={{ stopColor: displayColor, stopOpacity: 1 }} />
               <stop offset="100%" style={{ stopColor: displayColor, stopOpacity: 0.7 }} />
@@ -133,8 +147,8 @@ export function ScoreDisplay({
           </defs>
           {/* Soft inner ring for depth */}
           <circle cx="64" cy="64" r={r} stroke="currentColor" strokeWidth={strokeWidth - 4} fill="transparent" className="text-border-color/40" />
-          {/* Glow ring */}
-          <circle cx="64" cy="64" r={r} stroke={displayColor} strokeWidth={3} fill="transparent" opacity={0.2} filter="url(#glow)" />
+          {/* Glow ring — no filter on mobile */}
+          <circle cx="64" cy="64" r={r} stroke={displayColor} strokeWidth={3} fill="transparent" opacity={0.2} filter={isMobile ? undefined : "url(#glow)"} />
           {/* Background circle */}
           <circle
             cx="64"
@@ -180,7 +194,7 @@ export function ScoreDisplay({
       {/* Enhanced Grade badge */}
       <div className="flex items-center gap-2">
         <div
-          className={`px-4 py-2 rounded-xl font-bold text-sm sm:text-base shadow-lg transition-all duration-500 border-2 backdrop-blur-sm`}
+          className={`px-4 py-2 rounded-xl font-bold text-sm sm:text-base shadow-lg transition-colors duration-300 border-2`}
           style={{
             background: `linear-gradient(135deg, ${displayColor}18, ${displayColor}08)`,
             color: displayColor,

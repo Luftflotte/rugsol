@@ -42,7 +42,7 @@ const severityLabels = {
 };
 
 function StatusIcon({ status }: { status: CheckStatus }) {
-  const baseClasses = "w-7 h-7 rounded-lg flex items-center justify-center backdrop-blur-sm transition-all duration-200";
+  const baseClasses = "w-7 h-7 rounded-lg flex items-center justify-center transition-colors duration-200";
   switch (status) {
     case "pass":
       return (
@@ -103,8 +103,8 @@ function CheckRow({ check }: { check: CheckItem }) {
     };
 
     updatePosition();
-    window.addEventListener("scroll", updatePosition, true);
-    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, { capture: true, passive: true });
+    window.addEventListener("resize", updatePosition, { passive: true });
     return () => {
       window.removeEventListener("scroll", updatePosition, true);
       window.removeEventListener("resize", updatePosition);
@@ -158,7 +158,7 @@ function CheckRow({ check }: { check: CheckItem }) {
           {showTooltip && mounted &&
             createPortal(
               <div
-                className="fixed z-[9999] w-48 md:w-64 p-3 md:p-4 bg-bg-card border border-border-color rounded-xl shadow-2xl text-xs text-text-secondary animate-fade-in-up backdrop-blur-xl"
+                className="fixed z-[9999] w-48 md:w-64 p-3 md:p-4 bg-bg-card border border-border-color rounded-xl shadow-2xl text-xs text-text-secondary animate-fade-in-up"
                 style={tooltipStyle}
                 onMouseEnter={() => setShowTooltip(true)}
                 onMouseLeave={() => setShowTooltip(false)}
@@ -183,7 +183,7 @@ function CheckGroupAccordion({ group }: { group: CheckGroup }) {
 
   return (
     <div
-      className={`rounded-2xl border ${severityColors[group.severity]} overflow-hidden backdrop-blur-sm transition-all duration-300 hover:shadow-lg`}
+      className={`rounded-2xl border ${severityColors[group.severity]} overflow-hidden transition-colors duration-300`}
     >
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -192,7 +192,7 @@ function CheckGroupAccordion({ group }: { group: CheckGroup }) {
         <div className="flex items-center gap-3 md:gap-4">
           {/* Severity indicator dot */}
           <div className={`w-2 h-2 rounded-full ${
-            group.severity === 'critical' ? 'bg-red-500 animate-pulse shadow-lg shadow-red-500/50' :
+            group.severity === 'critical' ? 'bg-red-500 md:animate-pulse shadow-lg shadow-red-500/50' :
             group.severity === 'high' ? 'bg-orange-500 shadow-lg shadow-orange-500/50' :
             group.severity === 'medium' ? 'bg-yellow-500 shadow-lg shadow-yellow-500/50' :
             group.severity === 'low' ? 'bg-blue-400 shadow-lg shadow-blue-400/50' :
@@ -205,7 +205,7 @@ function CheckGroupAccordion({ group }: { group: CheckGroup }) {
             {group.checks.length} checks
           </span>
           {failedCount > 0 && (
-            <span className="text-[10px] md:text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 px-2 md:px-2.5 py-0.5 rounded-full animate-pulse">
+            <span className="text-[10px] md:text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 px-2 md:px-2.5 py-0.5 rounded-full md:animate-pulse">
               {failedCount} {failedCount === 1 ? 'issue' : 'issues'}
             </span>
           )}
@@ -223,14 +223,8 @@ function CheckGroupAccordion({ group }: { group: CheckGroup }) {
         isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
       } overflow-hidden`}>
         <div className="border-t border-border-color p-2">
-          {group.checks.map((check, idx) => (
-            <div
-              key={check.id}
-              className="animate-fade-in-up"
-              style={{ animationDelay: `${idx * 30}ms` }}
-            >
-              <CheckRow check={check} />
-            </div>
+          {group.checks.map((check) => (
+            <CheckRow key={check.id} check={check} />
           ))}
         </div>
       </div>

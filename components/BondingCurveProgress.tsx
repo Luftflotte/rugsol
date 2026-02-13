@@ -43,7 +43,7 @@ export function BondingCurveProgress({
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
           <div>
             <h3 className="text-base font-bold text-text-primary flex items-center gap-2 mb-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse shadow-lg shadow-pink-500/50"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-pink-500 md:animate-pulse shadow-lg shadow-pink-500/50"></span>
               Bonding Curve Progress
               <InfoTooltip
                 content={
@@ -93,8 +93,8 @@ export function BondingCurveProgress({
             className={`h-full ${colorClass} transition-all duration-1000 ease-out relative shadow-lg`}
             style={{ width: `${Math.min(100, Math.max(0, progressPercent))}%` }}
           >
-            {/* Shimmer effect */}
-            <div className="absolute top-0 left-0 bottom-0 w-32 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[shimmer_2s_infinite] -skew-x-12" />
+            {/* Shimmer effect — disabled on mobile via CSS */}
+            <div className="absolute top-0 left-0 bottom-0 w-32 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[shimmer_2s_infinite] -skew-x-12 max-md:hidden" />
             {/* Inner glow */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-white/10" />
           </div>

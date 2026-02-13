@@ -388,8 +388,10 @@
   background: linear-gradient(90deg, transparent, var(--border-color), transparent);
 }
 
-/* Theme transition for all elements (only color props — transform/box-shadow are on specific classes) */
-*, *::before, *::after {
+/* Theme transition — scoped to interactive elements instead of universal * selector */
+body, a, button, input, select, textarea,
+.glass-card, .glass-card-enhanced, .card-hover, .btn-premium,
+nav, footer, header, [data-theme] {
   transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
               border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
               color 0.3s ease;
@@ -407,4 +409,72 @@
   display: none !important;
   width: 0 !important;
   height: 0 !important;
+}
+
+/* ===== Mobile Performance Optimizations ===== */
+@media (max-width: 768px) {
+  /* Remove GPU-heavy backdrop-blur on mobile, use solid backgrounds */
+  .glass-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--bg-card);
+  }
+
+  .glass-card-enhanced {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .card-hover {
+    backdrop-filter: none;
+  }
+
+  /* Simplify box-shadows to single layer */
+  .glass-card:hover {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-hover:hover {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Disable infinite animations on mobile */
+  .animate-pulse-glow,
+  .animate-pulse {
+    animation: none !important;
+  }
+
+  .gradient-text {
+    animation: none;
+    background-size: 100% 100%;
+  }
+
+  /* Disable hover transitions on mobile (no hover on touch) */
+  .glass-card,
+  .card-hover,
+  .btn-premium {
+    transition: none;
+  }
+}
+
+/* Respect reduced motion preference on all devices */
+@media (prefers-reduced-motion: reduce) {
+  .glass-card,
+  .glass-card-enhanced,
+  .card-hover,
+  .btn-premium {
+    transition: none;
+  }
+
+  .animate-pulse-glow,
+  .animate-pulse,
+  .gradient-text,
+  .animate-fade-in-up,
+  .animate-slide-in-right,
+  .animate-scale-in,
+  .animate-score {
+    animation: none !important;
+  }
 }
