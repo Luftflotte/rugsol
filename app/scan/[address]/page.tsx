@@ -305,7 +305,7 @@ function transformToCheckGroups(result: ScanResult): CheckGroup[] {
 }
 
 const RATE_LIMIT_KEY = "rugsol_last_scan";
-const RATE_LIMIT_SECONDS = 60;
+const RATE_LIMIT_SECONDS = 120;
 
 function getRateLimitSecondsLeft(): number {
   try {
