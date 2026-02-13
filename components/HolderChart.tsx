@@ -100,7 +100,7 @@ export function HolderChart({ holders, devAddress, snipers = [], linkedWallets =
             {/* Bar Fill */}
             <div 
               className={`h-full ${getBarColor(holder)} rounded-full transition-all duration-500`}
-              style={{ width: `${(holder.percent / 100) * 100}%` }} 
+              style={{ width: `${Math.min(100, (holder.percent / maxPercent) * 100)}%` }}
             />
           </div>
 

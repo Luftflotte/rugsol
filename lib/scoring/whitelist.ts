@@ -95,7 +95,7 @@ export const WHITELISTED_TOKENS: WhitelistedToken[] = [
     name: "Orca",
     symbol: "ORCA",
     type: "defi",
-    skipChecks: { age: true },
+    skipChecks: { mintAuthority: true, age: true },
     minScore: 85,
   },
   {
@@ -103,7 +103,15 @@ export const WHITELISTED_TOKENS: WhitelistedToken[] = [
     name: "Raydium",
     symbol: "RAY",
     type: "defi",
-    skipChecks: { age: true },
+    skipChecks: { mintAuthority: true, age: true },
+    minScore: 85,
+  },
+  {
+    address: "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+    name: "Raydium",
+    symbol: "RAY",
+    type: "defi",
+    skipChecks: { mintAuthority: true, age: true },
     minScore: 85,
   },
   {

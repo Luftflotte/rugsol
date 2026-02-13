@@ -59,7 +59,7 @@ export async function getTokenPrice(mintAddress: string): Promise<TokenPrice | n
   // Hard override for major stablecoins to prevent "price glitch" from low-liquidity pairs
   const STABLECOINS: Record<string, string> = {
     "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": "USDC",
-    "Es9vMFrzaDCSTMdCD8MZAgDQNksFgeBeZcWfbD6Scky": "USDT",
+    "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB": "USDT",
   };
 
   // Hard override for SOL/wSOL — Jupiter Price API returns 404 for these

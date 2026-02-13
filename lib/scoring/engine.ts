@@ -287,8 +287,8 @@ export function calculatePenalties(
     // We treat "Dev Sold Out" as high risk unless verified community.
     if (isDevSoldOut) {
       penalties.push({ 
-        category: "Dev Action", 
-        reason: `Dev has sold out (holds ${devBalancePercent?.toFixed(2)}%)`, 
+        category: "Dev Activity",
+        reason: `Dev has sold out (holds ${devBalancePercent?.toFixed(2)}%)`,
         points: mode === "pump" ? 40 : 25 
       });
     } else if (devBalancePercent) {
@@ -296,13 +296,13 @@ export function calculatePenalties(
       if (mode === "pump") {
         if (devBalancePercent > 10) {
            penalties.push({
-             category: "Dev Holdings",
+             category: "Dev Wallet",
              reason: `Dev holds high supply (${devBalancePercent.toFixed(1)}%)`,
              points: 25
            });
         } else if (devBalancePercent > 5) {
            penalties.push({
-             category: "Dev Holdings",
+             category: "Dev Wallet",
              reason: `Dev holds significant supply (${devBalancePercent.toFixed(1)}%)`,
              points: 15
            });
@@ -311,7 +311,7 @@ export function calculatePenalties(
         // DEX Mode
         if (devBalancePercent > 30) {
           penalties.push({
-             category: "Dev Action",
+             category: "Dev Activity",
              reason: `Dev wallet holds ${devBalancePercent.toFixed(1)}% (Dump risk)`,
              points: 20
           });
@@ -333,14 +333,14 @@ export function calculatePenalties(
     } else {
       // DEX Mode: Strict checks
       if (liq.lpSizeUsd === -1) {
-        penalties.push({ 
-          category: "Liquidity", 
-          reason: "Liquidity data unavailable (Unknown)", 
-          points: 10 
+        penalties.push({
+          category: "Low Liquidity",
+          reason: "Liquidity data unavailable (Unknown)",
+          points: 10
         });
       } else if (liq.lpSizeUsd === 0) {
-        penalties.push({ 
-          category: "Liquidity", 
+        penalties.push({
+          category: "Low Liquidity",
           reason: "No Liquidity (Pool Size $0)", 
           points: 50,
           isCritical: true
@@ -426,9 +426,9 @@ export function calculatePenalties(
 
     // Apply the MAX of the two penalties
     if (singlePenalty > top10Penalty) {
-      penalties.push({ category: "Holder Concentration", reason: `${singleReason} (Top 10: ${topTenPercent.toFixed(1)}%)`, points: singlePenalty });
+      penalties.push({ category: "Top Holder Risk", reason: `${singleReason} (Top 10: ${topTenPercent.toFixed(1)}%)`, points: singlePenalty });
     } else if (top10Penalty > 0) {
-      penalties.push({ category: "Holder Concentration", reason: `${top10Reason} (Largest: ${largestHolder?.percent.toFixed(1)}%)`, points: top10Penalty });
+      penalties.push({ category: "Top Holder Risk", reason: `${top10Reason} (Largest: ${largestHolder?.percent.toFixed(1)}%)`, points: top10Penalty });
     }
 
     // 6.5 Clusters (Identical or tight-range Balances)
@@ -452,19 +452,19 @@ export function calculatePenalties(
   // Metadata
   if (mode !== "pump" && !skip.metadata) {
     if (checks.metadata.data?.isMutable) {
-      penalties.push({ category: "Metadata", reason: "Metadata is mutable", points: 5 });
+      penalties.push({ category: "Mutable Metadata", reason: "Metadata is mutable", points: 5 });
     }
-  }
-  
-  const hasSocials = checks.metadata.data?.website || checks.metadata.data?.twitter || checks.metadata.data?.telegram;
-  if (!hasSocials) {
-      penalties.push({ category: "Social Links", reason: "No social links found", points: 10 });
+
+    const hasSocials = checks.metadata.data?.website || checks.metadata.data?.twitter || checks.metadata.data?.telegram;
+    if (!hasSocials) {
+      penalties.push({ category: "No Socials", reason: "No social links found", points: 10 });
+    }
   }
 
   // Age (Skip for Pump)
   if (mode !== "pump" && !skip.age && checks.tokenAge.data) {
     if (checks.tokenAge.data.ageInHours < 24) {
-      penalties.push({ category: "Age", reason: "Token is very new (< 24h)", points: 15 });
+      penalties.push({ category: "New Token", reason: "Token is very new (< 24h)", points: 15 });
     }
   }
 
@@ -649,13 +649,14 @@ async function _scanTokenImpl(tokenAddress: string): Promise<ScanResult> {
   }
 
   // 7. Final Grade (with Auto-F logic)
-  const hasCriticalFail = riskFactors.some(r => r.isCritical);
+  // Whitelisted tokens with minScore bypass criticalFail — the whitelist is an explicit trust signal
+  const hasCriticalFail = whitelist ? false : riskFactors.some(r => r.isCritical);
   let { grade, color, label } = getGrade(score, hasCriticalFail);
 
   // Override label for severe F grades
   if (grade === 'F') {
      const totalPenalty = riskFactors.reduce((sum, p) => sum + p.points, 0);
-     if (totalPenalty > 170) label = "Almost Certain Scam";
+     if (totalPenalty > 170) label = "High Confidence Scam";
      else if (totalPenalty > 130) label = "Extreme Risk";
      // else default "Likely Scam"
   }

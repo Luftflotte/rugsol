@@ -34,43 +34,76 @@ function transformToCheckGroups(result: ScanResult): CheckGroup[] {
   // --- 1. Critical Safety (Always Show) ---
   const criticalChecks = [];
 
-  // Honeypot
+  // Honeypot (skip for Pump.fun — Jupiter has no routes for bonding curve tokens)
   if (result.checks.honeypot.data) {
     const hp = result.checks.honeypot.data;
-    criticalChecks.push({
-      id: "honeypot",
-      name: "Sell Simulation",
-      status: hp.isHoneypot ? ("fail" as const) : ("pass" as const),
-      value: hp.isHoneypot ? "Failed" : "Pass (Sellable)",
-      tooltip: hp.isHoneypot 
-        ? `Cannot sell token. Simulation failed: ${hp.reason}` 
-        : "Successfully simulated a sell transaction via Jupiter.",
-      penalty: hp.isHoneypot ? 50 : 0,
-    });
+    if (isPump) {
+      criticalChecks.push({
+        id: "honeypot",
+        name: "Sell Simulation",
+        status: "unknown" as const,
+        value: "N/A (Bonding Curve)",
+        tooltip: "Sell simulation is skipped for Pump.fun bonding curve tokens. Jupiter has no swap routes for tokens still on the curve.",
+        penalty: 0,
+      });
+    } else {
+      criticalChecks.push({
+        id: "honeypot",
+        name: "Sell Simulation",
+        status: hp.isHoneypot ? ("fail" as const) : ("pass" as const),
+        value: hp.isHoneypot ? "Failed" : "Pass (Sellable)",
+        tooltip: hp.isHoneypot
+          ? `Cannot sell token. Simulation failed: ${hp.reason}`
+          : "Successfully simulated a sell transaction via Jupiter.",
+        penalty: hp.isHoneypot ? 100 : 0,
+      });
+    }
   }
 
-  // Authorities
+  // Authorities (for Pump.fun, authority is expected to be the Bonding Curve PDA)
   if (result.checks.mintAuthority.data) {
     const ma = result.checks.mintAuthority.data;
-    criticalChecks.push({
-      id: "mint-auth",
-      name: "Mint Authority",
-      status: ma.status === "pass" ? "pass" as const : "fail" as const,
-      value: ma.value,
-      tooltip: ma.status === "pass" ? "Mint revoked." : "Owner can print new tokens.",
-      penalty: ma.status === "fail" ? 25 : 0,
-    });
+    if (isPump) {
+      criticalChecks.push({
+        id: "mint-auth",
+        name: "Mint Authority",
+        status: "unknown" as const,
+        value: "Bonding Curve (Expected)",
+        tooltip: "Pump.fun tokens have mint authority set to the Bonding Curve PDA. This is expected and not a risk.",
+        penalty: 0,
+      });
+    } else {
+      criticalChecks.push({
+        id: "mint-auth",
+        name: "Mint Authority",
+        status: ma.status === "pass" ? "pass" as const : "fail" as const,
+        value: ma.value,
+        tooltip: ma.status === "pass" ? "Mint revoked." : "Owner can print new tokens.",
+        penalty: ma.status === "fail" ? 50 : 0,
+      });
+    }
   }
   if (result.checks.freezeAuthority.data) {
     const fa = result.checks.freezeAuthority.data;
-    criticalChecks.push({
-      id: "freeze-auth",
-      name: "Freeze Authority",
-      status: fa.status === "pass" ? "pass" as const : "fail" as const,
-      value: fa.value,
-      tooltip: fa.status === "pass" ? "Freeze revoked." : "Owner can freeze wallets.",
-      penalty: fa.status === "fail" ? 15 : 0,
-    });
+    if (isPump) {
+      criticalChecks.push({
+        id: "freeze-auth",
+        name: "Freeze Authority",
+        status: "unknown" as const,
+        value: "Platform Default",
+        tooltip: "Pump.fun tokens typically have freeze authority set to the program. This is expected behavior.",
+        penalty: 0,
+      });
+    } else {
+      criticalChecks.push({
+        id: "freeze-auth",
+        name: "Freeze Authority",
+        status: fa.status === "pass" ? "pass" as const : "fail" as const,
+        value: fa.value,
+        tooltip: fa.status === "pass" ? "Freeze revoked." : "Owner can freeze wallets.",
+        penalty: fa.status === "fail" ? 30 : 0,
+      });
+    }
   }
 
   // Check for $0 Liquidity (Critical)
@@ -152,7 +185,7 @@ function transformToCheckGroups(result: ScanResult): CheckGroup[] {
         tooltip: isSoldOut 
           ? "Developer has sold all/most tokens. Potential abandonment." 
           : "Developer still holds a portion of supply.",
-        penalty: result.penalties.find(p => p.category === "Dev Action")?.points || 0
+        penalty: result.penalties.find(p => p.category === "Dev Activity" || p.category === "Dev Wallet")?.points || 0
       });
     }
 
@@ -414,7 +447,7 @@ export default function ScanResultPage() {
         grade: result.grade,
         label: result.gradeLabel,
         mode: result.scanMode,
-        price: price?.priceUsd ? `$${price.priceUsd < 0.0001 ? price.priceUsd.toFixed(8) : price.priceUsd.toFixed(4)}` : "$0.00",
+        price: price?.priceUsd ? `$${parseFloat((price.priceUsd < 0.0001 ? price.priceUsd.toFixed(8) : price.priceUsd.toFixed(4)))}` : "$0.00",
         mcap: price?.marketCap ? formatCompact(price.marketCap) : "0",
         change: price?.priceChange?.h24 ? `${price.priceChange.h24 > 0 ? '+' : ''}${price.priceChange.h24.toFixed(1)}%` : "0%",
         liq: result.scanMode === 'pump' ? `${result.bondingCurveData?.curveProgressPercent || 0}%` : (liq?.lpSizeUsd ? formatCompact(liq.lpSizeUsd) : "$0"),

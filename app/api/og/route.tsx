@@ -29,23 +29,25 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const address = searchParams.get("address") || "";
-    const name = searchParams.get("name") || "Unknown";
+    const rawName = searchParams.get("name") || "Unknown";
+    const name = rawName.length > 20 ? rawName.slice(0, 18) + "..." : rawName;
     const symbol = searchParams.get("symbol") || "TOKEN";
     const score = Math.max(0, Math.min(100, parseInt(searchParams.get("score") || "0") || 0));
     const grade = searchParams.get("grade") || "F";
     const gradeLabel = searchParams.get("label") || "Likely Scam";
     const image = searchParams.get("image");
     const mode = (searchParams.get("mode") || "dex").toUpperCase();
-    const price = searchParams.get("price") || "$0.00";
+    const rawPrice = searchParams.get("price") || "$0.00";
+    const price = rawPrice.length > 14 ? rawPrice.slice(0, 12) + ".." : rawPrice;
     const mcap = searchParams.get("mcap") || "0";
-    const change = searchParams.get("change") || "0%";
-    const isUp = !change.startsWith("-");
+    const rawChange = searchParams.get("change") || "0%";
+    const change = rawChange.length > 8 ? rawChange.slice(0, 7) + "%" : rawChange;
     const liq = searchParams.get("liq") || "$0";
     const top10 = searchParams.get("top10") || "0%";
     const lock = searchParams.get("lock") || "No";
     const sell = searchParams.get("sell") || "Yes";
     const mint = searchParams.get("mint") || "Active";
-    const penalty = Math.max(0, parseInt(searchParams.get("penalty") || "0") || 0);
+    const penalty = Math.min(100, Math.max(0, parseInt(searchParams.get("penalty") || "0") || 0));
     const tagsParam = searchParams.get("tags") || "";
     const tags = tagsParam ? tagsParam.split(",").filter(Boolean) : ["Analyzed"];
     const tagPointsParam = searchParams.get("tagPoints") || "";
@@ -81,7 +83,7 @@ export async function GET(request: NextRequest) {
       subtle: "rgba(0,0,0,0.06)",
       subtler: "rgba(0,0,0,0.04)",
       grid: "rgba(0,0,0,0.03)",
-      footerBg: "rgba(240,240,240,0.95)",
+      footerBg: "rgba(0,0,0,0.04)",
       footerBorder: "rgba(0,0,0,0.06)",
       svgStroke: "rgba(0,0,0,0.3)",
       svgFill: "rgba(0,0,0,0.08)",
@@ -122,6 +124,19 @@ export async function GET(request: NextRequest) {
         if (lock === "No" || lock === "Active" || lock === "0") m3Color = "#ef4444";
     }
 
+    // Score ring enhancements — tick marks + arc cap
+    const tickCount = 40;
+    const filledTicks = Math.floor(score * tickCount / 100);
+    const ticks = Array.from({ length: tickCount }, (_, i) => {
+      const a = -Math.PI / 2 + i * (2 * Math.PI / tickCount);
+      const isLong = i % 10 === 0;
+      const oR = 130, iR = isLong ? 117 : 122;
+      return { x1: 135 + iR * Math.cos(a), y1: 135 + iR * Math.sin(a), x2: 135 + oR * Math.cos(a), y2: 135 + oR * Math.sin(a), isLong, filled: i < filledTicks };
+    });
+    const endA = -Math.PI / 2 + (score / 100) * 2 * Math.PI;
+    const capX = 135 + 108 * Math.cos(endA);
+    const capY = 135 + 108 * Math.sin(endA);
+
     return new ImageResponse(
       (
         <div style={{ width: 1200, height: 630, display: "flex", flexDirection: "column", background: theme.bg, fontFamily: "Inter", position: "relative", overflow: "hidden" }}>
@@ -137,25 +152,25 @@ export async function GET(request: NextRequest) {
                     {tokenImage ? <img src={tokenImage} width="90" height="90" style={{ objectFit: "cover" }} /> : <span style={{ fontSize: 36, fontWeight: 800, color: c.textGhost, display: "flex" }}>{symbol[0]}</span>}
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                      <span style={{ fontSize: 44, fontWeight: 800, color: c.text, letterSpacing: "-1px", display: "flex" }}>{name}</span>
-                      <span style={{ fontSize: 12, fontWeight: 700, padding: "5px 14px", borderRadius: 7, textTransform: "uppercase", background: mode === "PUMP" ? "rgba(249,115,22,0.14)" : "rgba(34,197,94,0.14)", color: mode === "PUMP" ? "#fb923c" : "#4ade80", border: `1px solid ${mode === "PUMP" ? "rgba(249,115,22,0.25)" : "rgba(34,197,94,0.25)"}`, display: "flex" }}>{mode === "PUMP" ? "PUMP.FUN" : "DEX"}</span>
-                      <span style={{ fontSize: 22, color: c.textSoft, fontWeight: 500, display: "flex" }}>${symbol}</span>
+                    <div style={{ display: "flex", flexDirection: "row", alignItems: "flex-end", flexWrap: "nowrap", gap: 16 }}>
+                      <span style={{ fontSize: 44, fontWeight: 800, color: c.text, letterSpacing: "-1px", lineHeight: 1, display: "flex" }}>{name}</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 7, textTransform: "uppercase", background: mode === "PUMP" ? "rgba(249,115,22,0.14)" : "rgba(34,197,94,0.14)", color: mode === "PUMP" ? "#fb923c" : "#4ade80", border: `1px solid ${mode === "PUMP" ? "rgba(249,115,22,0.25)" : "rgba(34,197,94,0.25)"}`, display: "flex", alignItems: "center", marginBottom: 4 }}>{mode === "PUMP" ? "PUMP.FUN" : "DEX"}</span>
+                      <span style={{ fontSize: 22, color: c.textSoft, fontWeight: 500, lineHeight: 1, display: "flex", marginBottom: 7 }}>${symbol}</span>
                     </div>
                     <span style={{ fontFamily: "JetBrains Mono", fontSize: 15, color: c.textMuted, letterSpacing: "0.5px", display: "flex" }}>{address}</span>
                   </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", marginTop: 36 }}>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 20 }}>
-                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 54, fontWeight: 700, color: c.text, letterSpacing: "-2.5px", display: "flex" }}>{price}</span>
-                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 24, fontWeight: 600, color: change.startsWith("-") ? "#ef4444" : "#22c55e", display: "flex" }}>{change}</span>
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
+                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 54, fontWeight: 700, color: c.text, letterSpacing: "-2.5px", lineHeight: 1, display: "flex" }}>{price}</span>
+                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 24, fontWeight: 600, color: change.startsWith("-") ? "#ef4444" : change === "0%" ? c.textDim : "#22c55e", lineHeight: 1, display: "flex", marginBottom: 5 }}>{change}</span>
                   </div>
                   <div style={{ fontFamily: "JetBrains Mono", fontSize: 18, color: c.textDim, marginTop: 10, letterSpacing: "0.5px", display: "flex" }}>MC {mcap}</div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 36 }}>
-                   <span style={{ fontFamily: "JetBrains Mono", fontSize: 15, fontWeight: 600, color: theme.acDim, display: "flex" }}>-{penalty} penalty</span>
-                   <div style={{ flex: 1, height: 7, background: c.subtle, borderRadius: 4, overflow: "hidden", display: "flex" }}>
-                      <div style={{ height: "100%", borderRadius: 4, width: `${Math.min(100, (penalty / 100) * 100)}%`, background: `linear-gradient(90deg, ${theme.ac}, ${theme.ac}bb)`, display: "flex" }} />
+                   <span style={{ fontFamily: "JetBrains Mono", fontSize: 15, fontWeight: 600, color: penalty === 0 ? "rgba(34,197,94,0.6)" : penalty >= 50 ? "rgba(239,68,68,0.7)" : penalty >= 25 ? "rgba(245,158,11,0.7)" : "rgba(234,179,8,0.6)", display: "flex" }}>{penalty === 0 ? "No penalties" : `-${penalty} points`}</span>
+                   <div style={{ flex: 1, height: 7, background: theme.acBg, borderRadius: 4, overflow: "hidden", display: "flex" }}>
+                      <div style={{ height: "100%", borderRadius: 4, width: `${Math.min(100, (penalty / 100) * 100)}%`, background: penalty >= 50 ? "linear-gradient(90deg, #ef4444, #ef4444bb)" : penalty >= 25 ? "linear-gradient(90deg, #f59e0b, #f59e0bbb)" : "linear-gradient(90deg, #eab308, #eab308bb)", display: "flex" }} />
                    </div>
                 </div>
               </div>
@@ -175,35 +190,63 @@ export async function GET(request: NextRequest) {
               </div>
             </div>
             <div style={{ width: 1, alignSelf: "stretch", background: `linear-gradient(180deg, transparent 5%, ${c.subtle} 30%, ${c.subtle} 70%, transparent 95%)`, display: "flex" }} />
-            <div style={{ width: 360, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 }}>
+            <div style={{ width: 360, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 22 }}>
               <div style={{ position: "relative", width: 270, height: 270, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {/* Idea 3: Subtle accent fill inside ring */}
+                <div style={{ position: "absolute", width: 196, height: 196, borderRadius: "50%", background: theme.acBg, top: 37, left: 37, display: "flex" }} />
+                {/* Soft radial glow — Satori-compatible (no blur) */}
+                <div style={{ position: "absolute", width: 160, height: 160, borderRadius: "50%", background: `radial-gradient(circle, ${theme.ac}20 0%, transparent 70%)`, top: 55, left: 55, display: "flex" }} />
+                {/* Idea 1: Tick marks + Idea 6: Inner thin ring */}
+                <svg width="270" height="270" viewBox="0 0 270 270" style={{ position: "absolute", top: 0, left: 0, display: "flex" }}>
+                  {ticks.map((t, i) => (
+                    <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke={t.filled ? theme.ac : c.subtle} strokeWidth={t.isLong ? 2.5 : 1.5} strokeLinecap="round" style={{ opacity: t.filled ? 0.7 : 0.4 }} />
+                  ))}
+                  <circle cx="135" cy="135" r="98" fill="none" stroke={c.subtle} strokeWidth="2" />
+                </svg>
+                {/* Main progress ring */}
                 <svg width="270" height="270" viewBox="0 0 270 270" style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)", display: "flex" }}>
                   <circle cx="135" cy="135" r="108" fill="none" stroke={c.subtle} strokeWidth="12" />
                   <circle cx="135" cy="135" r="108" fill="none" stroke={theme.ac} strokeWidth="14" strokeLinecap="round" strokeDasharray={circum} strokeDashoffset={offset} style={{ opacity: 0.85 }} />
                 </svg>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: score === 100 ? 86 : 92, fontWeight: 900, color: theme.ac, letterSpacing: "-4px", lineHeight: 1, display: "flex" }}>{score}</span>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 18, color: c.textGhost, marginTop: 6, display: "flex" }}>/ 100</span>
+                {/* Idea 8: Arc start & end cap markers */}
+                {score > 0 && score < 100 && (
+                  <svg width="270" height="270" viewBox="0 0 270 270" style={{ position: "absolute", top: 0, left: 0, display: "flex" }}>
+                    <circle cx={capX} cy={capY} r="5" fill={theme.ac} style={{ opacity: 0.9 }} />
+                    <circle cx="135" cy="27" r="4" fill={theme.acDim} style={{ opacity: 0.5 }} />
+                  </svg>
+                )}
+                {/* Score centered in circle, /100 slightly below */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", marginTop: 20 }}>
+                  <span style={{ fontSize: score === 100 ? 92 : 96, fontWeight: 900, color: theme.ac, letterSpacing: "-4px", lineHeight: 1, display: "flex" }}>{score}</span>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 16, color: c.textGhost, opacity: 0.5, marginTop: -2, display: "flex" }}>/ 100</span>
                 </div>
               </div>
-              <div style={{ fontSize: 18, fontWeight: 700, padding: "12px 32px", borderRadius: 100, background: theme.acBg, border: `1px solid ${theme.acBorder}`, color: theme.ac, letterSpacing: "0.5px", display: "flex" }}>Grade {grade} · {gradeLabel}</div>
+              {/* Idea 4: Enhanced grade badge */}
+              <div style={{ fontSize: 22, fontWeight: 700, padding: "14px 36px", borderRadius: 100, background: theme.acBg, border: `2px solid ${theme.acBorder}`, color: theme.ac, letterSpacing: "0.5px", display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ width: 10, height: 10, borderRadius: "50%", background: theme.ac, display: "flex" }} />
+                Grade {grade} · {gradeLabel}
+              </div>
+              {/* Idea 5: Tags with severity dots */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", maxWidth: 340 }}>
                 {tags.map((t, i) => {
                     const pts = tagPointsList[i] || 0;
                     const tagColor = pts >= 30 ? "#ef4444" : pts >= 15 ? "#f59e0b" : "#eab308";
                     return (
-                      <span key={i} style={{ fontSize: 13, fontWeight: 600, padding: "7px 16px", borderRadius: 100, background: `${tagColor}18`, border: `1px solid ${tagColor}30`, color: `${tagColor}cc`, display: "flex" }}>{t}</span>
+                      <span key={i} style={{ fontSize: 13, fontWeight: 600, padding: "7px 16px", borderRadius: 100, background: `${tagColor}18`, border: `1px solid ${tagColor}30`, color: `${tagColor}cc`, display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ width: 7, height: 7, borderRadius: "50%", background: tagColor, display: "flex" }} />
+                        {t}
+                      </span>
                     );
                 })}
               </div>
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 72px", background: c.footerBg, borderTop: `1px solid ${c.footerBorder}` }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-              <svg width="36" height="36" viewBox="0 0 48 48" fill="none" style={{ display: "flex" }}><path d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z" stroke={c.svgStroke} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><path d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z" fill={c.svgFill} stroke={c.svgStroke} strokeWidth="1" strokeLinejoin="round"/><path d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z" fill={c.svgShield}/><path d="M20.5 23.5L23 26L28 20.5" stroke={c.svgCheck} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontSize: 22, fontWeight: 800, color: isLight ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.45)", display: "flex" }}>RugSol</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: isLight ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.15)", letterSpacing: "3.5px", display: "flex" }}>SCANNER</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <svg width="42" height="42" viewBox="0 0 48 48" fill="none" style={{ display: "flex", opacity: 0.35 }}><path d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z" stroke={isLight ? "#8b8b8b" : "#c0c0c0"} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><path d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z" fill={isLight ? "rgba(139,139,139,0.08)" : "rgba(192,192,192,0.08)"} stroke={isLight ? "#8b8b8b" : "#c0c0c0"} strokeWidth="1" strokeLinejoin="round"/><path d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z" fill={isLight ? "#8b8b8b" : "#c0c0c0"}/><path d="M20.5 23.5L23 26L28 20.5" stroke={isLight ? "#f5f5f5" : "#0a0a0a"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <span style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.5px", lineHeight: 1.25, color: isLight ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.35)", display: "flex" }}>RugSol</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: isLight ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.15)", letterSpacing: "3px", textTransform: "uppercase", marginTop: 3, display: "flex" }}>Scanner</span>
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
@@ -215,8 +258,11 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
       ),
-      { width: 1200, height: 630, fonts: [
-        { name: "Inter", data: interReg, weight: 400 }, 
+      { width: 1200, height: 630, headers: {
+        "Content-Disposition": `inline; filename="rugsol-${symbol.toLowerCase()}-${score}.png"`,
+        "Cache-Control": "public, max-age=3600, s-maxage=3600",
+      }, fonts: [
+        { name: "Inter", data: interReg, weight: 400 },
         { name: "Inter", data: interBold, weight: 700 },
         { name: "JetBrains Mono", data: jbMono, weight: 400 },
         { name: "JetBrains Mono", data: jbMonoBold, weight: 700 }

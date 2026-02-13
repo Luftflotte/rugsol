@@ -6,6 +6,7 @@
 - Do not create files unless absolutely necessary. Prefer editing existing files.
 - Do not add features, refactor, or "improve" code beyond what was explicitly requested.
 - Preserve existing patterns and conventions. Match the style of surrounding code.
+- Always use Context7 MCP when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
 
 ## Project Overview
 
@@ -104,7 +105,7 @@ public/
 
 **Score:** starts at 100, penalties deducted per risk. Critical fails (honeypot, active mint authority) → automatic F.
 
-**Grades:** A ≥80 · B 60-79 · C 40-59 · D 20-39 · E 1-19 · F 0/critical
+**Grades:** A ≥80 · B 60-79 · C 40-59 · D 20-39 · F <20/critical
 
 **Pump vs DEX:** auto-detected. Pump mode uses bonding curve instead of LP checks.
 

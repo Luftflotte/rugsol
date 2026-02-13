@@ -48,13 +48,13 @@ export function RateLimitModal({ secondsLeft, onClose }: RateLimitModalProps) {
   const progressColor = isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.35)";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center pt-0" style={{ alignItems: "start", paddingTop: "5vh" }}>
+    <div className="fixed inset-0 z-50 overflow-y-auto">
       <div
         className={`absolute inset-0 backdrop-blur-sm ${isDark ? "bg-black/50" : "bg-white/60"}`}
         onClick={() => router.push("/")}
       />
 
-      <div className="relative z-10 w-full max-w-4xl mx-4 flex flex-col items-center gap-6" onClick={(e) => e.stopPropagation()}>
+      <div className="relative z-10 w-full max-w-4xl mx-4 sm:mx-auto flex flex-col items-center gap-6 py-[5vh] pb-12" onClick={(e) => e.stopPropagation()}>
         {/* Timer */}
         <div className="flex flex-col items-center gap-4">
           <div className="relative w-20 h-20 flex items-center justify-center">

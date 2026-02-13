@@ -195,11 +195,11 @@ export function ScoreDisplay({
             <div className="space-y-2">
               <p className="font-bold text-text-primary">Token Safety Score</p>
               <div className="space-y-1 text-[11px]">
-                <p><strong className="text-green-400">A (90-100):</strong> Excellent - Very Safe</p>
-                <p><strong className="text-green-400">B (80-89):</strong> Good - Low Risk</p>
-                <p><strong className="text-yellow-400">C (70-79):</strong> Fair - Medium Risk</p>
-                <p><strong className="text-orange-400">D (60-69):</strong> Poor - High Risk</p>
-                <p><strong className="text-red-400">F (&lt;60):</strong> Fail - Very High Risk</p>
+                <p><strong className="text-green-400">A (80-100):</strong> Safe</p>
+                <p><strong className="text-lime-400">B (60-79):</strong> Low Risk</p>
+                <p><strong className="text-yellow-400">C (40-59):</strong> Moderate Risk</p>
+                <p><strong className="text-orange-400">D (20-39):</strong> High Risk</p>
+                <p><strong className="text-red-400">F (&lt;20 or Critical):</strong> Likely Scam</p>
               </div>
               <p className="text-[10px] opacity-70 mt-2">Score starts at 100 and decreases based on detected risk factors.</p>
             </div>

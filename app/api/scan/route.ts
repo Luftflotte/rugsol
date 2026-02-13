@@ -233,6 +233,7 @@ export async function GET(request: NextRequest) {
           grade: result.grade,
           gradeColor: result.gradeColor,
           scannedAt: result.scannedAt.toISOString(),
+          createdAt: metadata?.createdAt || undefined,
         });
 
         return NextResponse.json({ success: true, cached: false, data: result }, { headers: { "X-Cache": "MISS" } });
