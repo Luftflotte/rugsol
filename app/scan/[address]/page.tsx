@@ -479,10 +479,10 @@ export default function ScanResultPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col premium-bg text-text-primary">
+    <div className="min-h-[100dvh] flex flex-col premium-bg text-text-primary overflow-x-hidden">
       <Navbar />
 
-      <main className="flex-1 pt-16 sm:pt-20 md:pt-28 pb-8 sm:pb-10 md:pb-20 overflow-x-hidden">
+      <main className="flex-1 pt-16 sm:pt-20 md:pt-28 pb-8 sm:pb-10 md:pb-20">
         <div className="mx-auto w-full max-w-5xl lg:max-w-6xl px-4 sm:px-6 lg:px-8">
           
           {/* Back Link */}
