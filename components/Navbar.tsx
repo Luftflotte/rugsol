@@ -24,7 +24,7 @@ export function Navbar() {
               About
             </Link>
             <Link
-              href="#api"
+              href="/api-docs"
               className="text-sm text-text-secondary hover:text-text-primary transition-colors duration-300"
             >
               API
@@ -77,7 +77,7 @@ export function Navbar() {
               <Link href="/about" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
                 About
               </Link>
-              <Link href="#api" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
+              <Link href="/api-docs" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
                 API
               </Link>
               <a href="https://t.me/rugsolinfobot" target="_blank" rel="noopener noreferrer" className="text-sm text-text-secondary hover:text-text-primary transition-colors">

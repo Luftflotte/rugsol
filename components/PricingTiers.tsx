@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 import {
@@ -49,13 +50,14 @@ interface Tier {
 
 const tiers: Tier[] = [
   {
-    name: "FREE",
-    subtext: "No account required",
-    price: "Free",
+    name: "Visitor",
+    subtext: "Try it out",
+    price: "$0",
+    period: "/month",
     style: "basic",
     features: [
       {
-        text: "1 scan every 2 min",
+        text: "1 trial scan",
         icon: <Timer className="w-4 h-4" />,
       },
       {
@@ -77,22 +79,22 @@ const tiers: Tier[] = [
       },
     ],
     button: {
-      text: "Active now",
+      text: "Used • Next in 24h",
       disabled: true,
       variant: "muted",
     },
   },
   {
-    name: "PRO",
-    subtext: "Connect wallet to unlock",
+    name: "Authorized",
+    subtext: "Just connect your wallet",
     price: "$0",
-    period: "/mo",
+    period: "/month",
     style: "hero",
-    badge: "Most popular",
+    badge: "Best value",
     features: [
       {
-        text: "3 scans per min",
-        icon: <Timer className="w-4 h-4" />,
+        text: "1 scan per minute",
+        icon: <Zap className="w-4 h-4" />,
         highlight: true,
       },
       {
@@ -113,13 +115,13 @@ const tiers: Tier[] = [
       },
     ],
     button: {
-      text: "Connect wallet",
+      text: "Unlock now",
       variant: "primary",
     },
   },
   {
     name: "API",
-    subtext: "Billed monthly",
+    subtext: "For developers",
     price: "$9",
     period: "/mo",
     style: "technical",
@@ -285,16 +287,7 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
             ? isDark ? "text-zinc-400" : "text-gray-500"
             : isDark ? "text-zinc-600" : "text-gray-400"
         }`}>
-          {isHero ? (
-            <span className="inline-flex items-center gap-1.5">
-              <span className={`font-semibold ${isDark ? "text-green-400" : "text-green-600"}`}>{tier.subtext}</span>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${
-                isDark ? "bg-green-500/15 text-green-400" : "bg-green-500/10 text-green-600"
-              }`}>free</span>
-            </span>
-          ) : (
-            <>{tier.subtext}</>
-          )}
+          {tier.subtext}
         </p>
       </div>
 
@@ -339,7 +332,7 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
           </li>
         ))}
         {isHero && (
-          <li className={`text-xs pt-1 ${isDark ? "text-zinc-500" : "text-gray-400"}`}>+ all FREE tier features</li>
+          <li className={`text-xs pt-1 ${isDark ? "text-zinc-500" : "text-gray-400"}`}>+ all Visitor tier features</li>
         )}
       </ul>
 
@@ -358,7 +351,8 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
           {tier.button.text}
         </button>
       ) : tier.button.variant === "outline" ? (
-        <button
+        <Link
+          href="/api-docs"
           className={`w-full ${compact ? "py-2.5 px-4" : "py-3 px-6"} rounded-xl font-semibold text-sm font-mono
             ${isDark
               ? "border border-zinc-600/60 text-zinc-400 hover:bg-blue-500/[0.04] hover:border-zinc-500/70 hover:text-zinc-300"
@@ -369,7 +363,7 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
         >
           <Lock className="w-4 h-4" />
           {tier.button.text}
-        </button>
+        </Link>
       ) : (
         <button
           disabled
@@ -399,18 +393,18 @@ export function PricingTiers({ instant, compact }: { instant?: boolean; compact?
 
   return (
     <section id="api" className="scroll-mt-20">
-      <div className={`text-center ${compact ? "mb-6" : "mb-12"}`}>
+      <div className={`text-center ${compact ? "mb-8" : "mb-12"}`}>
         <h2 className={`${compact ? "text-xl sm:text-2xl" : "text-3xl sm:text-4xl"} font-bold text-text-primary mb-2`}>
-          {compact ? "Want more?" : <><span className="gradient-text">Security</span> That Scales</>}
+          {compact ? "Want more?" : <>Unlimited Scans, <span className="gradient-text">Free Forever</span></>}
         </h2>
         {!compact && (
           <p className="text-text-secondary text-base max-w-xl mx-auto">
-            Instant scans for casual users. Advanced tracking for traders. Programmatic access for builders.
+            Try it once for free. Connect your wallet for unlimited access. No subscription, no catches.
           </p>
         )}
       </div>
 
-      <div className={`grid grid-cols-1 md:grid-cols-3 ${compact ? "gap-4 lg:gap-5" : "gap-6 lg:gap-8"} items-start`}>
+      <div className={`grid grid-cols-1 ${compact ? "sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-5" : "md:grid-cols-3 gap-6 lg:gap-8"} items-start`}>
         {tiers.map((tier, i) => (
           <TierCard key={tier.name} tier={tier} index={i} instant={instant} compact={compact} isDark={isDark} />
         ))}
