@@ -22,14 +22,17 @@ async function fetchWithTimeout(url: string, timeoutMs = 5000): Promise<Response
 async function fetchAndOptimizeImage(url: string | null): Promise<string | null> {
   if (!url || url === "" || url === "undefined" || url === "null") return null;
   let targetUrl = url;
-  if (url.includes("ipfs.io")) targetUrl = url.replace("ipfs.io", "gateway.pinata.cloud");
-  else if (url.startsWith("ipfs://")) targetUrl = url.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
+  if (url.startsWith("ipfs://")) targetUrl = url.replace("ipfs://", "https://ipfs.io/ipfs/");
+  else if (url.includes("cf-ipfs.com")) targetUrl = url.replace("cf-ipfs.com", "ipfs.io");
+  else if (url.includes("gateway.pinata.cloud")) targetUrl = url.replace("gateway.pinata.cloud", "ipfs.io");
+  else if (url.includes("cloudflare-ipfs.com")) targetUrl = url.replace("cloudflare-ipfs.com", "ipfs.io");
 
   try {
-    const res = await fetchWithTimeout(targetUrl, 4000);
+    const res = await fetchWithTimeout(targetUrl, 6000);
     if (!res.ok) return null;
-    const arrayBuffer = await res.arrayBuffer();
     const contentType = res.headers.get("content-type") || "image/png";
+    if (!contentType.startsWith("image/")) return null;
+    const arrayBuffer = await res.arrayBuffer();
     return `data:${contentType};base64,${arrayBufferToBase64(arrayBuffer)}`;
   } catch { return null; }
 }
