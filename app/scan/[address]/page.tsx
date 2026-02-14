@@ -304,25 +304,8 @@ function transformToCheckGroups(result: ScanResult): CheckGroup[] {
   return groups;
 }
 
-const RATE_LIMIT_KEY = "rugsol_last_scan";
-const RATE_LIMIT_SECONDS = 120;
-
-function getRateLimitSecondsLeft(): number {
-  try {
-    const last = localStorage.getItem(RATE_LIMIT_KEY);
-    if (!last) return 0;
-    const elapsed = Math.floor((Date.now() - parseInt(last, 10)) / 1000);
-    return Math.max(0, RATE_LIMIT_SECONDS - elapsed);
-  } catch {
-    return 0;
-  }
-}
-
-function markScanTime() {
-  try {
-    localStorage.setItem(RATE_LIMIT_KEY, Date.now().toString());
-  } catch { /* ignore */ }
-}
+// Удалена старая система rate limiting на основе localStorage
+// Теперь используется server-side система с wallet авторизацией
 
 export default function ScanResultPage() {
   const params = useParams();
@@ -333,74 +316,99 @@ export default function ScanResultPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [cached, setCached] = useState(false);
-  const [rateLimited, setRateLimited] = useState(false);
-  const [rateLimitSeconds, setRateLimitSeconds] = useState(0);
+  const [needsAuth, setNeedsAuth] = useState(false);
   const [metadata, setMetadata] = useState<{
     name: string | null;
     symbol: string | null;
     image: string | null;
   }>({ name: null, symbol: null, image: null });
 
-  const handleRateLimitClose = useCallback(() => {
-    setRateLimited(false);
-    // Re-check: if timer expired, trigger scan
-    const left = getRateLimitSecondsLeft();
-    if (left <= 0) {
-      fetchScanData(address);
-    }
+  const handleAuthModalClose = useCallback(() => {
+    setNeedsAuth(false);
+  }, []);
+
+  const handleWalletConnected = useCallback(() => {
+    setNeedsAuth(false);
+    // Повторяем скан после успешной авторизации
+    loadScan(address);
   }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function fetchScanData(addr: string) {
+  // Загрузка скана - сначала проверяет кеш, если нет - запускает новый скан
+  async function loadScan(addr: string) {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch("/api/scan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address: addr }),
+      // Сначала проверяем кеш (не тратит скан)
+      const cacheResponse = await fetch(`/api/scan?address=${encodeURIComponent(addr)}`, {
+        method: "GET",
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to scan token");
+      // Если есть кеш - показываем его
+      if (cacheResponse.ok) {
+        const data: ScanResponse = await cacheResponse.json();
+        setResult(data.data);
+        setCached(data.cached);
+
+        if (data.data.checks.metadata.data) {
+          setMetadata({
+            name: data.data.checks.metadata.data.name,
+            symbol: data.data.checks.metadata.data.symbol,
+            image: data.data.checks.metadata.data.image,
+          });
+        }
+        setLoading(false);
+        return;
       }
 
-      const data: ScanResponse = await response.json();
-
-      // Mark scan time only after successful fetch
-      markScanTime();
-
-      setResult(data.data);
-      setCached(data.cached);
-
-      // Extract metadata
-      if (data.data.checks.metadata.data) {
-        setMetadata({
-          name: data.data.checks.metadata.data.name,
-          symbol: data.data.checks.metadata.data.symbol,
-          image: data.data.checks.metadata.data.image,
+      // Кеша нет (404) - запускаем новый скан
+      if (cacheResponse.status === 404) {
+        const scanResponse = await fetch("/api/scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ address: addr }),
         });
+
+        if (!scanResponse.ok) {
+          const errorData = await scanResponse.json();
+
+          // Проверяем, требуется ли авторизация
+          if (scanResponse.status === 429 && errorData.needsAuth) {
+            setNeedsAuth(true);
+            setLoading(false);
+            return;
+          }
+
+          throw new Error(errorData.error || "Failed to scan token");
+        }
+
+        const data: ScanResponse = await scanResponse.json();
+        setResult(data.data);
+        setCached(data.cached);
+
+        if (data.data.checks.metadata.data) {
+          setMetadata({
+            name: data.data.checks.metadata.data.name,
+            symbol: data.data.checks.metadata.data.symbol,
+            image: data.data.checks.metadata.data.image,
+          });
+        }
+        setLoading(false);
+        return;
       }
+
+      // Другая ошибка
+      throw new Error("Failed to load scan");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
     if (!address) return;
-
-    const secondsLeft = getRateLimitSecondsLeft();
-    if (secondsLeft > 0) {
-      setRateLimited(true);
-      setRateLimitSeconds(secondsLeft);
-      setLoading(false);
-      return;
-    }
-
-    fetchScanData(address);
+    // При загрузке страницы загружаем скан (кеш или новый)
+    loadScan(address);
   }, [address]);
 
   const [isGenerating, setIsGenerating] = useState(false);
@@ -795,11 +803,11 @@ export default function ScanResultPage() {
       </main>
       <Footer />
 
-      {/* Rate Limit Modal */}
-      {rateLimited && (
+      {/* Auth Required Modal */}
+      {needsAuth && (
         <RateLimitModal
-          secondsLeft={rateLimitSeconds}
-          onClose={handleRateLimitClose}
+          onClose={handleAuthModalClose}
+          onWalletConnected={handleWalletConnected}
         />
       )}
     </div>

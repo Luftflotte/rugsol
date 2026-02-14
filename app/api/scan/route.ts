@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { scanToken, ScanResult } from "@/lib/scoring/engine";
 import { addRecentScan } from "@/lib/storage/recent-scans";
 import { isValidSolanaAddress } from "@/lib/utils";
+import {
+  createFingerprint,
+  checkScanLimit,
+  recordScan,
+  getWalletForFingerprint
+} from "@/lib/auth/rate-limit";
+import { isOwnerWallet } from "@/lib/auth/wallet";
 
 function formatCompact(num: number): string {
   if (num >= 1_000_000_000) return `$${(num / 1_000_000_000).toFixed(1)}B`;
@@ -45,11 +52,6 @@ function buildOgQuery(result: ScanResult): string {
 const scanCache = new Map<string, { result: ScanResult; timestamp: number }>();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-// Rate limiting (replace with Redis in production)
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX_REQUESTS = 10;
-
 function getClientIp(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
@@ -60,34 +62,6 @@ function getClientIp(request: NextRequest): string {
     return realIp;
   }
   return "unknown";
-}
-
-function checkRateLimit(ip: string): { allowed: boolean; remaining: number; resetIn: number } {
-  // Cleanup if map gets too large to prevent memory leaks
-  if (rateLimitMap.size > 5000) {
-    const now = Date.now();
-    for (const [key, value] of rateLimitMap.entries()) {
-      if (now > value.resetTime) {
-        rateLimitMap.delete(key);
-      }
-    }
-  }
-
-  const now = Date.now();
-  const record = rateLimitMap.get(ip);
-
-  if (!record || now > record.resetTime) {
-    // New window
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
-    return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - 1, resetIn: RATE_LIMIT_WINDOW_MS };
-  }
-
-  if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
-    return { allowed: false, remaining: 0, resetIn: record.resetTime - now };
-  }
-
-  record.count++;
-  return { allowed: true, remaining: RATE_LIMIT_MAX_REQUESTS - record.count, resetIn: record.resetTime - now };
 }
 
 function getCachedResult(address: string): ScanResult | null {
@@ -119,25 +93,38 @@ function setCachedResult(address: string, result: ScanResult): void {
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting
+    // Создаём fingerprint пользователя
     const clientIp = getClientIp(request);
-    const rateLimit = checkRateLimit(clientIp);
+    const userAgent = request.headers.get("user-agent") || "";
+    const fingerprint = createFingerprint(clientIp, userAgent);
 
-    if (!rateLimit.allowed) {
-      return NextResponse.json(
-        {
-          error: "Rate limit exceeded",
-          message: `Too many requests. Try again in ${Math.ceil(rateLimit.resetIn / 1000)} seconds.`,
-        },
-        {
-          status: 429,
-          headers: {
-            "X-RateLimit-Limit": String(RATE_LIMIT_MAX_REQUESTS),
-            "X-RateLimit-Remaining": String(rateLimit.remaining),
-            "X-RateLimit-Reset": String(Math.ceil(rateLimit.resetIn / 1000)),
+    // Проверяем, есть ли привязанный wallet
+    const walletAddress = getWalletForFingerprint(fingerprint);
+
+    // Проверяем, является ли пользователь владельцем (безлимит)
+    const isOwner = walletAddress ? isOwnerWallet(walletAddress) : false;
+
+    // Проверяем лимиты (владельцы и авторизованные пользователи имеют безлимит)
+    if (!isOwner && !walletAddress) {
+      const scanLimit = checkScanLimit(fingerprint);
+
+      if (!scanLimit.allowed) {
+        return NextResponse.json(
+          {
+            error: "Scan limit exceeded",
+            message: "You have used your free scan. Connect your wallet to continue scanning.",
+            needsAuth: true,
           },
-        }
-      );
+          {
+            status: 429,
+            headers: {
+              "X-Scan-Limit": "1",
+              "X-Scan-Remaining": "0",
+              "X-Needs-Auth": "true",
+            },
+          }
+        );
+      }
     }
 
     // Parse body
@@ -171,8 +158,11 @@ export async function POST(request: NextRequest) {
     // Run scan
     const result = await scanToken(address);
 
-    // Cache result (Keep disabled for now, but ensure recent scan is added)
+    // Cache result
     setCachedResult(address, result);
+
+    // Записываем использование скана
+    recordScan(fingerprint, walletAddress || undefined);
 
     // Add to recent scans with OG query for Twitter cards
     const metadata = result.checks.metadata.data;
@@ -190,6 +180,9 @@ export async function POST(request: NextRequest) {
       ogQuery: buildOgQuery(result),
     });
 
+    // Получаем актуальную информацию о лимитах после скана
+    const updatedLimit = checkScanLimit(fingerprint, walletAddress || undefined);
+
     return NextResponse.json(
       {
         success: true,
@@ -198,8 +191,9 @@ export async function POST(request: NextRequest) {
       },
       {
         headers: {
-          "X-RateLimit-Limit": String(RATE_LIMIT_MAX_REQUESTS),
-          "X-RateLimit-Remaining": String(rateLimit.remaining),
+          "X-Scan-Remaining": String(updatedLimit.remaining === Infinity ? "unlimited" : updatedLimit.remaining),
+          "X-Is-Authenticated": String(!!walletAddress),
+          "X-Is-Owner": String(isOwner),
         },
       }
     );
@@ -259,36 +253,26 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      // No cached result — run a fresh scan. For server-side/GET callers we skip the rate-limit
-      try {
-        const result = await scanToken(address);
-        setCachedResult(address, result);
-
-        // Add to recent scans
-        const metadata = result.checks.metadata.data;
-        addRecentScan({
-          address: result.tokenAddress,
-          name: metadata?.name || result.whitelistInfo?.name || "Unknown",
-          symbol: metadata?.symbol || result.whitelistInfo?.symbol || "???",
-          image: metadata?.image || undefined,
-          score: result.score,
-          grade: result.grade,
-          gradeLabel: result.gradeLabel,
-          gradeColor: result.gradeColor,
-          scannedAt: result.scannedAt.toISOString(),
-          createdAt: metadata?.createdAt || undefined,
-          ogQuery: buildOgQuery(result),
-        });
-
-        return NextResponse.json({ success: true, cached: false, data: result }, { headers: { "X-Cache": "MISS" } });
-      } catch (e) {
-        console.error("Scan API GET error:", e);
-        return NextResponse.json({ error: "Scan failed", message: e instanceof Error ? e.message : String(e) }, { status: 500 });
-      }
+      // No cached result — return 404 (не тратим скан!)
+      // Клиент должен явно запустить POST запрос для нового скана
+      return NextResponse.json(
+        {
+          success: false,
+          cached: false,
+          notFound: true,
+          message: "No cached scan found. Click 'Scan Token' to analyze.",
+        },
+        {
+          status: 404,
+          headers: {
+            "X-Cache": "MISS",
+          },
+        }
+      );
     }
 
     // Default health response (no address provided)
-    return NextResponse.json({ status: "ok", cacheSize: scanCache.size, rateLimitEntries: rateLimitMap.size });
+    return NextResponse.json({ status: "ok", cacheSize: scanCache.size });
   } catch (error) {
     console.error("Scan GET error:", error);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
