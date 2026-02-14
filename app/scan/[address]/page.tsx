@@ -752,7 +752,7 @@ export default function ScanResultPage() {
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={() => {
-                          const text = encodeURIComponent(`Just scanned ${metadata.name || 'this token'} ($${metadata.symbol || 'TOKEN'}) on @RugSol\n\nScore: ${result.score}/100 (Grade ${result.grade})\n\nCheck it out:`);
+                          const text = encodeURIComponent(`${metadata.name || 'Token'} ($${metadata.symbol || 'TOKEN'}) — ${result.score}/100 (Grade ${result.grade})\n\nScanned with @RugSol`);
                           window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(window.location.href)}`, '_blank');
                         }}
                         className="py-2.5 px-3 bg-bg-secondary hover:bg-bg-card text-text-secondary hover:text-text-primary rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all duration-200 border border-border-color hover:border-silver-accent/50 hover:scale-105 active:scale-95"
