@@ -1,13 +1,22 @@
-import { ImageResponse } from "@vercel/og";
+import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
-
-export const runtime = "edge";
 
 function arrayBufferToBase64(buffer: ArrayBuffer) {
   let binary = "";
   const bytes = new Uint8Array(buffer);
   for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
   return btoa(binary);
+}
+
+async function fetchWithTimeout(url: string, timeoutMs = 5000): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(id);
+  }
 }
 
 async function fetchAndOptimizeImage(url: string | null): Promise<string | null> {
@@ -17,12 +26,27 @@ async function fetchAndOptimizeImage(url: string | null): Promise<string | null>
   else if (url.startsWith("ipfs://")) targetUrl = url.replace("ipfs://", "https://gateway.pinata.cloud/ipfs/");
 
   try {
-    const res = await fetch(targetUrl, { next: { revalidate: 3600 } });
+    const res = await fetchWithTimeout(targetUrl, 4000);
     if (!res.ok) return null;
     const arrayBuffer = await res.arrayBuffer();
     const contentType = res.headers.get("content-type") || "image/png";
     return `data:${contentType};base64,${arrayBufferToBase64(arrayBuffer)}`;
-  } catch (e) { return null; }
+  } catch { return null; }
+}
+
+// Cache fonts in memory so they're fetched once per server lifetime
+let fontCache: { interReg: ArrayBuffer; interBold: ArrayBuffer; jbMono: ArrayBuffer; jbMonoBold: ArrayBuffer } | null = null;
+
+async function loadFonts() {
+  if (fontCache) return fontCache;
+  const [interReg, interBold, jbMono, jbMonoBold] = await Promise.all([
+    fetchWithTimeout("https://cdn.jsdelivr.net/fontsource/fonts/inter@5.1.0/latin-400-normal.ttf", 8000).then(r => r.arrayBuffer()),
+    fetchWithTimeout("https://cdn.jsdelivr.net/fontsource/fonts/inter@5.1.0/latin-700-normal.ttf", 8000).then(r => r.arrayBuffer()),
+    fetchWithTimeout("https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@5.1.0/latin-400-normal.ttf", 8000).then(r => r.arrayBuffer()),
+    fetchWithTimeout("https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@5.1.0/latin-700-normal.ttf", 8000).then(r => r.arrayBuffer()),
+  ]);
+  fontCache = { interReg, interBold, jbMono, jbMonoBold };
+  return fontCache;
 }
 
 export async function GET(request: NextRequest) {
@@ -54,12 +78,8 @@ export async function GET(request: NextRequest) {
     const tagPointsList = tagPointsParam ? tagPointsParam.split(",").map(Number) : [];
     const isLight = searchParams.get("theme") === "light";
 
-    const [interReg, interBold, jbMono, jbMonoBold] = await Promise.all([
-      fetch(new URL("https://cdn.jsdelivr.net/fontsource/fonts/inter@5.1.0/latin-400-normal.ttf", import.meta.url)).then(res => res.arrayBuffer()),
-      fetch(new URL("https://cdn.jsdelivr.net/fontsource/fonts/inter@5.1.0/latin-700-normal.ttf", import.meta.url)).then(res => res.arrayBuffer()),
-      fetch(new URL("https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@5.1.0/latin-400-normal.ttf", import.meta.url)).then(res => res.arrayBuffer()),
-      fetch(new URL("https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@5.1.0/latin-700-normal.ttf", import.meta.url)).then(res => res.arrayBuffer())
-    ]);
+    const fonts = await loadFonts();
+    const { interReg, interBold, jbMono, jbMonoBold } = fonts;
 
     const tokenImage = await fetchAndOptimizeImage(image);
 
