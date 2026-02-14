@@ -14,9 +14,11 @@ export interface RecentScan {
   image?: string;
   score: number;
   grade: string;
+  gradeLabel?: string;
   gradeColor: string;
   scannedAt: string;
   createdAt?: string;
+  ogQuery?: string; // pre-built OG image query string
 }
 
 interface PersistedData {
@@ -126,6 +128,10 @@ export function addRecentScan(scan: RecentScan): void {
 
   // Persist to disk
   saveToDisk();
+}
+
+export function getRecentScanByAddress(address: string): RecentScan | null {
+  return recentScans.find(s => s.address === address) || null;
 }
 
 export function getRecentScans(limit: number = 12): RecentScan[] {

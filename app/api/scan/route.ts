@@ -3,6 +3,44 @@ import { scanToken, ScanResult } from "@/lib/scoring/engine";
 import { addRecentScan } from "@/lib/storage/recent-scans";
 import { isValidSolanaAddress } from "@/lib/utils";
 
+function formatCompact(num: number): string {
+  if (num >= 1_000_000_000) return `$${(num / 1_000_000_000).toFixed(1)}B`;
+  if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(1)}M`;
+  if (num >= 1_000) return `$${(num / 1_000).toFixed(1)}K`;
+  return `$${num.toFixed(0)}`;
+}
+
+function buildOgQuery(result: ScanResult): string {
+  const meta = result.checks.metadata.data;
+  const price = result.price;
+  const liq = result.checks.liquidity.data;
+  const h = result.checks.holders.data;
+  const adv = result.checks.advanced?.data;
+  const topPenalties = result.penalties.slice(0, 3);
+
+  return new URLSearchParams({
+    address: result.tokenAddress,
+    name: meta?.name || "Unknown",
+    symbol: meta?.symbol || "TOKEN",
+    score: result.score.toString(),
+    grade: result.grade,
+    label: result.gradeLabel,
+    mode: result.scanMode,
+    price: price?.priceUsd ? `$${parseFloat((price.priceUsd < 0.0001 ? price.priceUsd.toFixed(8) : price.priceUsd.toFixed(4)))}` : "$0.00",
+    mcap: price?.marketCap ? formatCompact(price.marketCap) : "0",
+    change: price?.priceChange?.h24 ? `${price.priceChange.h24 > 0 ? "+" : ""}${price.priceChange.h24.toFixed(1)}%` : "0%",
+    liq: result.scanMode === "pump" ? `${result.bondingCurveData?.curveProgressPercent || 0}%` : (liq?.lpSizeUsd ? formatCompact(liq.lpSizeUsd) : "$0"),
+    top10: h ? `${h.topTenPercent.toFixed(1)}%` : "0%",
+    lock: result.scanMode === "pump" ? (adv?.sniperCount?.toString() || "0") : (liq?.lpBurned ? "Burned" : "No"),
+    sell: result.checks.honeypot.data?.isHoneypot ? "No" : "Yes",
+    mint: result.checks.mintAuthority.data?.status === "pass" ? "Revoked" : "Active",
+    penalty: result.totalPenalties.toString(),
+    tags: topPenalties.map(p => p.category).join(",") || "Safe,Verified,Low Risk",
+    tagPoints: topPenalties.map(p => p.points).join(","),
+    image: meta?.image || "",
+  }).toString();
+}
+
 // In-memory cache (replace with Redis in production)
 const scanCache = new Map<string, { result: ScanResult; timestamp: number }>();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -136,7 +174,7 @@ export async function POST(request: NextRequest) {
     // Cache result (Keep disabled for now, but ensure recent scan is added)
     setCachedResult(address, result);
 
-    // Add to recent scans
+    // Add to recent scans with OG query for Twitter cards
     const metadata = result.checks.metadata.data;
     addRecentScan({
       address: result.tokenAddress,
@@ -145,9 +183,11 @@ export async function POST(request: NextRequest) {
       image: metadata?.image || undefined,
       score: result.score,
       grade: result.grade,
+      gradeLabel: result.gradeLabel,
       gradeColor: result.gradeColor,
       scannedAt: result.scannedAt.toISOString(),
       createdAt: metadata?.createdAt || undefined,
+      ogQuery: buildOgQuery(result),
     });
 
     return NextResponse.json(
@@ -198,9 +238,11 @@ export async function GET(request: NextRequest) {
           image: metadata?.image || undefined,
           score: cachedResult.score,
           grade: cachedResult.grade,
+          gradeLabel: cachedResult.gradeLabel,
           gradeColor: cachedResult.gradeColor,
           scannedAt: new Date().toISOString(),
           createdAt: metadata?.createdAt || undefined,
+          ogQuery: buildOgQuery(cachedResult),
         });
 
         return NextResponse.json(
@@ -231,9 +273,11 @@ export async function GET(request: NextRequest) {
           image: metadata?.image || undefined,
           score: result.score,
           grade: result.grade,
+          gradeLabel: result.gradeLabel,
           gradeColor: result.gradeColor,
           scannedAt: result.scannedAt.toISOString(),
           createdAt: metadata?.createdAt || undefined,
+          ogQuery: buildOgQuery(result),
         });
 
         return NextResponse.json({ success: true, cached: false, data: result }, { headers: { "X-Cache": "MISS" } });
