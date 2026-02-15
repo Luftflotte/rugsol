@@ -46,3 +46,10 @@ export function isOwnerWallet(walletAddress: string): boolean {
   const ownerWallets = (process.env.OWNER_WALLETS || "").split(",").map(w => w.trim());
   return ownerWallets.includes(walletAddress);
 }
+
+/**
+ * Проверяет, является ли это dev окружением (localhost)
+ */
+export function isDevEnvironment(): boolean {
+  return process.env.NODE_ENV === "development";
+}

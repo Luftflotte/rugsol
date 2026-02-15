@@ -1,10 +1,16 @@
 import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
 
-function arrayBufferToBase64(buffer: ArrayBuffer) {
-  let binary = "";
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
-  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  const chunkSize = 8192; // Process in chunks to avoid stack overflow
+  let binary = "";
+
+  for (let i = 0; i < bytes.byteLength; i += chunkSize) {
+    const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.byteLength));
+    binary += String.fromCharCode.apply(null, Array.from(chunk));
+  }
+
   return btoa(binary);
 }
 
@@ -32,9 +38,34 @@ async function fetchAndOptimizeImage(url: string | null): Promise<string | null>
     if (!res.ok) return null;
     const contentType = res.headers.get("content-type") || "image/png";
     if (!contentType.startsWith("image/")) return null;
+
+    // Проверяем размер изображения (лимит 500KB для безопасности)
+    const contentLength = res.headers.get("content-length");
+    if (contentLength && parseInt(contentLength) > 500000) {
+      console.warn(`Image too large: ${contentLength} bytes`);
+      return null;
+    }
+
     const arrayBuffer = await res.arrayBuffer();
-    return `data:${contentType};base64,${arrayBufferToBase64(arrayBuffer)}`;
-  } catch { return null; }
+
+    // Дополнительная проверка размера после загрузки
+    if (arrayBuffer.byteLength > 500000) {
+      console.warn(`Image buffer too large: ${arrayBuffer.byteLength} bytes`);
+      return null;
+    }
+
+    // Безопасная конвертация в base64
+    try {
+      const base64 = arrayBufferToBase64(arrayBuffer);
+      return `data:${contentType};base64,${base64}`;
+    } catch (e) {
+      console.error("Failed to convert image to base64:", e);
+      return null;
+    }
+  } catch (e) {
+    console.error("Failed to fetch image:", e);
+    return null;
+  }
 }
 
 // Cache fonts in memory so they're fetched once per server lifetime
@@ -84,7 +115,14 @@ export async function GET(request: NextRequest) {
     const fonts = await loadFonts();
     const { interReg, interBold, jbMono, jbMonoBold } = fonts;
 
-    const tokenImage = await fetchAndOptimizeImage(image);
+    // Workaround: Skip WebP images in light theme (Satori bug)
+    let tokenImage: string | null = null;
+    if (isLight && image?.toLowerCase().endsWith('.webp')) {
+      console.warn('Skipping WebP image in light theme to avoid Satori bug');
+      tokenImage = null;
+    } else {
+      tokenImage = await fetchAndOptimizeImage(image);
+    }
 
     let theme = { bg: "linear-gradient(150deg, #0d0808 0%, #130b0b 45%, #0f0909 100%)", ac: "#ef4444", acDim: "rgba(239,68,68,0.6)", acBg: "rgba(239,68,68,0.1)", acBorder: "rgba(239,68,68,0.18)" };
     if (score >= 60) theme = { bg: "linear-gradient(150deg, #080d08 0%, #0b130b 45%, #090f09 100%)", ac: "#22c55e", acDim: "rgba(34,197,94,0.6)", acBg: "rgba(34,197,94,0.1)", acBorder: "rgba(34,197,94,0.18)" };

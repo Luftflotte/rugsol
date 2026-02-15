@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { scanToken } from "@/lib/scoring/engine";
 import { getRecentScanByAddress } from "@/lib/storage/recent-scans";
 import { isValidSolanaAddress } from "@/lib/utils";
+import { getBaseUrl } from "@/lib/utils/url";
 
 interface Props {
   params: Promise<{ address: string }>;
@@ -17,7 +18,7 @@ function formatCompact(num: number): string {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { address } = await params;
   const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = getBaseUrl();
 
   // Default fallback
   let ogImageUrl = `${siteUrl}/api/og?address=${address}`;

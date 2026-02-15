@@ -8,7 +8,7 @@ import {
   recordScan,
   getWalletForFingerprint
 } from "@/lib/auth/rate-limit";
-import { isOwnerWallet } from "@/lib/auth/wallet";
+import { isOwnerWallet, isDevEnvironment } from "@/lib/auth/wallet";
 
 function formatCompact(num: number): string {
   if (num >= 1_000_000_000) return `$${(num / 1_000_000_000).toFixed(1)}B`;
@@ -104,8 +104,11 @@ export async function POST(request: NextRequest) {
     // Проверяем, является ли пользователь владельцем (безлимит)
     const isOwner = walletAddress ? isOwnerWallet(walletAddress) : false;
 
-    // Проверяем лимиты (владельцы и авторизованные пользователи имеют безлимит)
-    if (!isOwner && !walletAddress) {
+    // В dev режиме — автоматический безлимит
+    const isDev = isDevEnvironment();
+
+    // Проверяем лимиты (владельцы, авторизованные пользователи и dev режим имеют безлимит)
+    if (!isOwner && !walletAddress && !isDev) {
       const scanLimit = checkScanLimit(fingerprint);
 
       if (!scanLimit.allowed) {
@@ -191,9 +194,9 @@ export async function POST(request: NextRequest) {
       },
       {
         headers: {
-          "X-Scan-Remaining": String(updatedLimit.remaining === Infinity ? "unlimited" : updatedLimit.remaining),
+          "X-Scan-Remaining": String(updatedLimit.remaining === Infinity || isDev ? "unlimited" : updatedLimit.remaining),
           "X-Is-Authenticated": String(!!walletAddress),
-          "X-Is-Owner": String(isOwner),
+          "X-Is-Owner": String(isOwner || isDev),
         },
       }
     );
