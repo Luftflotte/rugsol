@@ -83,9 +83,70 @@ async function loadFonts() {
   return fontCache;
 }
 
+function renderHomepageCard(fonts: { interReg: ArrayBuffer; interBold: ArrayBuffer; jbMono: ArrayBuffer; jbMonoBold: ArrayBuffer }) {
+  const { interReg, interBold, jbMono, jbMonoBold } = fonts;
+  return new ImageResponse(
+    (
+      <div style={{ width: 1200, height: 630, display: "flex", flexDirection: "column", background: "linear-gradient(150deg, #080d08 0%, #0b130b 45%, #090f09 100%)", fontFamily: "Inter", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", backgroundImage: "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)", backgroundSize: "64px 64px" }} />
+        <div style={{ position: "absolute", width: 700, height: 700, borderRadius: "50%", background: "#22c55e", opacity: 0.04, filter: "blur(140px)", right: -120, top: -120, display: "flex" }} />
+        <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", background: "#22c55e", opacity: 0.03, filter: "blur(100px)", left: -100, bottom: -200, display: "flex" }} />
+        <div style={{ height: 5, width: "100%", background: "linear-gradient(90deg, transparent 0%, #22c55e 50%, transparent 100%)", display: "flex" }} />
+
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 36, position: "relative", padding: "0 72px" }}>
+          {/* Logo + title */}
+          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+            <svg width="72" height="72" viewBox="0 0 48 48" fill="none" style={{ display: "flex" }}><path d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z" stroke="#c0c0c0" strokeWidth="1.5" strokeLinejoin="round" fill="none"/><path d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z" fill="rgba(192,192,192,0.08)" stroke="#c0c0c0" strokeWidth="1" strokeLinejoin="round"/><path d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z" fill="#c0c0c0"/><path d="M20.5 23.5L23 26L28 20.5" stroke="#0a0a0a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span style={{ fontSize: 64, fontWeight: 900, color: "#ffffff", letterSpacing: "-2px", lineHeight: 1, display: "flex" }}>RugSol</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.25)", letterSpacing: "6px", textTransform: "uppercase", marginTop: 6, display: "flex" }}>Token Scanner</span>
+            </div>
+          </div>
+
+          {/* Tagline */}
+          <span style={{ fontSize: 28, fontWeight: 500, color: "rgba(255,255,255,0.4)", textAlign: "center", maxWidth: 700, lineHeight: 1.4, display: "flex" }}>Instant rug pull detection for Solana tokens</span>
+
+          {/* Feature pills */}
+          <div style={{ display: "flex", gap: 16, marginTop: 12 }}>
+            {["On-chain Analysis", "Honeypot Detection", "Holder Clustering", "Pump.fun Support"].map((f, i) => (
+              <span key={i} style={{ fontSize: 15, fontWeight: 600, padding: "10px 22px", borderRadius: 100, background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.18)", color: "rgba(34,197,94,0.7)", display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", opacity: 0.6, display: "flex" }} />
+                {f}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "22px 72px", background: "rgba(0,0,0,0.4)", borderTop: "1px solid rgba(255,255,255,0.03)" }}>
+          <div style={{ display: "flex", alignItems: "center", padding: "10px 28px", borderRadius: 100, background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.15)" }}>
+            <span style={{ fontFamily: "JetBrains Mono", fontSize: 22, fontWeight: 700, color: "#22c55e", letterSpacing: "0.5px", display: "flex" }}>rugsol.info</span>
+          </div>
+        </div>
+      </div>
+    ),
+    { width: 1200, height: 630, headers: {
+      "Content-Disposition": 'inline; filename="rugsol-og.png"',
+      "Cache-Control": "public, max-age=86400, s-maxage=86400",
+    }, fonts: [
+      { name: "Inter", data: interReg, weight: 400 },
+      { name: "Inter", data: interBold, weight: 700 },
+      { name: "JetBrains Mono", data: jbMono, weight: 400 },
+      { name: "JetBrains Mono", data: jbMonoBold, weight: 700 },
+    ]}
+  );
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+
+    // Homepage mode — branded card without token data
+    if (searchParams.get("mode") === "home" || (!searchParams.get("address") && !searchParams.get("name"))) {
+      const fonts = await loadFonts();
+      return renderHomepageCard(fonts);
+    }
+
     const address = searchParams.get("address") || "";
     const rawName = searchParams.get("name") || "Unknown";
     const name = rawName.length > 20 ? rawName.slice(0, 18) + "..." : rawName;
@@ -115,10 +176,10 @@ export async function GET(request: NextRequest) {
     const fonts = await loadFonts();
     const { interReg, interBold, jbMono, jbMonoBold } = fonts;
 
-    // Workaround: Skip WebP images in light theme (Satori bug)
+    // Workaround: Skip WebP images — Satori doesn't support WebP decoding
     let tokenImage: string | null = null;
-    if (isLight && image?.toLowerCase().endsWith('.webp')) {
-      console.warn('Skipping WebP image in light theme to avoid Satori bug');
+    if (image?.toLowerCase().endsWith('.webp')) {
+      console.warn('Skipping WebP image — not supported by Satori');
       tokenImage = null;
     } else {
       tokenImage = await fetchAndOptimizeImage(image);

@@ -25,11 +25,20 @@ export const metadata: Metadata = {
     description: "Instant rug pull detection for Solana tokens. Protect yourself before you ape in.",
     type: "website",
     siteName: "RugSol",
+    images: [
+      {
+        url: `${getBaseUrl()}/api/og?mode=home`,
+        width: 1200,
+        height: 630,
+        alt: "RugSol - Solana Token Scanner",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "RugSol - Solana Token Scanner",
     description: "Instant rug pull detection for Solana tokens. Protect yourself before you ape in.",
+    images: [`${getBaseUrl()}/api/og?mode=home`],
   },
 };
 
