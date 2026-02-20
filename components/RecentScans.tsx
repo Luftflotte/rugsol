@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { reloadNoirScript } from "@/lib/utils";
@@ -18,24 +18,6 @@ interface RecentScan {
   createdAt?: string;
 }
 
-// Pool of known Solana mainnet tokens used to simulate live activity
-const FAKE_POOL: Omit<RecentScan, "scannedAt">[] = [
-  { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", name: "USD Coin", symbol: "USDC", score: 97, grade: "A", gradeColor: "#22c55e" },
-  { address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", name: "Tether USD", symbol: "USDT", score: 94, grade: "A", gradeColor: "#22c55e" },
-  { address: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", name: "Bonk", symbol: "BONK", score: 78, grade: "B", gradeColor: "#84cc16" },
-  { address: "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm", name: "dogwifhat", symbol: "WIF", score: 82, grade: "A", gradeColor: "#22c55e" },
-  { address: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN", name: "Jupiter", symbol: "JUP", score: 91, grade: "A", gradeColor: "#22c55e" },
-  { address: "7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr", name: "Popcat", symbol: "POPCAT", score: 74, grade: "B", gradeColor: "#84cc16" },
-  { address: "HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3", name: "Pyth Network", symbol: "PYTH", score: 88, grade: "A", gradeColor: "#22c55e" },
-  { address: "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R", name: "Raydium", symbol: "RAY", score: 85, grade: "A", gradeColor: "#22c55e" },
-  { address: "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE", name: "Orca", symbol: "ORCA", score: 83, grade: "A", gradeColor: "#22c55e" },
-  { address: "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So", name: "Marinade staked SOL", symbol: "mSOL", score: 93, grade: "A", gradeColor: "#22c55e" },
-  { address: "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU", name: "Samoyedcoin", symbol: "SAMO", score: 68, grade: "B", gradeColor: "#84cc16" },
-  { address: "MEW1gQWJ3nEXg2qgERiKu7FAFj79PHvQVREQUzScPP5", name: "cat in a dogs world", symbol: "MEW", score: 71, grade: "B", gradeColor: "#84cc16" },
-  { address: "WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCpk", name: "Wen", symbol: "WEN", score: 66, grade: "B", gradeColor: "#84cc16" },
-  { address: "ukHH6c7mMyiWCf1b9pnWe25TSpkDDt3H5pQZgZ74J82", name: "Book of Meme", symbol: "BOME", score: 63, grade: "B", gradeColor: "#84cc16" },
-];
-
 function formatPrice(price: number): string {
   if (price >= 1) {
     return price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -47,19 +29,6 @@ function formatPrice(price: number): string {
     const str = price.toPrecision(4);
     return parseFloat(str).toLocaleString('en-US', { maximumFractionDigits: 10 });
   }
-}
-
-function timeAgo(dateStr: string): string {
-  const date = new Date(dateStr);
-  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-
-  if (seconds < 60) return `${seconds}s ago`;
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  const days = Math.floor(seconds / 86400);
-  if (days < 30) return `${days}d ago`;
-  if (days < 365) return `${Math.floor(days / 30)}mo ago`;
-  return `${Math.floor(days / 365)}y ago`;
 }
 
 function TokenImage({ src, symbol }: { src?: string; symbol: string }) {
@@ -163,17 +132,7 @@ function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }
 export function RecentScans() {
   const [displayedScans, setDisplayedScans] = useState<RecentScan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-  const displayedScansRef = useRef<RecentScan[]>([]);
-  const fakeAddressesRef = useRef(new Set<string>());
-  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Keep ref in sync with state
-  useEffect(() => {
-    displayedScansRef.current = displayedScans;
-  }, [displayedScans]);
 
   // Fetch real scans from API
   useEffect(() => {
@@ -182,20 +141,7 @@ export function RecentScans() {
         const res = await fetch("/api/recent");
         const data = await res.json();
         if (data.success) {
-          const apiScans: RecentScan[] = data.data;
-          setDisplayedScans(prev => {
-            // Preserve fake entries at the top
-            const fakes = prev.filter(s => fakeAddressesRef.current.has(s.address));
-            const fakeAddrs = new Set(fakes.map(f => f.address));
-            const reals = apiScans.filter(s => !fakeAddrs.has(s.address));
-            const merged = [...fakes, ...reals];
-            const seen = new Set<string>();
-            return merged.filter(s => {
-              if (seen.has(s.address)) return false;
-              seen.add(s.address);
-              return true;
-            }).slice(0, 20);
-          });
+          setDisplayedScans(data.data);
         }
       } catch (error) {
         console.error("Failed to fetch recent scans:", error);
@@ -207,54 +153,6 @@ export function RecentScans() {
     fetchRecentScans();
     const interval = setInterval(fetchRecentScans, 30000);
     return () => clearInterval(interval);
-  }, []);
-
-  // Periodic fake scan injection
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-
-    function inject() {
-      const current = displayedScansRef.current;
-      const available = FAKE_POOL.filter(f => !current.some(s => s.address === f.address));
-
-      if (available.length > 0) {
-        const fake = available[Math.floor(Math.random() * available.length)];
-        fakeAddressesRef.current.add(fake.address);
-
-        const entry: RecentScan = {
-          ...fake,
-          scannedAt: new Date().toISOString(),
-          price: null,
-        };
-
-        setDisplayedScans(prev => [entry, ...prev].slice(0, 20));
-
-        // Highlight the new card
-        if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
-        setHighlightedId(fake.address);
-        highlightTimerRef.current = setTimeout(() => setHighlightedId(null), 2000);
-
-        // Increment fake count in localStorage for Stats component
-        try {
-          const count = parseInt(localStorage.getItem("fakeScansCount") || "0", 10);
-          localStorage.setItem("fakeScansCount", String(count + 1));
-          window.dispatchEvent(new CustomEvent("fakeScansUpdate"));
-        } catch {}
-      }
-
-      // Schedule next injection: random 8–40 seconds
-      const delay = 8000 + Math.random() * 32000;
-      timeoutId = setTimeout(inject, delay);
-    }
-
-    // First injection after 8–20 seconds
-    const initialDelay = 8000 + Math.random() * 12000;
-    timeoutId = setTimeout(inject, initialDelay);
-
-    return () => {
-      clearTimeout(timeoutId);
-      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
-    };
   }, []);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -288,16 +186,6 @@ export function RecentScans() {
 
   return (
     <>
-      <style>{`
-        @keyframes scan-card-glow {
-          0%   { box-shadow: 0 0 0 2px rgba(132, 204, 22, 0.85), 0 0 20px rgba(132, 204, 22, 0.35); }
-          100% { box-shadow: 0 0 0 0px rgba(132, 204, 22, 0),    0 0  0px rgba(132, 204, 22, 0); }
-        }
-        .scan-card-new {
-          animation: scan-card-glow 2s ease-out forwards;
-        }
-      `}</style>
-
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between px-4">
@@ -332,12 +220,10 @@ export function RecentScans() {
           }}
         >
           <div className="flex gap-4 min-w-max px-4 py-2">
-            {displayedScans.map((scan, index) => {
-              const isNew = scan.address === highlightedId;
-              return (
+            {displayedScans.map((scan, index) => (
                 <Link href={`/scan/${scan.address}`} key={scan.address}>
                   <Card
-                    className={`glass-card p-4 w-56 flex-shrink-0 animate-fade-in-up cursor-pointer relative group${isNew ? " scan-card-new" : ""}`}
+                    className="glass-card p-4 w-56 flex-shrink-0 animate-fade-in-up cursor-pointer relative group"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
                     {/* Favorite Button */}
@@ -380,12 +266,6 @@ export function RecentScans() {
                           {scan.grade}
                         </span>
                       </div>
-                      <span
-                        className="text-xs text-text-muted"
-                        title={scan.createdAt ? new Date(scan.createdAt).toLocaleString() : new Date(scan.scannedAt).toLocaleString()}
-                      >
-                        {timeAgo(scan.createdAt || scan.scannedAt)}
-                      </span>
                     </div>
 
                     <div className="mt-2">
@@ -395,8 +275,7 @@ export function RecentScans() {
                     </div>
                   </Card>
                 </Link>
-              );
-            })}
+            ))}
 
             {/* Portfolio Teaser Card */}
             <button

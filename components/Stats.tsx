@@ -9,22 +9,10 @@ function formatNumber(num: number): string {
   return num.toLocaleString("en-US");
 }
 
-function readFakeCount(): number {
-  try {
-    return parseInt(localStorage.getItem("fakeScansCount") || "0", 10);
-  } catch {
-    return 0;
-  }
-}
-
 export function Stats() {
   const [stats, setStats] = useState({ totalScans: 0, rugsDetected: 0 });
-  const [fakeCount, setFakeCount] = useState(0);
 
   useEffect(() => {
-    // Read initial fake count from localStorage
-    setFakeCount(readFakeCount());
-
     async function fetchStats() {
       try {
         const res = await fetch("/api/stats");
@@ -40,19 +28,12 @@ export function Stats() {
     fetchStats();
     const interval = setInterval(fetchStats, 60000);
 
-    // Sync fake count whenever RecentScans injects a new fake card
-    function onFakeUpdate() {
-      setFakeCount(readFakeCount());
-    }
-    window.addEventListener("fakeScansUpdate", onFakeUpdate);
-
     return () => {
       clearInterval(interval);
-      window.removeEventListener("fakeScansUpdate", onFakeUpdate);
     };
   }, []);
 
-  const displayTotalScans = stats.totalScans + fakeCount + TOTAL_SCANS_OFFSET;
+  const displayTotalScans = stats.totalScans + TOTAL_SCANS_OFFSET;
   const displayRugsDetected = stats.rugsDetected + RUGS_DETECTED_OFFSET;
 
   return (
