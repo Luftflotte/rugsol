@@ -217,8 +217,8 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
           initial="hidden"
           animate="visible"
           exit="exit"
-          className={`absolute inset-0 backdrop-blur-sm ${
-            isDark ? "bg-black/50" : "bg-white/60"
+          className={`absolute inset-0 backdrop-blur-sm max-md:backdrop-blur-none ${
+            isDark ? "bg-black/50 max-md:bg-black/80" : "bg-white/60 max-md:bg-white/85"
           }`}
           onClick={onClose}
         />
