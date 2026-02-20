@@ -1,0 +1,42 @@
+# RugSol — Solana Token Security Scanner
+
+> RugSol is a free, real-time security analysis tool for Solana tokens. It helps users detect rug pulls, scams, and risky tokens before investing.
+
+## What RugSol Does
+
+- Analyzes any Solana token by its mint address
+- Returns a risk score (0–100), letter grade (A–F), and detailed security breakdown
+- Checks mint authority, freeze authority, holder concentration, liquidity, honeypot status, metadata, and token age
+- Supports both DEX-listed tokens and Pump.fun bonding curve tokens
+- Provides results in under 5 seconds with no sign-up required
+
+## Key Features
+
+- On-chain analysis via Solana RPC (Helius)
+- Holder distribution and whale detection
+- Liquidity pool verification (DexScreener)
+- Honeypot simulation via Jupiter swap
+- Pump.fun bonding curve progress tracking
+- Developer wallet history analysis
+- Telegram bot for instant token checks
+- REST API for integration with trading bots
+
+## How to Use
+
+1. Visit https://rugsol.info
+2. Paste a Solana token mint address
+3. Get instant risk assessment
+
+## API
+
+POST https://rugsol.info/api/scan
+Body: { "address": "<token_mint_address>" }
+Returns: risk score, grade, detailed checks, token metadata
+
+## Links
+
+- Website: https://rugsol.info
+- Docs: https://rugsol.info/docs
+- API Docs: https://rugsol.info/api-docs
+- Scoring Methodology: https://rugsol.info/scoring
+- About: https://rugsol.info/about

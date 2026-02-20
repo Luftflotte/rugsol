@@ -61,6 +61,36 @@ export default function RootLayout({
             `,
           }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              name: "RugSol",
+              url: "https://rugsol.info",
+              description:
+                "Free Solana token security scanner. Instant rug pull detection with on-chain analysis — risk scores, holder analysis, honeypot checks, and more.",
+              applicationCategory: "SecurityApplication",
+              operatingSystem: "Web",
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "USD",
+              },
+              featureList: [
+                "Solana token risk scoring (0-100)",
+                "Mint & freeze authority checks",
+                "Holder concentration analysis",
+                "Honeypot detection via swap simulation",
+                "Liquidity pool verification",
+                "Pump.fun bonding curve tracking",
+                "Telegram bot integration",
+                "REST API for trading bots",
+              ],
+            }),
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
