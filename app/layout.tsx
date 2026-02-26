@@ -68,7 +68,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               name: "RugSol",
-              url: "https://rugsol.info",
+              url: "https://rugsol.live",
               description:
                 "Free Solana token security scanner. Instant rug pull detection with on-chain analysis — risk scores, holder analysis, honeypot checks, and more.",
               applicationCategory: "SecurityApplication",
