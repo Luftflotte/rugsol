@@ -120,7 +120,7 @@ function renderHomepageCard(fonts: { interReg: ArrayBuffer; interBold: ArrayBuff
         {/* Footer */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "22px 72px", background: "rgba(0,0,0,0.4)", borderTop: "1px solid rgba(255,255,255,0.03)" }}>
           <div style={{ display: "flex", alignItems: "center", padding: "10px 28px", borderRadius: 100, background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.15)" }}>
-            <span style={{ fontFamily: "JetBrains Mono", fontSize: 22, fontWeight: 700, color: "#22c55e", letterSpacing: "0.5px", display: "flex" }}>rugsol.info</span>
+            <span style={{ fontFamily: "JetBrains Mono", fontSize: 22, fontWeight: 700, color: "#22c55e", letterSpacing: "0.5px", display: "flex" }}>rugsol.live</span>
           </div>
         </div>
       </div>
@@ -374,7 +374,7 @@ export async function GET(request: NextRequest) {
             <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
               <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, color: c.textMuted, display: "flex" }}>{dateStr}</span>
               <div style={{ display: "flex", alignItems: "center", padding: "10px 24px", borderRadius: 100, background: `${theme.acBg}`, border: `1px solid ${theme.acBorder}` }}>
-                <span style={{ fontFamily: "JetBrains Mono", fontSize: 20, fontWeight: 700, color: theme.ac, letterSpacing: "0.5px", display: "flex" }}>rugsol.info</span>
+                <span style={{ fontFamily: "JetBrains Mono", fontSize: 20, fontWeight: 700, color: theme.ac, letterSpacing: "0.5px", display: "flex" }}>rugsol.live</span>
               </div>
             </div>
           </div>
