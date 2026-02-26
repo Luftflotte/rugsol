@@ -137,6 +137,38 @@ function renderHomepageCard(fonts: { interReg: ArrayBuffer; interBold: ArrayBuff
   );
 }
 
+function hashAddress(address: string): {
+  blur1X: number; blur1Y: number; blur1Size: number;
+  blur2X: number; blur2Y: number; blur2Size: number;
+  gridOffset: number; gridRotation: number;
+  hueShift: number; cornerSeed: string;
+  decorAngle: number; decorDistance: number;
+} {
+  const hash = (s: string, max: number) => {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) {
+      h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    }
+    return Math.abs(h) % max;
+  };
+
+  const addr = address || "default";
+  return {
+    blur1X: -80 + hash(addr + "b1x", 160),
+    blur1Y: -160 + hash(addr + "b1y", 100),
+    blur1Size: 500 + hash(addr + "b1s", 400),
+    blur2X: -200 + hash(addr + "b2x", 200),
+    blur2Y: -250 + hash(addr + "b2y", 200),
+    blur2Size: 400 + hash(addr + "b2s", 300),
+    gridOffset: hash(addr + "grid", 32),
+    gridRotation: hash(addr + "rot", 15) - 7,
+    hueShift: hash(addr + "hue", 20) - 10,
+    cornerSeed: addr.slice(-8),
+    decorAngle: hash(addr + "da", 360),
+    decorDistance: 100 + hash(addr + "dd", 150),
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -148,6 +180,7 @@ export async function GET(request: NextRequest) {
     }
 
     const address = searchParams.get("address") || "";
+    const unique = hashAddress(address);
     const rawName = searchParams.get("name") || "Unknown";
     const name = rawName.length > 20 ? rawName.slice(0, 18) + "..." : rawName;
     const symbol = searchParams.get("symbol") || "TOKEN";
@@ -259,11 +292,17 @@ export async function GET(request: NextRequest) {
     const capX = 135 + 108 * Math.cos(endA);
     const capY = 135 + 108 * Math.sin(endA);
 
+    const gridSize = 48 + unique.gridOffset;
+
     return new ImageResponse(
       (
         <div style={{ width: 1200, height: 630, display: "flex", flexDirection: "column", background: theme.bg, fontFamily: "Inter", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", backgroundImage: `linear-gradient(${c.grid} 1px, transparent 1px), linear-gradient(90deg, ${c.grid} 1px, transparent 1px)`, backgroundSize: "64px 64px" }} />
-          <div style={{ position: "absolute", width: 700, height: 700, borderRadius: "50%", background: theme.ac, opacity: c.glow, filter: "blur(140px)", right: -120, top: -120, display: "flex" }} />
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", backgroundImage: `linear-gradient(${c.grid} 1px, transparent 1px), linear-gradient(90deg, ${c.grid} 1px, transparent 1px)`, backgroundSize: `${gridSize}px ${gridSize}px`, transform: `rotate(${unique.gridRotation}deg)` }} />
+          <div style={{ position: "absolute", width: unique.blur1Size, height: unique.blur1Size, borderRadius: "50%", background: theme.ac, opacity: c.glow, filter: "blur(140px)", right: unique.blur1X, top: unique.blur1Y, display: "flex" }} />
+          <div style={{ position: "absolute", width: unique.blur2Size, height: unique.blur2Size, borderRadius: "50%", background: theme.ac, opacity: 0.025, filter: "blur(100px)", left: unique.blur2X, bottom: unique.blur2Y, display: "flex" }} />
+          <div style={{ position: "absolute", width: 3, height: 3, borderRadius: "50%", background: c.textGhost, opacity: 0.15, left: 50 + (unique.decorDistance * Math.cos(unique.decorAngle * Math.PI / 180)), top: 50 + (unique.decorDistance * Math.sin(unique.decorAngle * Math.PI / 180)), display: "flex" }} />
+          <div style={{ position: "absolute", width: 2, height: 2, borderRadius: "50%", background: c.textGhost, opacity: 0.1, left: 100 + (unique.decorDistance * 0.7 * Math.cos((unique.decorAngle + 120) * Math.PI / 180)), top: 200 + (unique.decorDistance * 0.7 * Math.sin((unique.decorAngle + 120) * Math.PI / 180)), display: "flex" }} />
+          <div style={{ position: "absolute", width: 4, height: 4, borderRadius: "50%", background: c.textGhost, opacity: 0.08, right: 150 + (unique.decorDistance * 0.5 * Math.cos((unique.decorAngle + 240) * Math.PI / 180)), bottom: 100 + (unique.decorDistance * 0.5 * Math.sin((unique.decorAngle + 240) * Math.PI / 180)), display: "flex" }} />
           <div style={{ height: 5, width: "100%", background: `linear-gradient(90deg, transparent 0%, ${theme.ac} 50%, transparent 100%)`, display: "flex" }} />
 
           <div style={{ flex: 1, display: "flex", padding: "52px 72px 32px", gap: 40, position: "relative" }}>
@@ -377,6 +416,9 @@ export async function GET(request: NextRequest) {
                 <span style={{ fontFamily: "JetBrains Mono", fontSize: 20, fontWeight: 700, color: theme.ac, letterSpacing: "0.5px", display: "flex" }}>rugsol.live</span>
               </div>
             </div>
+          </div>
+          <div style={{ position: "absolute", bottom: 8, right: 72, opacity: 0.03, display: "flex" }}>
+            <span style={{ fontFamily: "JetBrains Mono", fontSize: 9, color: c.textGhost, letterSpacing: "1px", display: "flex" }}>#{unique.cornerSeed}</span>
           </div>
         </div>
       ),
