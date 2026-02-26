@@ -23,20 +23,20 @@
 
 ## How to Use
 
-1. Visit https://rugsol.info
+1. Visit https://rugsol.live
 2. Paste a Solana token mint address
 3. Get instant risk assessment
 
 ## API
 
-POST https://rugsol.info/api/scan
+POST https://rugsol.live/api/scan
 Body: { "address": "<token_mint_address>" }
 Returns: risk score, grade, detailed checks, token metadata
 
 ## Links
 
-- Website: https://rugsol.info
-- Docs: https://rugsol.info/docs
-- API Docs: https://rugsol.info/api-docs
-- Scoring Methodology: https://rugsol.info/scoring
-- About: https://rugsol.info/about
+- Website: https://rugsol.live
+- Docs: https://rugsol.live/docs
+- API Docs: https://rugsol.live/api-docs
+- Scoring Methodology: https://rugsol.live/scoring
+- About: https://rugsol.live/about
