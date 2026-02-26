@@ -5,7 +5,7 @@
  */
 export function getBaseUrl(): string {
   if (process.env.NODE_ENV === 'production') {
-    return process.env.NEXT_PUBLIC_SITE_URL || 'https://rugsol.info';
+    return process.env.NEXT_PUBLIC_SITE_URL || 'https://rugsol.live';
   }
   return 'http://localhost:3000';
 }
