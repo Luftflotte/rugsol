@@ -20,7 +20,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // 2. No cache — run a live scan (for Twitter/OG crawlers)
   if (!scan?.ogQuery && isValidSolanaAddress(address)) {
     try {
-      const result = await scanToken(address);
+      // 3000ms timeout for Twitter crawler
+      const result = await Promise.race([
+        scanToken(address),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Timeout fetching scan for OG")), 3000))
+      ]);
       const meta = result.checks.metadata.data;
       const ogQuery = buildOgQuery(result);
 
@@ -40,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
       scan = getRecentScanByAddress(address);
     } catch (e) {
-      console.error("OG scan failed:", e);
+      console.error("OG scan failed or timed out:", e);
     }
   }
 

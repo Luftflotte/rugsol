@@ -34,7 +34,7 @@ async function fetchAndOptimizeImage(url: string | null): Promise<string | null>
   else if (url.includes("cloudflare-ipfs.com")) targetUrl = url.replace("cloudflare-ipfs.com", "ipfs.io");
 
   try {
-    const res = await fetchWithTimeout(targetUrl, 6000);
+    const res = await fetchWithTimeout(targetUrl, 1500);
     if (!res.ok) return null;
     const contentType = res.headers.get("content-type") || "image/png";
     if (!contentType.startsWith("image/")) return null;
