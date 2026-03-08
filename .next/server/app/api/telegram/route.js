@@ -1,0 +1,11 @@
+var R=require("../../../chunks/[turbopack]_runtime.js")("server/app/api/telegram/route.js")
+R.c("server/chunks/[root-of-the-server]__26d91234._.js")
+R.c("server/chunks/[root-of-the-server]__6b68a916._.js")
+R.c("server/chunks/lib_scoring_engine_ts_33e0a92f._.js")
+R.c("server/chunks/node_modules_7803f12e._.js")
+R.c("server/chunks/[root-of-the-server]__6594f386._.js")
+R.c("server/chunks/[root-of-the-server]__8f5ebbc3._.js")
+R.c("server/chunks/node_modules_next_1402a1da._.js")
+R.c("server/chunks/_next-internal_server_app_api_telegram_route_actions_5dc61943.js")
+R.m(6332)
+module.exports=R.m(6332).exports

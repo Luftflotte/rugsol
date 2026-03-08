@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
 import {
   Check,
   EyeOff,
@@ -19,12 +18,11 @@ import {
   Layers,
   Webhook,
   Lock,
-  Wallet,
+  LogIn,
   Sparkles,
   Timer,
 } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
-import { reloadNoirScript } from "@/lib/utils";
 
 interface Feature {
   text: string;
@@ -42,7 +40,7 @@ interface Tier {
   button: {
     text: string;
     disabled?: boolean;
-    variant: "muted" | "primary" | "outline";
+    variant: "muted" | "primary" | "pro" | "outline";
   };
   style: "basic" | "hero" | "technical";
   badge?: string;
@@ -50,15 +48,16 @@ interface Tier {
 
 const tiers: Tier[] = [
   {
-    name: "Visitor",
-    subtext: "Try it out",
+    name: "Free",
+    subtext: "Free account",
     price: "$0",
-    period: "/month",
-    style: "basic",
+    period: "/mo",
+    style: "hero",
     features: [
       {
-        text: "1 trial scan",
-        icon: <Timer className="w-4 h-4" />,
+        text: "1 scan per minute",
+        icon: <Zap className="w-4 h-4" />,
+        highlight: true,
       },
       {
         text: "Risk score & letter grade",
@@ -69,41 +68,35 @@ const tiers: Tier[] = [
         icon: <Users className="w-4 h-4" />,
       },
       {
+        text: "Security checklist",
+        icon: <Check className="w-4 h-4" />,
+      },
+      {
         text: "Shareable result cards",
         icon: <Share2 className="w-4 h-4" />,
       },
-      {
-        text: "No dev wallet history",
-        icon: <EyeOff className="w-4 h-4" />,
-        disabled: true,
-      },
     ],
     button: {
-      text: "Used • Next in 24h",
-      disabled: true,
-      variant: "muted",
+      text: "Get Started",
+      variant: "primary",
     },
   },
   {
-    name: "Authorized",
-    subtext: "Just connect your wallet",
-    price: "$0",
-    period: "/month",
-    style: "hero",
-    badge: "Best value",
+    name: "Pro",
+    subtext: "For serious traders",
+    price: "$5",
+    period: "/mo",
+    style: "technical",
+    badge: "Most Popular",
     features: [
       {
-        text: "1 scan per minute",
+        text: "5 scans per minute",
         icon: <Zap className="w-4 h-4" />,
         highlight: true,
       },
       {
-        text: "Dev wallet rug history",
+        text: "Full dev wallet history",
         icon: <History className="w-4 h-4" />,
-      },
-      {
-        text: "Linked wallet detection",
-        icon: <Map className="w-4 h-4" />,
       },
       {
         text: "Watchlist & price alerts",
@@ -113,10 +106,14 @@ const tiers: Tier[] = [
         text: "30-day scan history",
         icon: <Archive className="w-4 h-4" />,
       },
+      {
+        text: "Priority scan queue",
+        icon: <Timer className="w-4 h-4" />,
+      },
     ],
     button: {
-      text: "Unlock now",
-      variant: "primary",
+      text: "Get Pro",
+      variant: "pro",
     },
   },
   {
@@ -193,7 +190,7 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
       className={`
         relative flex flex-col rounded-2xl ${compact ? "p-4 sm:p-5" : "p-6 sm:p-8"}
         ${cardBg}
-        ${isHero ? "md:scale-[1.03] md:z-10" : ""}
+        ${isHero && !compact ? "md:z-10" : ""}
         transition-all duration-300
       `}
     >
@@ -331,8 +328,8 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
             <span>{feature.text}</span>
           </li>
         ))}
-        {isHero && (
-          <li className={`text-xs pt-1 ${isDark ? "text-zinc-500" : "text-gray-400"}`}>+ all Visitor tier features</li>
+        {isTechnical && tier.name === "Pro" && (
+          <li className={`text-xs pt-1 ${isDark ? "text-zinc-500" : "text-gray-400"}`}>+ everything in Free</li>
         )}
       </ul>
 
@@ -347,7 +344,26 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
             active:scale-[0.98] hover:scale-[1.01]
             transition-all duration-200 cursor-pointer flex items-center justify-center gap-2`}
         >
-          <Wallet className="w-4 h-4" />
+          <LogIn className="w-4 h-4" />
+          {tier.button.text}
+        </button>
+      ) : tier.button.variant === "pro" ? (
+        <button
+          className={`noir-connect w-full ${compact ? "py-2.5 px-4" : "py-3 px-6"} rounded-xl font-semibold text-sm
+            relative overflow-hidden group
+            ${isDark
+              ? "bg-gradient-to-r from-[#c0c0c0]/15 to-[#d4d4d8]/10 border border-[#c0c0c0]/30 text-[#e8e8e8] hover:border-[#c0c0c0]/50 hover:shadow-[0_0_24px_-4px_rgba(192,192,192,0.2)]"
+              : "bg-gradient-to-r from-gray-800/5 to-gray-600/10 border border-gray-400/40 text-gray-700 hover:border-gray-500/60 hover:shadow-[0_0_24px_-4px_rgba(0,0,0,0.1)]"
+            }
+            active:scale-[0.98] hover:scale-[1.01]
+            transition-all duration-200 cursor-pointer flex items-center justify-center gap-2`}
+        >
+          <span className={`absolute inset-0 bg-gradient-to-r ${
+            isDark
+              ? "from-transparent via-white/[0.07] to-transparent"
+              : "from-transparent via-black/[0.03] to-transparent"
+          } translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700`} />
+          <Sparkles className="w-4 h-4" />
           {tier.button.text}
         </button>
       ) : tier.button.variant === "outline" ? (
@@ -374,7 +390,7 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
             }
             cursor-not-allowed flex items-center justify-center gap-2`}
         >
-          <Check className="w-4 h-4" />
+          <Sparkles className="w-4 h-4" />
           {tier.button.text}
         </button>
       )}
@@ -386,28 +402,25 @@ export function PricingTiers({ instant, compact }: { instant?: boolean; compact?
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  // Reload script on mount to attach to buttons
-  useEffect(() => {
-    reloadNoirScript();
-  }, []);
-
   return (
     <section id="api" className="scroll-mt-20">
       <div className={`text-center ${compact ? "mb-8" : "mb-12"}`}>
         <h2 className={`${compact ? "text-xl sm:text-2xl" : "text-3xl sm:text-4xl"} font-bold text-text-primary mb-2`}>
-          {compact ? "Want more?" : <>Unlimited Scans, <span className="gradient-text">Free Forever</span></>}
+          {compact ? <>Sign in to <span className="gradient-text">Start Scanning</span></> : <>Unlimited Scans, <span className="gradient-text">Free Forever</span></>}
         </h2>
         {!compact && (
           <p className="text-text-secondary text-base max-w-xl mx-auto">
-            Try it once for free. Connect your wallet for unlimited access. No subscription, no catches.
+            Sign up for free and scan as much as you want. Takes seconds, no catches.
           </p>
         )}
       </div>
 
-      <div className={`grid grid-cols-1 ${compact ? "sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-5" : "md:grid-cols-3 gap-6 lg:gap-8"} items-start`}>
-        {tiers.map((tier, i) => (
-          <TierCard key={tier.name} tier={tier} index={i} instant={instant} compact={compact} isDark={isDark} />
-        ))}
+      <div className={`grid grid-cols-1 ${compact ? "sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-5" : "md:grid-cols-3 gap-6 lg:gap-8"} items-stretch`}>
+        {tiers
+          .filter((tier) => !(compact && tier.name === "API"))
+          .map((tier, i) => (
+            <TierCard key={tier.name} tier={tier} index={i} instant={instant} compact={compact} isDark={isDark} />
+          ))}
       </div>
     </section>
   );

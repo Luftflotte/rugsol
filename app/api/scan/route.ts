@@ -5,7 +5,6 @@ import { isValidSolanaAddress } from "@/lib/utils";
 import { buildOgQuery } from "@/lib/utils/og";
 import {
   createFingerprint,
-  checkScanLimit,
   recordScan,
   getWalletForFingerprint
 } from "@/lib/auth/rate-limit";
@@ -70,27 +69,21 @@ export async function POST(request: NextRequest) {
     // В dev режиме — автоматический безлимит
     const isDev = isDevEnvironment();
 
-    // Проверяем лимиты (владельцы, авторизованные пользователи и dev режим имеют безлимит)
+    // Сканирование требует авторизации. Владельцы и dev режим — исключение.
     if (!isOwner && !walletAddress && !isDev) {
-      const scanLimit = checkScanLimit(fingerprint);
-
-      if (!scanLimit.allowed) {
-        return NextResponse.json(
-          {
-            error: "Scan limit exceeded",
-            message: "You have used your free scan. Connect your wallet to continue scanning.",
-            needsAuth: true,
+      return NextResponse.json(
+        {
+          error: "Authentication required",
+          message: "Connect your wallet to scan tokens.",
+          needsAuth: true,
+        },
+        {
+          status: 429,
+          headers: {
+            "X-Needs-Auth": "true",
           },
-          {
-            status: 429,
-            headers: {
-              "X-Scan-Limit": "1",
-              "X-Scan-Remaining": "0",
-              "X-Needs-Auth": "true",
-            },
-          }
-        );
-      }
+        }
+      );
     }
 
     // Parse body
@@ -146,9 +139,6 @@ export async function POST(request: NextRequest) {
       ogQuery: buildOgQuery(result),
     });
 
-    // Получаем актуальную информацию о лимитах после скана
-    const updatedLimit = checkScanLimit(fingerprint, walletAddress || undefined);
-
     return NextResponse.json(
       {
         success: true,
@@ -157,7 +147,6 @@ export async function POST(request: NextRequest) {
       },
       {
         headers: {
-          "X-Scan-Remaining": String(updatedLimit.remaining === Infinity || isDev ? "unlimited" : updatedLimit.remaining),
           "X-Is-Authenticated": String(!!walletAddress),
           "X-Is-Owner": String(isOwner || isDev),
         },

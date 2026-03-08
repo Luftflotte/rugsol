@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Lock, Skull, AlertTriangle, TrendingDown } from "lucide-react";
-import { reloadNoirScript } from "@/lib/utils";
 
 const FAKE_TOKENS = [
   {
@@ -73,10 +72,6 @@ export function DevHistory({ score, isWhitelisted, marketCap, grade }: DevHistor
     const count = Math.random() < 0.5 ? 1 : 2;
     setTokens(shuffled.slice(0, count));
     setVisible(true);
-
-    // Reload script if we become visible
-    // Use timeout to ensure DOM render
-    setTimeout(() => reloadNoirScript(), 100);
   }, [score, isWhitelisted, marketCap, grade]);
 
   if (!visible) return null;

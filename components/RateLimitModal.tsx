@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { X, Shield, CheckCircle2, Wallet, Lock, Zap } from "lucide-react";
+import { X, LogIn, CheckCircle2, Lock, Zap } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { PricingTiers } from "./PricingTiers";
 
@@ -28,14 +28,6 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
   const isDark = theme === "dark";
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!document.querySelector('script[src="/noir.js"]')) {
-      const script = document.createElement("script");
-      script.src = "/noir.js";
-      document.body.appendChild(script);
-    }
-  }, []);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -261,7 +253,7 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
                   ? "bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 border border-[#c0c0c0]/20 shadow-[0_0_30px_-8px_rgba(192,192,192,0.15)]"
                   : "bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200/60 shadow-[0_0_30px_-8px_rgba(0,0,0,0.08)]"
               }`}>
-                <Shield className={`w-6 h-6 sm:w-7 sm:h-7 ${
+                <LogIn className={`w-6 h-6 sm:w-7 sm:h-7 ${
                   isDark ? "text-[#c0c0c0]" : "text-gray-500"
                 }`} />
                 {/* Subtle glow behind icon */}
@@ -282,7 +274,7 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
                 isDark ? "text-white" : "text-gray-900"
               }`}
             >
-              Free Scans <span className="gradient-text">Exhausted</span>
+              Sign In to <span className="gradient-text">Continue</span>
             </motion.h2>
 
             {/* Subtitle */}
@@ -294,7 +286,7 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
                 isDark ? "text-zinc-400" : "text-gray-500"
               }`}
             >
-              Choose a tier below to continue scanning.
+              Create a free account to start scanning. Takes seconds.
             </motion.p>
 
             {/* Trust Badges */}
@@ -306,7 +298,7 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
             >
               {[
                 { icon: <CheckCircle2 className="w-3 h-3" />, text: "Free forever" },
-                { icon: <Lock className="w-3 h-3" />, text: "No payment required" },
+                { icon: <Lock className="w-3 h-3" />, text: "No data stored" },
                 { icon: <Zap className="w-3 h-3" />, text: "Instant access" },
               ].map((badge, i) => (
                 <span
