@@ -190,3 +190,30 @@ export function getWalletForFingerprint(fingerprint: string): string | null {
   const fingerprintData = data.fingerprints.get(fingerprint);
   return fingerprintData?.walletAddress || null;
 }
+
+// --- Трекинг неавторизованных сканов (для блюра в recent scans) ---
+const unauthScans = new Map<string, Set<string>>(); // fingerprint → Set<tokenAddress>
+
+/**
+ * Записывает что fingerprint сканировал токен без авторизации
+ */
+export function recordUnauthScan(fingerprint: string, tokenAddress: string): void {
+  if (!unauthScans.has(fingerprint)) {
+    unauthScans.set(fingerprint, new Set());
+  }
+  unauthScans.get(fingerprint)!.add(tokenAddress);
+}
+
+/**
+ * Убирает токен из блюр-списка fingerprint (после авторизации)
+ */
+export function clearUnauthScan(fingerprint: string, tokenAddress: string): void {
+  unauthScans.get(fingerprint)?.delete(tokenAddress);
+}
+
+/**
+ * Возвращает список адресов токенов, которые fingerprint сканировал без авторизации
+ */
+export function getUnauthScans(fingerprint: string): string[] {
+  return Array.from(unauthScans.get(fingerprint) || []);
+}

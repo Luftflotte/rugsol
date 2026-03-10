@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRecentScans } from "@/lib/storage/recent-scans";
+import { createFingerprint, getWalletForFingerprint, getUnauthScans } from "@/lib/auth/rate-limit";
+import { isOwnerWallet, isDevEnvironment } from "@/lib/auth/wallet";
 
 export const dynamic = "force-dynamic"; // Disable caching to ensure new scans appear immediately
 
@@ -116,9 +118,22 @@ export async function GET(request: NextRequest) {
       ...scan,
       price: prices.get(scan.address?.toLowerCase?.()) || null,
     }));
+    // Определяем заблюренные токены для этого юзера
+    const forwarded = request.headers.get("x-forwarded-for");
+    const clientIp = forwarded ? forwarded.split(",")[0].trim() : (request.headers.get("x-real-ip") || "unknown");
+    const userAgent = request.headers.get("user-agent") || "";
+    const fingerprint = createFingerprint(clientIp, userAgent);
+    const walletAddress = getWalletForFingerprint(fingerprint);
+    const isOwner = walletAddress ? isOwnerWallet(walletAddress) : false;
+    const isDev = isDevEnvironment();
+    const isAuthed = isOwner || !!walletAddress || isDev;
+
+    const blurredAddresses = isAuthed ? [] : getUnauthScans(fingerprint);
+
     return NextResponse.json({
       success: true,
       data: scansWithPrices,
+      blurredAddresses,
       count: scansWithPrices.length,
     });
   } catch (e) {

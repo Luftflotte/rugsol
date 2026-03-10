@@ -123,6 +123,7 @@ export function RecentScans() {
   const [displayedScans, setDisplayedScans] = useState<RecentScan[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [blurredAddresses, setBlurredAddresses] = useState<string[]>([]);
 
   // Fetch real scans from API
   useEffect(() => {
@@ -132,6 +133,7 @@ export function RecentScans() {
         const data = await res.json();
         if (data.success) {
           setDisplayedScans(data.data);
+          setBlurredAddresses(data.blurredAddresses || []);
         }
       } catch (error) {
         console.error("Failed to fetch recent scans:", error);
@@ -210,7 +212,9 @@ export function RecentScans() {
           }}
         >
           <div className="flex gap-4 min-w-max px-4 py-2">
-            {displayedScans.map((scan, index) => (
+            {displayedScans.map((scan, index) => {
+              const isBlurred = blurredAddresses.includes(scan.address);
+              return (
                 <Link href={`/scan/${scan.address}`} key={scan.address}>
                   <Card
                     className="glass-card p-4 w-56 flex-shrink-0 animate-fade-in-up cursor-pointer relative group"
@@ -239,21 +243,21 @@ export function RecentScans() {
                     </div>
 
                     <div className="mt-4 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                      <div className={`flex items-center gap-2 ${isBlurred ? "blur-[6px] select-none" : ""}`}>
                         <span
                           className="text-2xl font-bold"
-                          style={{ color: scan.gradeColor }}
+                          style={{ color: isBlurred ? "var(--text-secondary)" : scan.gradeColor }}
                         >
-                          {scan.score}
+                          {isBlurred ? "??" : scan.score}
                         </span>
                         <span
                           className="text-xs font-semibold px-2 py-0.5 rounded"
                           style={{
-                            backgroundColor: `${scan.gradeColor}20`,
-                            color: scan.gradeColor,
+                            backgroundColor: isBlurred ? "var(--bg-secondary)" : `${scan.gradeColor}20`,
+                            color: isBlurred ? "var(--text-secondary)" : scan.gradeColor,
                           }}
                         >
-                          {scan.grade}
+                          {isBlurred ? "?" : scan.grade}
                         </span>
                       </div>
                     </div>
@@ -265,7 +269,8 @@ export function RecentScans() {
                     </div>
                   </Card>
                 </Link>
-            ))}
+              );
+            })}
 
             {/* Portfolio Teaser Card */}
             <button

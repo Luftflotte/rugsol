@@ -6,7 +6,8 @@ import { buildOgQuery } from "@/lib/utils/og";
 import {
   createFingerprint,
   recordScan,
-  getWalletForFingerprint
+  getWalletForFingerprint,
+  recordUnauthScan
 } from "@/lib/auth/rate-limit";
 import { isOwnerWallet, isDevEnvironment } from "@/lib/auth/wallet";
 
@@ -69,22 +70,8 @@ export async function POST(request: NextRequest) {
     // В dev режиме — автоматический безлимит
     const isDev = isDevEnvironment();
 
-    // Сканирование требует авторизации. Владельцы и dev режим — исключение.
-    if (!isOwner && !walletAddress && !isDev) {
-      return NextResponse.json(
-        {
-          error: "Authentication required",
-          message: "Connect your wallet to scan tokens.",
-          needsAuth: true,
-        },
-        {
-          status: 429,
-          headers: {
-            "X-Needs-Auth": "true",
-          },
-        }
-      );
-    }
+    // Определяем, нужна ли авторизация
+    const needsAuth = !isOwner && !walletAddress && !isDev;
 
     // Parse body
     let body: { address?: string };
@@ -114,13 +101,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Run scan
+    // Run scan (всегда, даже без авторизации — для preview)
     const result = await scanToken(address);
 
     // Cache result
     setCachedResult(address, result);
 
-    // Записываем использование скана
+    // Если нужна авторизация — отдаём данные, но с needsAuth флагом
+    if (needsAuth) {
+      recordUnauthScan(fingerprint, address);
+      return NextResponse.json(
+        {
+          success: true,
+          cached: false,
+          needsAuth: true,
+          data: result,
+        },
+        {
+          status: 429,
+          headers: {
+            "X-Needs-Auth": "true",
+          },
+        }
+      );
+    }
+
+    // Записываем использование скана (только для авторизованных)
     recordScan(fingerprint, walletAddress || undefined);
 
     // Add to recent scans with OG query for Twitter cards
@@ -178,6 +184,35 @@ export async function GET(request: NextRequest) {
 
       const cachedResult = getCachedResult(address);
       if (cachedResult) {
+        // Проверяем авторизацию даже для кеша
+        const clientIp = getClientIp(request);
+        const userAgent = request.headers.get("user-agent") || "";
+        const fingerprint = createFingerprint(clientIp, userAgent);
+        const walletAddress = getWalletForFingerprint(fingerprint);
+        const isOwner = walletAddress ? isOwnerWallet(walletAddress) : false;
+        const isDev = isDevEnvironment();
+        const needsAuth = !isOwner && !walletAddress && !isDev;
+
+        if (needsAuth) {
+          recordUnauthScan(fingerprint, address);
+          // Отдаём кеш, но с needsAuth — клиент покажет блюр + модалку
+          return NextResponse.json(
+            {
+              success: true,
+              cached: true,
+              needsAuth: true,
+              data: cachedResult,
+            },
+            {
+              status: 429,
+              headers: {
+                "X-Cache": "HIT",
+                "X-Needs-Auth": "true",
+              },
+            }
+          );
+        }
+
         // Bump in recent scans even if cached
         const metadata = cachedResult.checks.metadata.data;
         addRecentScan({

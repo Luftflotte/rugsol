@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-explicit-any */
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -309,6 +309,7 @@ function transformToCheckGroups(result: ScanResult): CheckGroup[] {
 
 export default function ScanPageClient() {
   const params = useParams();
+  const router = useRouter();
   const address = params.address as string;
   const { theme } = useTheme();
 
@@ -317,18 +318,29 @@ export default function ScanPageClient() {
   const [result, setResult] = useState<ScanResult | null>(null);
   const [cached, setCached] = useState(false);
   const [needsAuth, setNeedsAuth] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [metadata, setMetadata] = useState<{
     name: string | null;
     symbol: string | null;
     image: string | null;
   }>({ name: null, symbol: null, image: null });
 
+  const openAuthModal = useCallback(() => {
+    if (needsAuth) setShowAuthModal(true);
+  }, [needsAuth]);
+
   const handleAuthModalClose = useCallback(() => {
-    setNeedsAuth(false);
+    setShowAuthModal(false);
   }, []);
+
+  const handleAuthBackdropClose = useCallback(() => {
+    // Закрытие модалки полностью — редирект на главную
+    router.push("/");
+  }, [router]);
 
   const handleWalletConnected = useCallback(() => {
     setNeedsAuth(false);
+    setShowAuthModal(false);
     // Повторяем скан после успешной авторизации
     loadScan(address);
   }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -344,19 +356,30 @@ export default function ScanPageClient() {
         method: "GET",
       });
 
-      // Если есть кеш - показываем его
-      if (cacheResponse.ok) {
-        const data: ScanResponse = await cacheResponse.json();
-        setResult(data.data);
-        setCached(data.cached);
+      // Кеш найден (200 или 429 с данными)
+      if (cacheResponse.ok || (cacheResponse.status === 429)) {
+        const data = await cacheResponse.json();
 
-        if (data.data.checks.metadata.data) {
-          setMetadata({
-            name: data.data.checks.metadata.data.name,
-            symbol: data.data.checks.metadata.data.symbol,
-            image: data.data.checks.metadata.data.image,
-          });
+        if (data.data) {
+          setResult(data.data);
+          setCached(data.cached);
+
+          if (data.data.checks.metadata.data) {
+            setMetadata({
+              name: data.data.checks.metadata.data.name,
+              symbol: data.data.checks.metadata.data.symbol,
+              image: data.data.checks.metadata.data.image,
+            });
+          }
         }
+
+        // Кеш с авторизацией — показываем блюр + модалку
+        if (cacheResponse.status === 429 && data.needsAuth) {
+          setNeedsAuth(true);
+          setLoading(false);
+          return;
+        }
+
         setLoading(false);
         return;
       }
@@ -369,20 +392,32 @@ export default function ScanPageClient() {
           body: JSON.stringify({ address: addr }),
         });
 
-        if (!scanResponse.ok) {
-          const errorData = await scanResponse.json();
+        const scanData = await scanResponse.json();
 
-          // Проверяем, требуется ли авторизация
-          if (scanResponse.status === 429 && errorData.needsAuth) {
+        if (!scanResponse.ok) {
+          // Проверяем, требуется ли авторизация (429 с данными скана)
+          if (scanResponse.status === 429 && scanData.needsAuth) {
+            // Сохраняем реальные данные скана для отображения за модалкой
+            if (scanData.data) {
+              setResult(scanData.data);
+              setCached(scanData.cached);
+              if (scanData.data.checks.metadata.data) {
+                setMetadata({
+                  name: scanData.data.checks.metadata.data.name,
+                  symbol: scanData.data.checks.metadata.data.symbol,
+                  image: scanData.data.checks.metadata.data.image,
+                });
+              }
+            }
             setNeedsAuth(true);
             setLoading(false);
             return;
           }
 
-          throw new Error(errorData.error || "Failed to scan token");
+          throw new Error(scanData.error || "Failed to scan token");
         }
 
-        const data: ScanResponse = await scanResponse.json();
+        const data: ScanResponse = scanData;
         setResult(data.data);
         setCached(data.cached);
 
@@ -551,7 +586,7 @@ export default function ScanPageClient() {
             </div>
           )}
 
-          {result && !loading && (
+          {result && !loading && !needsAuth && (
             <div className="flex flex-col lg:grid lg:grid-cols-[1fr_340px] gap-8">
 
               {/* Mobile Score Summary - visible only on small screens */}
@@ -799,14 +834,174 @@ export default function ScanPageClient() {
 
             </div>
           )}
+
+          {/* ===== Locked View for unauthenticated users ===== */}
+          {result && !loading && needsAuth && (
+            <div className="flex flex-col lg:grid lg:grid-cols-[1fr_340px] gap-8" onClick={openAuthModal}>
+
+              {/* Left Column */}
+              <div className="space-y-10">
+
+                {/* Token Header — visible, not blurred */}
+                <div className="glass-card p-6 md:p-8 rounded-2xl relative overflow-hidden border border-border-color animate-fade-in-up">
+                  <div className="relative z-10">
+                    <TokenHeader
+                        name={metadata.name}
+                        symbol={metadata.symbol}
+                        image={metadata.image}
+                        address={address}
+                        priceData={result.price}
+                        mode={result.scanMode}
+                    />
+                  </div>
+                </div>
+
+                {/* Locked: Bonding Curve (Pump only) */}
+                {result.scanMode === 'pump' && result.bondingCurveData && (
+                  <div className="relative cursor-pointer group animate-fade-in-up" style={{ animationDelay: '50ms' }}>
+                    <div className="blur-[4px] pointer-events-none select-none">
+                      <BondingCurveProgress
+                        progressPercent={result.bondingCurveData.curveProgressPercent || 0}
+                        marketCapSol={result.bondingCurveData.marketCapSol}
+                        remainingSol={result.bondingCurveData.remainingSolToGraduate}
+                        solPrice={result.solPrice}
+                      />
+                    </div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                      <div className="glass-card px-6 py-4 rounded-2xl border border-[var(--silver-accent)]/30 text-center group-hover:border-[var(--silver-accent)]/60 transition-all duration-300 group-hover:scale-105">
+                        <svg className="w-6 h-6 silver-accent mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                        <p className="text-xs text-text-secondary">Sign in to view</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Locked: Security Analysis — real checklist data */}
+                <div className="relative cursor-pointer group animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+                  <div className="blur-[4px] pointer-events-none select-none">
+                    <div className="animate-fade-in-up">
+                      <div className="divider-premium mb-8" />
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-[var(--silver-accent)]/10 flex items-center justify-center shrink-0 silver-accent">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-semibold text-text-primary">Security Analysis</h2>
+                          <p className="text-sm text-text-secondary">Detailed verification across multiple risk categories.</p>
+                        </div>
+                      </div>
+                      <Checklist groups={transformToCheckGroups(result)} />
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                    <div className="glass-card px-6 py-4 rounded-2xl border border-[var(--silver-accent)]/30 text-center group-hover:border-[var(--silver-accent)]/60 transition-all duration-300 group-hover:scale-105">
+                      <svg className="w-8 h-8 silver-accent mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                      <p className="text-sm font-semibold text-text-primary">Security Analysis</p>
+                      <p className="text-xs text-text-secondary mt-1">Sign in to view full report</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Locked: Holder Distribution — real chart data */}
+                {result.checks.holders.data && (
+                  <div className="relative cursor-pointer group animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                    <div className="blur-[4px] pointer-events-none select-none">
+                      <div className="glass-card p-6 md:p-8 rounded-2xl border border-border-color">
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="w-10 h-10 rounded-xl bg-[var(--silver-accent)]/10 flex items-center justify-center shrink-0 silver-accent">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-semibold text-text-primary">Top Holders Distribution</h3>
+                            <p className="text-sm text-text-secondary">Ownership breakdown of the top 10 wallets.</p>
+                          </div>
+                        </div>
+                        <HolderChart
+                          holders={result.checks.holders.data.topHolders}
+                          devAddress={result.checks.advanced?.data?.devAddress}
+                          snipers={result.checks.advanced?.data?.snipers}
+                          linkedWallets={result.checks.advanced?.data?.linkedWalletMap}
+                        />
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                      <div className="glass-card px-6 py-4 rounded-2xl border border-[var(--silver-accent)]/30 text-center group-hover:border-[var(--silver-accent)]/60 transition-all duration-300 group-hover:scale-105">
+                        <svg className="w-8 h-8 silver-accent mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                        <p className="text-sm font-semibold text-text-primary">Holder Distribution</p>
+                        <p className="text-xs text-text-secondary mt-1">Sign in to see top holders</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Locked: Risk Factors — real data */}
+                {result.penalties.length > 0 && (
+                  <div className="relative cursor-pointer group animate-fade-in-up" style={{ animationDelay: '250ms' }}>
+                    <div className="blur-[4px] pointer-events-none select-none">
+                      <RiskList penalties={result.penalties} />
+                    </div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                      <div className="glass-card px-6 py-4 rounded-2xl border border-[var(--silver-accent)]/30 text-center group-hover:border-[var(--silver-accent)]/60 transition-all duration-300 group-hover:scale-105">
+                        <svg className="w-8 h-8 silver-accent mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+                        <p className="text-sm font-semibold text-text-primary">Risk Factors</p>
+                        <p className="text-xs text-text-secondary mt-1">Sign in to see detected risks</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Locked: Timeline — real data */}
+                <div className="relative cursor-pointer group animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+                  <div className="blur-[4px] pointer-events-none select-none">
+                    <ActivityTimeline scanResult={result} />
+                  </div>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                    <div className="glass-card px-6 py-4 rounded-2xl border border-[var(--silver-accent)]/30 text-center group-hover:border-[var(--silver-accent)]/60 transition-all duration-300 group-hover:scale-105">
+                      <svg className="w-8 h-8 silver-accent mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      <p className="text-sm font-semibold text-text-primary">Activity Timeline</p>
+                      <p className="text-xs text-text-secondary mt-1">Sign in to see transaction history</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Right Column: Locked Score — real score data blurred */}
+              <div className="space-y-6">
+                <div className="glass-card p-6 md:p-8 rounded-2xl sticky top-24 border border-border-color animate-fade-in-up cursor-pointer group relative overflow-hidden" style={{ animationDelay: '100ms' }}>
+                  <div className="blur-[8px] pointer-events-none select-none">
+                    <ScoreDisplay
+                      score={result.score}
+                      grade={result.grade}
+                      gradeColor="#888888"
+                      gradeLabel={result.gradeLabel}
+                      animate={false}
+                    />
+                  </div>
+                  {/* Lock overlay */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-bg-card/20 rounded-2xl group-hover:bg-bg-card/30 transition-all duration-300">
+                    <div className="w-14 h-14 rounded-2xl bg-[var(--silver-accent)]/10 flex items-center justify-center mb-3 border border-[var(--silver-accent)]/20 group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-7 h-7 silver-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                    <p className="text-base font-bold text-text-primary">Score Locked</p>
+                    <p className="text-xs text-text-secondary mt-1 mb-4">Sign in to unlock</p>
+                    <div className="px-4 py-2 btn-premium rounded-xl text-xs font-bold group-hover:scale-105 transition-transform duration-200">
+                      Unlock Score
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          )}
         </div>
       </main>
       <Footer />
 
-      {/* Auth Required Modal */}
-      {needsAuth && (
+      {/* Auth Modal */}
+      {showAuthModal && (
         <RateLimitModal
-          onClose={handleAuthModalClose}
+          onClose={handleAuthBackdropClose}
           onWalletConnected={handleWalletConnected}
         />
       )}
