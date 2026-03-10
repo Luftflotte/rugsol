@@ -837,28 +837,54 @@ export default function ScanPageClient() {
 
           {/* ===== Locked View for unauthenticated users ===== */}
           {result && !loading && needsAuth && (
-            <div className="flex flex-col lg:grid lg:grid-cols-[1fr_340px] gap-8" onClick={openAuthModal}>
+            <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[1fr_340px] lg:gap-8" onClick={openAuthModal}>
 
-              {/* Left Column */}
-              <div className="space-y-10">
+              {/* Token Header — visible, not blurred */}
+              <div className="glass-card p-6 md:p-8 rounded-2xl relative overflow-hidden border border-border-color animate-fade-in-up lg:col-span-2">
+                <div className="relative z-10">
+                  <TokenHeader
+                      name={metadata.name}
+                      symbol={metadata.symbol}
+                      image={metadata.image}
+                      address={address}
+                      priceData={result.price}
+                      mode={result.scanMode}
+                  />
+                </div>
+              </div>
 
-                {/* Token Header — visible, not blurred */}
-                <div className="glass-card p-6 md:p-8 rounded-2xl relative overflow-hidden border border-border-color animate-fade-in-up">
-                  <div className="relative z-10">
-                    <TokenHeader
-                        name={metadata.name}
-                        symbol={metadata.symbol}
-                        image={metadata.image}
-                        address={address}
-                        priceData={result.price}
-                        mode={result.scanMode}
+              {/* Score Card — on mobile appears right after header, on desktop in right column */}
+              <div className="lg:order-2 lg:row-span-4">
+                <div className="glass-card p-6 md:p-8 rounded-2xl lg:sticky lg:top-24 border border-border-color animate-fade-in-up cursor-pointer group relative overflow-hidden" style={{ animationDelay: '100ms' }}>
+                  <div className="blur-[8px] pointer-events-none select-none">
+                    <ScoreDisplay
+                      score={result.score}
+                      grade={result.grade}
+                      gradeColor="#888888"
+                      gradeLabel={result.gradeLabel}
+                      animate={false}
                     />
                   </div>
+                  {/* Lock overlay */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-bg-card/20 rounded-2xl group-hover:bg-bg-card/30 transition-all duration-300">
+                    <div className="w-14 h-14 rounded-2xl bg-[var(--silver-accent)]/10 flex items-center justify-center mb-3 border border-[var(--silver-accent)]/20 group-hover:scale-110 transition-transform duration-300">
+                      <svg className="w-7 h-7 silver-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                    <p className="text-base font-bold text-text-primary">Score Locked</p>
+                    <p className="text-xs text-text-secondary mt-1 mb-4">Sign in to unlock</p>
+                    <div className="px-4 py-2 btn-premium rounded-xl text-xs font-bold group-hover:scale-105 transition-transform duration-200">
+                      Unlock Score
+                    </div>
+                  </div>
                 </div>
+              </div>
+
+              {/* Left Column — blurred sections */}
+              <div className="space-y-6 lg:order-1 lg:col-start-1">
 
                 {/* Locked: Bonding Curve (Pump only) */}
                 {result.scanMode === 'pump' && result.bondingCurveData && (
-                  <div className="relative cursor-pointer group animate-fade-in-up" style={{ animationDelay: '50ms' }}>
+                  <div className="relative cursor-pointer group animate-fade-in-up max-h-[200px] overflow-hidden rounded-2xl" style={{ animationDelay: '50ms' }}>
                     <div className="blur-[4px] pointer-events-none select-none">
                       <BondingCurveProgress
                         progressPercent={result.bondingCurveData.curveProgressPercent || 0}
@@ -877,7 +903,7 @@ export default function ScanPageClient() {
                 )}
 
                 {/* Locked: Security Analysis — real checklist data */}
-                <div className="relative cursor-pointer group animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+                <div className="relative cursor-pointer group animate-fade-in-up max-h-[250px] lg:max-h-none overflow-hidden rounded-2xl" style={{ animationDelay: '100ms' }}>
                   <div className="blur-[4px] pointer-events-none select-none">
                     <div className="animate-fade-in-up">
                       <div className="divider-premium mb-8" />
@@ -904,7 +930,7 @@ export default function ScanPageClient() {
 
                 {/* Locked: Holder Distribution — real chart data */}
                 {result.checks.holders.data && (
-                  <div className="relative cursor-pointer group animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+                  <div className="relative cursor-pointer group animate-fade-in-up max-h-[220px] lg:max-h-none overflow-hidden rounded-2xl" style={{ animationDelay: '200ms' }}>
                     <div className="blur-[4px] pointer-events-none select-none">
                       <div className="glass-card p-6 md:p-8 rounded-2xl border border-border-color">
                         <div className="flex items-center gap-3 mb-6">
@@ -936,7 +962,7 @@ export default function ScanPageClient() {
 
                 {/* Locked: Risk Factors — real data */}
                 {result.penalties.length > 0 && (
-                  <div className="relative cursor-pointer group animate-fade-in-up" style={{ animationDelay: '250ms' }}>
+                  <div className="relative cursor-pointer group animate-fade-in-up max-h-[180px] lg:max-h-none overflow-hidden rounded-2xl" style={{ animationDelay: '250ms' }}>
                     <div className="blur-[4px] pointer-events-none select-none">
                       <RiskList penalties={result.penalties} />
                     </div>
@@ -951,7 +977,7 @@ export default function ScanPageClient() {
                 )}
 
                 {/* Locked: Timeline — real data */}
-                <div className="relative cursor-pointer group animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+                <div className="relative cursor-pointer group animate-fade-in-up max-h-[180px] lg:max-h-none overflow-hidden rounded-2xl" style={{ animationDelay: '300ms' }}>
                   <div className="blur-[4px] pointer-events-none select-none">
                     <ActivityTimeline scanResult={result} />
                   </div>
@@ -964,32 +990,6 @@ export default function ScanPageClient() {
                   </div>
                 </div>
 
-              </div>
-
-              {/* Right Column: Locked Score — real score data blurred */}
-              <div className="space-y-6">
-                <div className="glass-card p-6 md:p-8 rounded-2xl sticky top-24 border border-border-color animate-fade-in-up cursor-pointer group relative overflow-hidden" style={{ animationDelay: '100ms' }}>
-                  <div className="blur-[8px] pointer-events-none select-none">
-                    <ScoreDisplay
-                      score={result.score}
-                      grade={result.grade}
-                      gradeColor="#888888"
-                      gradeLabel={result.gradeLabel}
-                      animate={false}
-                    />
-                  </div>
-                  {/* Lock overlay */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-bg-card/20 rounded-2xl group-hover:bg-bg-card/30 transition-all duration-300">
-                    <div className="w-14 h-14 rounded-2xl bg-[var(--silver-accent)]/10 flex items-center justify-center mb-3 border border-[var(--silver-accent)]/20 group-hover:scale-110 transition-transform duration-300">
-                      <svg className="w-7 h-7 silver-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                    </div>
-                    <p className="text-base font-bold text-text-primary">Score Locked</p>
-                    <p className="text-xs text-text-secondary mt-1 mb-4">Sign in to unlock</p>
-                    <div className="px-4 py-2 btn-premium rounded-xl text-xs font-bold group-hover:scale-105 transition-transform duration-200">
-                      Unlock Score
-                    </div>
-                  </div>
-                </div>
               </div>
 
             </div>
