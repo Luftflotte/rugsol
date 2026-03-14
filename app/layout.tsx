@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseUrl()),
+  icons: {
+    icon: "/favicon.ico",
+  },
   title: "RugSol - Solana Token Scanner",
   description: "Instant rug pull detection for Solana tokens. Check any token in seconds with on-chain analysis.",
   keywords: ["solana", "rug pull", "token scanner", "crypto", "defi", "security"],
