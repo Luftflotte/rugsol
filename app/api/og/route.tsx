@@ -98,11 +98,11 @@ function renderHomepageCard(fonts: { interReg: ArrayBuffer; interBold: ArrayBuff
           fontFamily: "Inter",
           position: "relative",
           overflow: "hidden",
-          padding: "32px 44px 24px",
+          padding: "36px 52px 28px",
           boxSizing: "border-box",
         }}
       >
-        {/* Ambient Top Accent Bar */}
+        {/* Top Accent Stripe */}
         <div
           style={{
             position: "absolute",
@@ -130,7 +130,7 @@ function renderHomepageCard(fonts: { interReg: ArrayBuffer; interBold: ArrayBuff
           }}
         />
 
-        {/* Top Header Row */}
+        {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", zIndex: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <svg width="40" height="40" viewBox="0 0 48 48" fill="none" style={{ display: "flex" }}>
@@ -167,8 +167,8 @@ function renderHomepageCard(fonts: { interReg: ArrayBuffer; interBold: ArrayBuff
           </div>
         </div>
 
-        {/* Center Hero Block */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 20, position: "relative", zIndex: 10 }}>
+        {/* Center Hero */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 22, position: "relative", zIndex: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 18px", borderRadius: 20, background: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.2)" }}>
             <span style={{ fontSize: 12, fontFamily: "JetBrains Mono", fontWeight: 700, color: "#38bdf8", letterSpacing: "1px", textTransform: "uppercase", display: "flex" }}>
               AUTOMATED SMART CONTRACT FORENSICS
@@ -184,8 +184,8 @@ function renderHomepageCard(fonts: { interReg: ArrayBuffer; interBold: ArrayBuff
             </span>
           </div>
 
-          {/* 4 Feature Telemetry Cards */}
-          <div style={{ display: "flex", gap: 16, marginTop: 12, width: "100%", maxWidth: 1100 }}>
+          {/* 4 Cards */}
+          <div style={{ display: "flex", gap: 16, marginTop: 10, width: "100%", maxWidth: 1080 }}>
             {[
               { tag: "[ HONEYPOT ]", title: "Sell Simulator", desc: "Simulates route via Jupiter API" },
               { tag: "[ LP LOCK ]", title: "Liquidity Audit", desc: "Burn & lock status across DEXs" },
@@ -219,7 +219,7 @@ function renderHomepageCard(fonts: { interReg: ArrayBuffer; interBold: ArrayBuff
           </div>
         </div>
 
-        {/* Bottom Footer Row */}
+        {/* Footer */}
         <div
           style={{
             display: "flex",
@@ -245,11 +245,11 @@ function renderHomepageCard(fonts: { interReg: ArrayBuffer; interBold: ArrayBuff
             style={{
               display: "flex",
               alignItems: "center",
-              padding: "10px 24px",
+              padding: "10px 28px",
               borderRadius: 8,
               background: "rgba(56,189,248,0.14)",
               border: "2px solid #38bdf8",
-              boxShadow: "0 0 20px rgba(56,189,248,0.25)",
+              boxShadow: "0 0 20px rgba(56,189,248,0.3)",
             }}
           >
             <span style={{ fontFamily: "JetBrains Mono", fontSize: 18, fontWeight: 800, color: "#38bdf8", letterSpacing: "0.5px", display: "flex" }}>
@@ -296,7 +296,7 @@ export async function GET(request: NextRequest) {
     const image = searchParams.get("image");
     const mode = (searchParams.get("mode") || "dex").toUpperCase();
     const rawPrice = searchParams.get("price") || "$0.00";
-    const price = rawPrice.length > 15 ? rawPrice.slice(0, 13) + ".." : rawPrice;
+    const price = rawPrice.length > 14 ? rawPrice.slice(0, 12) + ".." : rawPrice;
     const mcap = searchParams.get("mcap") || "0";
     const rawChange = (searchParams.get("change") || "0%").trim();
     let change = rawChange;
@@ -309,6 +309,10 @@ export async function GET(request: NextRequest) {
     const sell = searchParams.get("sell") || "Yes";
     const mint = searchParams.get("mint") || "Revoked";
     const penalty = Math.min(100, Math.max(0, parseInt(searchParams.get("penalty") || "0") || 0));
+    const tagsParam = searchParams.get("tags") || "";
+    const tags = tagsParam ? tagsParam.split(",").filter(Boolean) : ["Analyzed"];
+    const tagPointsParam = searchParams.get("tagPoints") || "";
+    const tagPointsList = tagPointsParam ? tagPointsParam.split(",").map(Number) : [];
     const isLight = searchParams.get("theme") === "light";
 
     const fonts = await loadFonts();
@@ -322,84 +326,72 @@ export async function GET(request: NextRequest) {
       tokenImage = await fetchAndOptimizeImage(image);
     }
 
-    // Determine status color & severity
-    const isSafe = score >= 70;
-    const isMedium = score >= 40 && score < 70;
+    // Status colors matching site
+    const isSafe = score >= 60;
+    const isMedium = score >= 40 && score < 60;
     const statusColor = isSafe ? "#10b981" : isMedium ? "#f59e0b" : "#ef4444";
 
-    // High-contrast clean color scheme
+    // Palette tokens matching site
     const c = isLight
       ? {
           bg: "#f8fafc",
           cardBg: "#ffffff",
           chipBg: "#f1f5f9",
           border: "#cbd5e1",
-          textPrimary: "#0f172a",
-          textSecondary: "#334155",
-          textMuted: "#64748b",
-          gridColor: "rgba(0, 0, 0, 0.04)",
+          subtle: "#e2e8f0",
+          text: "#0f172a",
+          textSoft: "#334155",
+          textDim: "#64748b",
+          textMuted: "#94a3b8",
+          grid: "rgba(0,0,0,0.035)",
           brandCyan: "#0284c7",
+          footerBg: "rgba(255,255,255,0.8)",
+          footerBorder: "#e2e8f0",
         }
       : {
           bg: "#08090d",
           cardBg: "#0e1118",
           chipBg: "#141824",
           border: "#1e2433",
-          textPrimary: "#f8fafc",
-          textSecondary: "#94a3b8",
+          subtle: "#1e2433",
+          text: "#f8fafc",
+          textSoft: "#94a3b8",
+          textDim: "#64748b",
           textMuted: "#64748b",
-          gridColor: "rgba(255, 255, 255, 0.025)",
+          grid: "rgba(255,255,255,0.025)",
           brandCyan: "#38bdf8",
+          footerBg: "#090b10",
+          footerBorder: "#1e2433",
         };
 
     const dateStr = new Date().toLocaleString("en-GB", { timeZone: "UTC", hour12: false }).replace(",", "") + " UTC";
 
-    // Metric evaluations
-    const isLiqCritical = liq === "$0" || liq === "0" || liq === "0%";
-    const top10Num = parseFloat(top10) || 0;
-    const isTop10Critical = top10Num > 60;
-    const isTop10Warning = top10Num > 40;
-    const isSellOk = sell === "Yes";
-    const isMintRevoked = mint === "Revoked" || mint === "Locked";
+    // Dynamic price font size to prevent border collision on long fractional prices
+    const priceFontSize = price.length > 11 ? 42 : price.length > 8 ? 48 : 54;
 
-    let lpStatusColor = "#10b981";
-    let lpStatusLabel = "LOCKED";
-    let lpStatusValue = lock === "No" ? "Unlocked" : lock;
+    // LP color & value
+    let m3Color = "#10b981";
+    let displayLock = lock;
     if (mode === "PUMP") {
       const snipers = parseInt(lock) || 0;
-      lpStatusValue = `${snipers} Snipers`;
-      if (snipers > 5) {
-        lpStatusColor = "#ef4444";
-        lpStatusLabel = "BOT HEAVY";
-      } else if (snipers > 0) {
-        lpStatusColor = "#f59e0b";
-        lpStatusLabel = "SNIPES";
-      } else {
-        lpStatusColor = "#10b981";
-        lpStatusLabel = "CLEAN";
-      }
+      displayLock = `${snipers} Snipers`;
+      if (snipers > 5) m3Color = "#ef4444";
+      else if (snipers > 0) m3Color = "#f59e0b";
+      else m3Color = "#10b981";
     } else {
-      if (lock === "Burned" || lock === "100% Burned") {
-        lpStatusColor = "#10b981";
-        lpStatusLabel = "BURNED";
-      } else if (lock === "Locked") {
-        lpStatusColor = "#10b981";
-        lpStatusLabel = "LOCKED";
+      if (lock === "No" || lock === "Active" || lock === "0") {
+        m3Color = "#ef4444";
+        displayLock = "Unlocked";
       } else {
-        lpStatusColor = "#ef4444";
-        lpStatusLabel = "UNLOCKED";
+        m3Color = "#10b981";
       }
     }
 
-    // Geometry for giant high-impact score gauge:
-    // ViewBox: 240x240, Center: cx=120, cy=120, Radius: 96
-    // Circumference: 2 * PI * 96 = 603.18
-    const dialRadius = 96;
-    const dialCircumference = 603.18;
-    const dialOffset = dialCircumference * (1 - score / 100);
-
-    const displayAddress = address.length > 24 ? `${address.slice(0, 10)}...${address.slice(-10)}` : address;
-    const priceFontSize = price.length > 11 ? 42 : price.length > 8 ? 48 : 56;
+    // Geometry for the large precision score dial:
+    // ViewBox: 270x270, Center: cx=135, cy=135, Radius: 104
+    // Circumference: 2 * PI * 104 = 653.45
+    const circum = 653.45;
+    const offset = circum * (1 - score / 100);
 
     return new ImageResponse(
       (
@@ -409,13 +401,11 @@ export async function GET(request: NextRequest) {
             height: 630,
             display: "flex",
             flexDirection: "column",
-            justifyContent: "space-between",
             background: c.bg,
             fontFamily: "Inter",
             position: "relative",
             overflow: "hidden",
-            padding: "26px 38px 20px",
-            boxSizing: "border-box",
+            justifyContent: "space-between",
           }}
         >
           {/* Top Status Accent Bar */}
@@ -431,7 +421,7 @@ export async function GET(request: NextRequest) {
             }}
           />
 
-          {/* Grid Pattern */}
+          {/* Technical Grid Pattern */}
           <div
             style={{
               position: "absolute",
@@ -440,7 +430,7 @@ export async function GET(request: NextRequest) {
               right: 0,
               bottom: 0,
               display: "flex",
-              backgroundImage: `linear-gradient(${c.gridColor} 1px, transparent 1px), linear-gradient(90deg, ${c.gridColor} 1px, transparent 1px)`,
+              backgroundImage: `linear-gradient(${c.grid} 1px, transparent 1px), linear-gradient(90deg, ${c.grid} 1px, transparent 1px)`,
               backgroundSize: "32px 32px",
             }}
           />
@@ -449,481 +439,196 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               position: "absolute",
-              width: 550,
-              height: 550,
+              width: 500,
+              height: 500,
               borderRadius: "50%",
-              background: `radial-gradient(circle, ${statusColor}22 0%, transparent 70%)`,
-              right: -50,
-              top: 30,
+              background: `radial-gradient(circle, ${statusColor}18 0%, transparent 70%)`,
+              right: -60,
+              top: 40,
               display: "flex",
             }}
           />
 
-          {/* 1. Header Row */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              position: "relative",
-              zIndex: 10,
-            }}
-          >
-            {/* Left: Avatar + Token Info */}
-            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-              <div
-                style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: 14,
-                  background: c.chipBg,
-                  border: `2px solid ${c.border}`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  overflow: "hidden",
-                  flexShrink: 0,
-                }}
-              >
-                {tokenImage ? (
-                  <img src={tokenImage} width="64" height="64" style={{ objectFit: "cover" }} />
-                ) : (
-                  <span style={{ fontSize: 26, fontWeight: 800, color: c.brandCyan, fontFamily: "JetBrains Mono", display: "flex" }}>
-                    {symbol.slice(0, 3)}
-                  </span>
-                )}
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ fontSize: 32, fontWeight: 800, color: c.textPrimary, letterSpacing: "-0.5px", lineHeight: 1, display: "flex" }}>
-                    {name}
-                  </span>
-                  <span
+          {/* Main Body (Original 2-column layout with vertical divider) */}
+          <div style={{ flex: 1, display: "flex", padding: "44px 64px 28px", gap: 36, position: "relative", zIndex: 10 }}>
+            {/* Left Column: Token Header, Price, Penalty, 5-Metric Continuous Bar */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {/* 1. Avatar + Name + Address Row */}
+                <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+                  <div
                     style={{
-                      fontSize: 12,
-                      fontFamily: "JetBrains Mono",
-                      fontWeight: 700,
-                      padding: "4px 10px",
-                      borderRadius: 6,
-                      background: mode === "PUMP" ? "rgba(249,115,22,0.14)" : "rgba(56,189,248,0.14)",
-                      color: mode === "PUMP" ? "#fb923c" : c.brandCyan,
-                      border: mode === "PUMP" ? "1px solid rgba(249,115,22,0.3)" : "1px solid rgba(56,189,248,0.3)",
+                      width: 82,
+                      height: 82,
+                      borderRadius: 18,
+                      background: c.cardBg,
+                      border: `2px solid ${c.border}`,
                       display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                      flexShrink: 0,
                     }}
                   >
-                    {mode === "PUMP" ? "[ PUMP.FUN ]" : "[ DEX POOL ]"}
-                  </span>
-                  <span style={{ fontSize: 22, fontWeight: 700, color: c.brandCyan, fontFamily: "JetBrains Mono", display: "flex" }}>
-                    ${symbol}
-                  </span>
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, color: c.textSecondary, fontWeight: 600, display: "flex" }}>
-                    {displayAddress}
-                  </span>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 12, color: "#475569", display: "flex" }}>•</span>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, color: "#10b981", fontWeight: 700, display: "flex" }}>
-                    SOLANA MAINNET
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Prominent Auditor Stamp */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-end",
-                gap: 4,
-                padding: "10px 18px",
-                borderRadius: 8,
-                background: c.cardBg,
-                border: `1px solid ${c.border}`,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, letterSpacing: "1px", display: "flex" }}>
-                  VERIFIED BY
-                </span>
-                <span style={{ fontSize: 13, fontFamily: "JetBrains Mono", color: c.brandCyan, fontWeight: 800, display: "flex" }}>
-                  RUGSOL.XYZ
-                </span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ width: 8, height: 8, borderRadius: "50%", background: statusColor, display: "flex" }} />
-                <span style={{ fontSize: 13, fontFamily: "JetBrains Mono", color: statusColor, fontWeight: 800, display: "flex" }}>
-                  {isSafe ? "AUDIT VERIFIED CLEAN" : isMedium ? "WARNINGS DETECTED" : "CRITICAL RISK IDENTIFIED"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* 2. Middle Content Grid (No empty gaps, rich telemetry) */}
-          <div style={{ display: "flex", gap: 24, alignItems: "stretch", position: "relative", zIndex: 10, flex: 1, margin: "14px 0" }}>
-            {/* Left Column: Price, Rich Assessment Panel, 5 Metrics */}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 14 }}>
-              {/* Price & Market Cap Bar */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 16 }}>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: priceFontSize, fontWeight: 800, color: c.textPrimary, letterSpacing: "-1.5px", lineHeight: 1, display: "flex" }}>
-                    {price}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "JetBrains Mono",
-                      fontSize: 20,
-                      fontWeight: 800,
-                      padding: "6px 14px",
-                      borderRadius: 6,
-                      background: change.startsWith("-") ? "rgba(239,68,68,0.14)" : "rgba(16,185,129,0.14)",
-                      color: change.startsWith("-") ? "#ef4444" : "#10b981",
-                      border: change.startsWith("-") ? "1px solid rgba(239,68,68,0.3)" : "1px solid rgba(16,185,129,0.3)",
-                      display: "flex",
-                    }}
-                  >
-                    {change}
-                  </span>
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, color: c.textSecondary, fontWeight: 700, display: "flex" }}>
-                    MCAP: {mcap}
-                  </span>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 12, color: "#475569", display: "flex" }}>|</span>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, color: c.textMuted, display: "flex" }}>
-                    LIQUIDITY: {liq}
-                  </span>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 12, color: "#475569", display: "flex" }}>|</span>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, color: c.textMuted, display: "flex" }}>
-                    SOLANA ON-CHAIN FORENSICS
-                  </span>
-                </div>
-              </div>
-
-              {/* Security Assessment & Vector Diagnostics Panel (Fills space meaningfully) */}
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 10,
-                  padding: "14px 18px",
-                  borderRadius: 10,
-                  background: penalty === 0 ? "rgba(16,185,129,0.09)" : "rgba(239,68,68,0.09)",
-                  border: penalty === 0 ? "1px solid rgba(16,185,129,0.28)" : "1px solid rgba(239,68,68,0.28)",
-                }}
-              >
-                {/* Top: Status & Deductions */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    {penalty === 0 ? (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ display: "flex" }}>
-                        <path d="M20 6L9 17L4 12" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                    {tokenImage ? (
+                      <img src={tokenImage} width="82" height="82" style={{ objectFit: "cover" }} />
                     ) : (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ display: "flex" }}>
-                        <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                      <span style={{ fontSize: 32, fontWeight: 800, color: c.brandCyan, fontFamily: "JetBrains Mono", display: "flex" }}>
+                        {symbol.slice(0, 3)}
+                      </span>
                     )}
-                    <span style={{ fontSize: 14, fontFamily: "JetBrains Mono", fontWeight: 800, color: penalty === 0 ? "#10b981" : "#ef4444", display: "flex" }}>
-                      {penalty === 0
-                        ? "0 PENALTIES DETECTED — ALL VECTORS CLEAN"
-                        : `-${penalty} PTS DEDUCTIONS — ${penalty >= 50 ? "CRITICAL RISK VECTORS COMPROMISED" : "CONTRACT ANOMALIES DETECTED"}`}
-                    </span>
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <span style={{ fontSize: 13, fontFamily: "JetBrains Mono", color: penalty === 0 ? "#10b981" : "#ef4444", fontWeight: 800, display: "flex" }}>
-                      {penalty === 0 ? "100% CLEAN" : `-${penalty} PTS`}
-                    </span>
-                    <div style={{ width: 100, height: 8, borderRadius: 4, background: c.border, overflow: "hidden", display: "flex" }}>
-                      <div
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 12 }}>
+                      <span style={{ fontSize: 38, fontWeight: 800, color: c.text, letterSpacing: "-1px", lineHeight: 1, display: "flex" }}>
+                        {name}
+                      </span>
+                      <span
                         style={{
-                          height: "100%",
-                          width: penalty === 0 ? "100%" : `${Math.min(100, (penalty / 100) * 100)}%`,
-                          background: penalty === 0 ? "#10b981" : penalty >= 50 ? "#ef4444" : "#f59e0b",
+                          fontSize: 12,
+                          fontFamily: "JetBrains Mono",
+                          fontWeight: 700,
+                          padding: "4px 10px",
+                          borderRadius: 6,
+                          textTransform: "uppercase",
+                          background: mode === "PUMP" ? "rgba(249,115,22,0.14)" : "rgba(56,189,248,0.14)",
+                          color: mode === "PUMP" ? "#fb923c" : c.brandCyan,
+                          border: mode === "PUMP" ? "1px solid rgba(249,115,22,0.3)" : "1px solid rgba(56,189,248,0.3)",
                           display: "flex",
                         }}
-                      />
+                      >
+                        {mode === "PUMP" ? "PUMP.FUN" : "DEX POOL"}
+                      </span>
+                      <span style={{ fontSize: 22, color: c.brandCyan, fontWeight: 700, fontFamily: "JetBrains Mono", display: "flex" }}>
+                        ${symbol}
+                      </span>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, color: c.textDim, letterSpacing: "0.5px", display: "flex" }}>
+                        {address}
+                      </span>
+                      <span style={{ fontFamily: "JetBrains Mono", fontSize: 12, color: "#334155", display: "flex" }}>•</span>
+                      <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, color: "#10b981", fontWeight: 700, display: "flex" }}>
+                        SOLANA MAINNET
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Bottom: On-Chain Audit Badges */}
-                <div style={{ display: "flex", alignItems: "center", gap: 12, borderTop: `1px solid ${penalty === 0 ? "rgba(16,185,129,0.18)" : "rgba(239,68,68,0.18)"}`, paddingTop: 8 }}>
-                  <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, display: "flex" }}>
-                    DIAGNOSTICS:
-                  </span>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "nowrap" }}>
-                    {[
-                      { label: "MINT", val: isMintRevoked ? "IMMUTABLE" : "ACTIVE", pass: isMintRevoked },
-                      { label: "LP", val: lpStatusLabel, pass: lpStatusLabel === "BURNED" || lpStatusLabel === "LOCKED" || lpStatusLabel === "CLEAN" },
-                      { label: "SELL", val: isSellOk ? "UNRESTRICTED" : "HONEYPOT", pass: isSellOk },
-                      { label: "TOP 10", val: isTop10Critical ? "HEAVY" : "BALANCED", pass: !isTop10Critical },
-                    ].map((diag, i) => (
-                      <span
-                        key={i}
-                        style={{
-                          fontSize: 10,
-                          fontFamily: "JetBrains Mono",
-                          fontWeight: 700,
-                          padding: "3px 8px",
-                          borderRadius: 4,
-                          background: diag.pass ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)",
-                          color: diag.pass ? "#10b981" : "#ef4444",
-                          border: diag.pass ? "1px solid rgba(16,185,129,0.25)" : "1px solid rgba(239,68,68,0.25)",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 5,
-                        }}
-                      >
-                        {diag.pass ? (
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style={{ display: "flex" }}>
-                            <path d="M20 6L9 17L4 12" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        ) : (
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style={{ display: "flex" }}>
-                            <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        )}
-                        <span>{diag.label}: {diag.val}</span>
-                      </span>
-                    ))}
+                {/* 2. Price + MCAP Row */}
+                <div style={{ display: "flex", flexDirection: "column", marginTop: 28 }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
+                    <span style={{ fontFamily: "JetBrains Mono", fontSize: priceFontSize, fontWeight: 800, color: c.text, letterSpacing: "-2px", lineHeight: 1, display: "flex" }}>
+                      {price}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: "JetBrains Mono",
+                        fontSize: 22,
+                        fontWeight: 700,
+                        color: change.startsWith("-") ? "#ef4444" : change === "0%" ? c.textDim : "#10b981",
+                        display: "flex",
+                      }}
+                    >
+                      {change}
+                    </span>
+                  </div>
+
+                  <div style={{ fontFamily: "JetBrains Mono", fontSize: 16, color: c.textDim, marginTop: 8, letterSpacing: "0.5px", fontWeight: 600, display: "flex" }}>
+                    MARKET CAP: ${mcap}
+                  </div>
+                </div>
+
+                {/* 3. Penalty Status Row */}
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 24 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    {penalty === 0 ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ display: "flex" }}>
+                        <path d="M20 6L9 17L4 12" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ display: "flex" }}>
+                        <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                    <span
+                      style={{
+                        fontFamily: "JetBrains Mono",
+                        fontSize: 14,
+                        fontWeight: 700,
+                        color: penalty === 0 ? "#10b981" : penalty >= 50 ? "#ef4444" : "#f59e0b",
+                        display: "flex",
+                      }}
+                    >
+                      {penalty === 0 ? "No penalties detected" : `-${penalty} points deducted`}
+                    </span>
+                  </div>
+
+                  <div style={{ flex: 1, height: 7, background: c.border, borderRadius: 4, overflow: "hidden", display: "flex" }}>
+                    <div
+                      style={{
+                        height: "100%",
+                        borderRadius: 4,
+                        width: penalty === 0 ? "100%" : `${Math.min(100, (penalty / 100) * 100)}%`,
+                        background: penalty === 0 ? "#10b981" : penalty >= 50 ? "#ef4444" : "#f59e0b",
+                        display: "flex",
+                      }}
+                    />
                   </div>
                 </div>
               </div>
 
-              {/* 5 Core Telemetry Metric Cards */}
-              <div style={{ display: "flex", gap: 10, width: "100%" }}>
-                {/* Metric 1: Liquidity */}
-                <div
-                  style={{
-                    flex: 1,
-                    background: c.cardBg,
-                    border: `1px solid ${c.border}`,
-                    borderRadius: 10,
-                    padding: "16px 12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    height: 114,
-                  }}
-                >
-                  <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase", display: "flex" }}>
-                    {mode === "PUMP" ? "CURVE" : "LIQUIDITY"}
-                  </span>
-                  <span style={{ fontSize: 22, fontFamily: "JetBrains Mono", color: isLiqCritical ? "#ef4444" : "#10b981", fontWeight: 800, display: "flex" }}>
-                    {liq}
-                  </span>
-                  <span
+              {/* 4. Original 5-Cell Continuous Metric Bar */}
+              <div style={{ display: "flex", borderRadius: 14, overflow: "hidden", border: `1px solid ${c.border}`, background: c.cardBg }}>
+                {[
+                  { l: mode === "PUMP" ? "Curve" : "Liquidity", v: liq, c: (liq === "$0" || liq === "0" || liq === "0%") ? "#ef4444" : "#10b981" },
+                  { l: "Top 10", v: top10, c: parseInt(top10) > 50 ? "#ef4444" : parseInt(top10) > 30 ? "#f59e0b" : "#10b981" },
+                  { l: mode === "PUMP" ? "Snipers" : "LP Lock", v: displayLock, c: m3Color },
+                  { l: "Sellable", v: sell === "Yes" ? "Yes" : "Trap", c: sell === "Yes" ? "#10b981" : "#ef4444" },
+                  { l: "Mint", v: mint === "Revoked" || mint === "Locked" ? "Revoked" : "Active", c: (mint === "Revoked" || mint === "Locked") ? "#10b981" : "#ef4444" },
+                ].map((m, i) => (
+                  <div
+                    key={i}
                     style={{
-                      fontSize: 10,
-                      fontFamily: "JetBrains Mono",
-                      fontWeight: 700,
-                      padding: "3px 7px",
-                      borderRadius: 4,
-                      background: isLiqCritical ? "rgba(239,68,68,0.14)" : "rgba(16,185,129,0.14)",
-                      color: isLiqCritical ? "#ef4444" : "#10b981",
-                      border: isLiqCritical ? "1px solid rgba(239,68,68,0.3)" : "1px solid rgba(16,185,129,0.3)",
-                      alignSelf: "flex-start",
+                      flex: 1,
+                      padding: "16px 14px",
                       display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                      borderLeft: i === 0 ? "0" : `1px solid ${c.border}`,
                     }}
                   >
-                    {isLiqCritical ? "ZERO POOL" : mode === "PUMP" ? "PROGRESS" : "HEALTHY"}
-                  </span>
-                </div>
-
-                {/* Metric 2: Top 10 */}
-                <div
-                  style={{
-                    flex: 1,
-                    background: c.cardBg,
-                    border: `1px solid ${c.border}`,
-                    borderRadius: 10,
-                    padding: "16px 12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    height: 114,
-                  }}
-                >
-                  <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase", display: "flex" }}>
-                    TOP 10
-                  </span>
-                  <span style={{ fontSize: 22, fontFamily: "JetBrains Mono", color: isTop10Critical ? "#ef4444" : isTop10Warning ? "#f59e0b" : "#10b981", fontWeight: 800, display: "flex" }}>
-                    {top10}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontFamily: "JetBrains Mono",
-                      fontWeight: 700,
-                      padding: "3px 7px",
-                      borderRadius: 4,
-                      background: isTop10Critical
-                        ? "rgba(239,68,68,0.14)"
-                        : isTop10Warning
-                        ? "rgba(245,158,11,0.14)"
-                        : "rgba(16,185,129,0.14)",
-                      color: isTop10Critical ? "#ef4444" : isTop10Warning ? "#f59e0b" : "#10b981",
-                      border: isTop10Critical
-                        ? "1px solid rgba(239,68,68,0.3)"
-                        : isTop10Warning
-                        ? "1px solid rgba(245,158,11,0.3)"
-                        : "1px solid rgba(16,185,129,0.3)",
-                      alignSelf: "flex-start",
-                      display: "flex",
-                    }}
-                  >
-                    {isTop10Critical ? "DANGEROUS" : isTop10Warning ? "CAUTION" : "CLEAN"}
-                  </span>
-                </div>
-
-                {/* Metric 3: LP Lock */}
-                <div
-                  style={{
-                    flex: 1,
-                    background: c.cardBg,
-                    border: `1px solid ${c.border}`,
-                    borderRadius: 10,
-                    padding: "16px 12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    height: 114,
-                  }}
-                >
-                  <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase", display: "flex" }}>
-                    {mode === "PUMP" ? "SNIPERS" : "LP LOCK"}
-                  </span>
-                  <span style={{ fontSize: 22, fontFamily: "JetBrains Mono", color: lpStatusColor, fontWeight: 800, display: "flex" }}>
-                    {lpStatusValue}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontFamily: "JetBrains Mono",
-                      fontWeight: 700,
-                      padding: "3px 7px",
-                      borderRadius: 4,
-                      background: `${lpStatusColor}18`,
-                      color: lpStatusColor,
-                      border: `1px solid ${lpStatusColor}35`,
-                      alignSelf: "flex-start",
-                      display: "flex",
-                    }}
-                  >
-                    {lpStatusLabel}
-                  </span>
-                </div>
-
-                {/* Metric 4: Honeypot */}
-                <div
-                  style={{
-                    flex: 1,
-                    background: c.cardBg,
-                    border: `1px solid ${c.border}`,
-                    borderRadius: 10,
-                    padding: "16px 12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    height: 114,
-                  }}
-                >
-                  <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase", display: "flex" }}>
-                    HONEYPOT
-                  </span>
-                  <span style={{ fontSize: 22, fontFamily: "JetBrains Mono", color: isSellOk ? "#10b981" : "#ef4444", fontWeight: 800, display: "flex" }}>
-                    {isSellOk ? "Passed" : "Trap"}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontFamily: "JetBrains Mono",
-                      fontWeight: 700,
-                      padding: "3px 7px",
-                      borderRadius: 4,
-                      background: isSellOk ? "rgba(16,185,129,0.14)" : "rgba(239,68,68,0.14)",
-                      color: isSellOk ? "#10b981" : "#ef4444",
-                      border: isSellOk ? "1px solid rgba(16,185,129,0.3)" : "1px solid rgba(239,68,68,0.3)",
-                      alignSelf: "flex-start",
-                      display: "flex",
-                    }}
-                  >
-                    {isSellOk ? "SELLABLE" : "TRAPPED"}
-                  </span>
-                </div>
-
-                {/* Metric 5: Mint Auth */}
-                <div
-                  style={{
-                    flex: 1,
-                    background: c.cardBg,
-                    border: `1px solid ${c.border}`,
-                    borderRadius: 10,
-                    padding: "16px 12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    height: 114,
-                  }}
-                >
-                  <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase", display: "flex" }}>
-                    MINT AUTH
-                  </span>
-                  <span style={{ fontSize: 22, fontFamily: "JetBrains Mono", color: isMintRevoked ? "#10b981" : "#ef4444", fontWeight: 800, display: "flex" }}>
-                    {isMintRevoked ? "Revoked" : "Active"}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontFamily: "JetBrains Mono",
-                      fontWeight: 700,
-                      padding: "3px 7px",
-                      borderRadius: 4,
-                      background: isMintRevoked ? "rgba(16,185,129,0.14)" : "rgba(239,68,68,0.14)",
-                      color: isMintRevoked ? "#10b981" : "#ef4444",
-                      border: isMintRevoked ? "1px solid rgba(16,185,129,0.3)" : "1px solid rgba(239,68,68,0.3)",
-                      alignSelf: "flex-start",
-                      display: "flex",
-                    }}
-                  >
-                    {isMintRevoked ? "IMMUTABLE" : "INFLATABLE"}
-                  </span>
-                </div>
+                    <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", textTransform: "uppercase", letterSpacing: "1.5px", color: c.textDim, fontWeight: 700, display: "flex" }}>
+                      {m.l}
+                    </span>
+                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 20, fontWeight: 800, color: m.c, display: "flex" }}>
+                      {m.v}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Right Column: Hero Score Center (Massive Dial, Loud Impact) */}
-            <div
-              style={{
-                width: 370,
-                background: c.cardBg,
-                border: `1px solid ${c.border}`,
-                borderRadius: 16,
-                padding: "20px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "space-between",
-                position: "relative",
-              }}
-            >
-              {/* Massive Radial Score Gauge (240x240) */}
-              <div style={{ position: "relative", width: 240, height: 240, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {/* Calibrated outer tick bezel */}
-                <svg width="240" height="240" viewBox="0 0 240 240" style={{ position: "absolute", top: 0, left: 0, display: "flex" }}>
-                  <circle cx="120" cy="120" r="112" fill="none" stroke={c.border} strokeWidth="1" strokeDasharray="3 6" />
+            {/* Vertical Divider Line */}
+            <div style={{ width: 1, alignSelf: "stretch", background: `linear-gradient(180deg, transparent 5%, ${c.border} 30%, ${c.border} 70%, transparent 95%)`, display: "flex" }} />
+
+            {/* Right Column: Original 270x270 Score Dial, Grade Badge, Tags */}
+            <div style={{ width: 360, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 20 }}>
+              {/* Circular Gauge */}
+              <div style={{ position: "relative", width: 270, height: 270, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {/* Dial SVG */}
+                <svg width="270" height="270" viewBox="0 0 270 270" style={{ position: "absolute", top: 0, left: 0, display: "flex" }}>
+                  {/* Calibrated outer tick ring */}
+                  <circle cx="135" cy="135" r="122" fill="none" stroke={c.border} strokeWidth="1" strokeDasharray="3 6" />
                 </svg>
 
                 {/* Progress SVG rotated -90deg */}
                 <svg
-                  width="240"
-                  height="240"
-                  viewBox="0 0 240 240"
+                  width="270"
+                  height="270"
+                  viewBox="0 0 270 270"
                   style={{
                     position: "absolute",
                     top: 0,
@@ -933,142 +638,142 @@ export async function GET(request: NextRequest) {
                   }}
                 >
                   {/* Track */}
-                  <circle cx="120" cy="120" r={dialRadius} fill="none" stroke={c.border} strokeWidth="12" />
-                  {/* Active Progress */}
+                  <circle cx="135" cy="135" r="104" fill="none" stroke={c.border} strokeWidth="13" />
+                  {/* Progress arc */}
                   <circle
-                    cx="120"
-                    cy="120"
-                    r={dialRadius}
+                    cx="135"
+                    cy="135"
+                    r="104"
                     fill="none"
                     stroke={statusColor}
-                    strokeWidth="12"
+                    strokeWidth="13"
                     strokeLinecap="round"
-                    strokeDasharray={dialCircumference}
-                    strokeDashoffset={dialOffset}
+                    strokeDasharray={circum}
+                    strokeDashoffset={offset}
                   />
                 </svg>
 
-                {/* Giant Centered Score Readout */}
+                {/* Center Readout: Massive score centered + /100 below */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: score === 100 ? 76 : 84, fontWeight: 900, fontFamily: "JetBrains Mono", color: statusColor, lineHeight: 1, display: "flex" }}>
+                  <span style={{ fontSize: score === 100 ? 92 : 98, fontWeight: 900, fontFamily: "JetBrains Mono", color: statusColor, letterSpacing: "-4px", lineHeight: 1, display: "flex" }}>
                     {score}
                   </span>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
-                    <span style={{ fontSize: 13, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, display: "flex" }}>
-                      /100
+                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 16, color: c.textDim, fontWeight: 700, display: "flex" }}>
+                      / 100
                     </span>
-                    <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: "#475569", display: "flex" }}>•</span>
-                    <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: c.textMuted, letterSpacing: "1.5px", textTransform: "uppercase", fontWeight: 700, display: "flex" }}>
+                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#334155", display: "flex" }}>•</span>
+                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: c.textDim, letterSpacing: "1.5px", textTransform: "uppercase", fontWeight: 700, display: "flex" }}>
                       SAFETY SCORE
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* Verdict Banner */}
+              {/* Grade Badge */}
               <div
                 style={{
+                  fontSize: 18,
+                  fontWeight: 800,
+                  fontFamily: "JetBrains Mono",
+                  padding: "10px 22px",
+                  borderRadius: 100,
+                  background: `${statusColor}18`,
+                  border: `2px solid ${statusColor}40`,
+                  color: statusColor,
+                  letterSpacing: "0.5px",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
                   gap: 10,
-                  padding: "12px 24px",
-                  borderRadius: 8,
-                  background: `${statusColor}18`,
-                  border: `2px solid ${statusColor}45`,
-                  color: statusColor,
-                  fontFamily: "JetBrains Mono",
-                  fontSize: 16,
-                  fontWeight: 800,
-                  letterSpacing: "0.5px",
-                  width: "100%",
-                  boxSizing: "border-box",
                 }}
               >
                 <span style={{ width: 8, height: 8, borderRadius: "50%", background: statusColor, display: "flex" }} />
-                <span>GRADE {grade} • {gradeLabel.toUpperCase()}</span>
+                <span>Grade {grade} · {gradeLabel}</span>
               </div>
 
-              {/* Auditor Proof Stamp */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  padding: "8px 16px",
-                  borderRadius: 6,
-                  background: c.chipBg,
-                  border: `1px solid ${c.border}`,
-                  width: "100%",
-                  boxSizing: "border-box",
-                }}
-              >
-                <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, display: "flex" }}>
-                  VERIFIED AUDIT //
-                </span>
-                <span style={{ fontSize: 12, fontFamily: "JetBrains Mono", color: c.brandCyan, fontWeight: 800, display: "flex" }}>
-                  RUGSOL.XYZ
-                </span>
+              {/* Tags with severity dots */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", maxWidth: 340 }}>
+                {tags.map((t, i) => {
+                  const pts = tagPointsList[i] || 0;
+                  const tagColor = pts >= 30 ? "#ef4444" : pts >= 15 ? "#f59e0b" : pts > 0 ? "#eab308" : "#10b981";
+                  return (
+                    <span
+                      key={i}
+                      style={{
+                        fontSize: 12,
+                        fontFamily: "JetBrains Mono",
+                        fontWeight: 700,
+                        padding: "6px 14px",
+                        borderRadius: 100,
+                        background: `${tagColor}15`,
+                        border: `1px solid ${tagColor}35`,
+                        color: tagColor,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: tagColor, display: "flex" }} />
+                      {t}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          {/* 3. Footer Row: High-Visibility Branding & Viral Call-To-Action */}
+          {/* Footer: Prominent Branding & Viral High-Visibility Domain */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              borderTop: `1px solid ${c.border}`,
-              paddingTop: 14,
+              padding: "18px 64px",
+              background: c.footerBg,
+              borderTop: `1px solid ${c.footerBorder}`,
               position: "relative",
               zIndex: 10,
             }}
           >
-            {/* Left: RugSol Terminal Brand */}
+            {/* Left: RugSol Brand */}
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <svg width="34" height="34" viewBox="0 0 48 48" fill="none" style={{ display: "flex" }}>
+              <svg width="36" height="36" viewBox="0 0 48 48" fill="none" style={{ display: "flex" }}>
                 <path d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z" stroke="#38bdf8" strokeWidth="1.5" strokeLinejoin="round" fill="none" />
                 <path d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z" fill="rgba(56,189,248,0.08)" stroke="#38bdf8" strokeWidth="1" strokeLinejoin="round" />
                 <path d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z" fill="#38bdf8" />
                 <path d="M20.5 23.5L23 26L28 20.5" stroke="#08090d" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
               </svg>
               <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-                <span style={{ fontSize: 24, fontWeight: 900, color: c.textPrimary, letterSpacing: "-0.5px", display: "flex" }}>
+                <span style={{ fontSize: 24, fontWeight: 900, color: c.text, letterSpacing: "-0.5px", display: "flex" }}>
                   RugSol
                 </span>
-                <span style={{ fontSize: 12, fontFamily: "JetBrains Mono", color: c.textMuted, letterSpacing: "1.5px", textTransform: "uppercase", display: "flex" }}>
+                <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: c.textDim, letterSpacing: "2px", textTransform: "uppercase", display: "flex" }}>
                   ON-CHAIN SECURITY PROTOCOL
                 </span>
               </div>
             </div>
 
-            {/* Center: Viral Scan CTA */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, color: c.textSecondary, fontWeight: 600, display: "flex" }}>
-                AUDIT ANY SOLANA TOKEN FREE:
+            {/* Right: Timestamp + High-Visibility Domain Badge */}
+            <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+              <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, color: c.textDim, display: "flex" }}>
+                {dateStr}
               </span>
-              <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, color: c.brandCyan, fontWeight: 800, display: "flex" }}>
-                RUGSOL.XYZ
-              </span>
-            </div>
 
-            {/* Right: High-Impact Glowing Domain Badge */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                padding: "8px 24px",
-                borderRadius: 8,
-                background: "rgba(56,189,248,0.15)",
-                border: "2px solid #38bdf8",
-                boxShadow: "0 0 20px rgba(56,189,248,0.3)",
-              }}
-            >
-              <span style={{ fontFamily: "JetBrains Mono", fontSize: 17, fontWeight: 900, color: "#38bdf8", letterSpacing: "0.5px", display: "flex" }}>
-                rugsol.xyz →
-              </span>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "10px 28px",
+                  borderRadius: 10,
+                  background: "rgba(56,189,248,0.14)",
+                  border: "2px solid #38bdf8",
+                  boxShadow: "0 0 24px rgba(56,189,248,0.35)",
+                }}
+              >
+                <span style={{ fontFamily: "JetBrains Mono", fontSize: 20, fontWeight: 900, color: "#38bdf8", letterSpacing: "0.5px", display: "flex" }}>
+                  rugsol.xyz →
+                </span>
+              </div>
             </div>
           </div>
         </div>
