@@ -9,13 +9,13 @@ export const metadata: Metadata = {
 
 export default function ApiDocsPage() {
   return (
-    <div className="min-h-screen bg-[#08090d] text-[#f1f5f9]">
+    <div className="min-h-screen bg-bg-main text-text-primary">
       <Navbar />
 
       <main className="pt-20 md:pt-28 pb-20">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          {/* Header - No pill badge */}
-          <div className="mb-10">
+          {/* Header */}
+          <div className="mb-14 sm:mb-16">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold tracking-tight text-[#f8fafc] mb-3">
               API DOCUMENTATION
             </h1>
@@ -32,7 +32,16 @@ export default function ApiDocsPage() {
           </div>
 
           {/* Base URL */}
-          <section className="mb-10">
+          <section className="mb-16 sm:mb-20">
+            <div className="mb-4 px-1">
+              <h2 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase flex items-center gap-2">
+                <span className="text-[#38bdf8]">//</span> NETWORK GATEWAY
+              </h2>
+              <p className="text-xs text-[#94a3b8] mt-1">
+                Global low-latency edge endpoints routed across Solana RPC validator clusters.
+              </p>
+            </div>
+
             <div className="bg-[#0e1118] border border-[#1e2433] p-4 sm:p-5 rounded-xl">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-mono text-[#64748b] uppercase tracking-wider">PRODUCTION BASE RPC ENDPOINT</span>
@@ -45,11 +54,14 @@ export default function ApiDocsPage() {
           </section>
 
           {/* Scan Endpoint */}
-          <section className="mb-10">
+          <section className="mb-16 sm:mb-20">
             <div className="mb-4 px-1">
               <h2 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase flex items-center gap-2">
                 <span className="text-[#38bdf8]">//</span> ENDPOINTS
               </h2>
+              <p className="text-xs text-[#94a3b8] mt-1">
+                High-throughput token contract audit endpoints for programmatic execution.
+              </p>
             </div>
 
             <div className="bg-[#0e1118] border border-[#1e2433] rounded-xl overflow-hidden shadow-xl">
@@ -139,11 +151,14 @@ export default function ApiDocsPage() {
           </section>
 
           {/* Example Code */}
-          <section className="mb-10">
+          <section className="mb-16 sm:mb-20">
             <div className="mb-4 px-1">
               <h2 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase flex items-center gap-2">
                 <span className="text-[#38bdf8]">//</span> CODE SNIPPETS
               </h2>
+              <p className="text-xs text-[#94a3b8] mt-1">
+                Production-ready implementation examples in cURL, TypeScript, and Python.
+              </p>
             </div>
 
             <div className="space-y-3">
@@ -194,11 +209,14 @@ print(f"Verdict: Grade {data['grade']} ({data['score']}/100)")`}
           </section>
 
           {/* Rate Limits */}
-          <section className="mb-10">
+          <section className="mb-16 sm:mb-20">
             <div className="mb-4 px-1">
               <h2 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase flex items-center gap-2">
                 <span className="text-[#38bdf8]">//</span> RATE QUOTAS & CAPACITY
               </h2>
+              <p className="text-xs text-[#94a3b8] mt-1">
+                Tier allocation limits and burst threshold policies for public RPC consumers.
+              </p>
             </div>
 
             <div className="bg-[#0e1118] border border-[#1e2433] p-5 rounded-xl">
@@ -228,6 +246,9 @@ print(f"Verdict: Grade {data['grade']} ({data['score']}/100)")`}
               <h2 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase flex items-center gap-2">
                 <span className="text-[#38bdf8]">//</span> OPERATIONAL PROTOCOLS
               </h2>
+              <p className="text-xs text-[#94a3b8] mt-1">
+                Caching mechanics, execution latency guarantees, and payload structural schemas.
+              </p>
             </div>
             <div className="grid sm:grid-cols-3 gap-3">
               {[

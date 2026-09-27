@@ -14,38 +14,38 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="border-t border-[#1e2433] bg-[#08090d] text-[#94a3b8] font-sans">
+    <footer className="border-t border-border-color bg-bg-main text-text-secondary font-sans">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand & Mission */}
           <div className="md:col-span-2 space-y-3">
             <div className="flex items-center gap-2">
               <Logo size="md" />
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#161b26] text-[#38bdf8] border border-[#1e2433]">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-bg-secondary text-primary-accent border border-border-color">
                 TERMINAL v2.4
               </span>
             </div>
-            <p className="text-xs text-[#94a3b8] leading-relaxed max-w-md">
+            <p className="text-xs text-text-secondary leading-relaxed max-w-md">
               Enterprise-grade real-time security auditor for the Solana ecosystem. Powered by direct RPC node simulations, Jupiter honeypot execution routes, and liquidity pool forensics.
             </p>
             <div className="flex items-center gap-3 pt-2 text-xs font-mono">
               <a
                 href="https://rugsol.xyz"
-                className="text-[#38bdf8] hover:underline"
+                className="text-primary-accent hover:underline"
               >
                 rugsol.xyz
               </a>
-              <span className="text-[#1e2433]">•</span>
+              <span className="text-border-color">•</span>
               <a
                 href="https://x.com/RugSolScanner"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#f1f5f9] transition-colors"
+                className="hover:text-text-primary transition-colors"
               >
                 Twitter / X
               </a>
-              <span className="text-[#1e2433]">•</span>
-              <Link href="/api-docs" className="hover:text-[#f1f5f9] transition-colors">
+              <span className="text-border-color">•</span>
+              <Link href="/api-docs" className="hover:text-text-primary transition-colors">
                 API Docs
               </Link>
             </div>
@@ -113,26 +113,26 @@ export function Footer() {
         </div>
 
         {/* Bottom bar & disclaimer */}
-        <div className="pt-6 border-t border-[#1e2433] flex flex-col md:flex-row md:items-center justify-between gap-4 text-[11px] font-mono text-[#64748b]">
+        <div className="pt-6 border-t border-border-color flex flex-col md:flex-row md:items-center justify-between gap-4 text-[11px] font-mono text-text-muted">
           <div>
             © {new Date().getFullYear()} RugSol Analytics. Built for on-chain traders and protocols.
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="/terms" className="hover:text-[#94a3b8] transition-colors">
+            <Link href="/terms" className="hover:text-text-primary transition-colors">
               Terms
             </Link>
-            <Link href="/privacy" className="hover:text-[#94a3b8] transition-colors">
+            <Link href="/privacy" className="hover:text-text-primary transition-colors">
               Privacy
             </Link>
-            <Link href="/scoring" className="hover:text-[#94a3b8] transition-colors">
+            <Link href="/scoring" className="hover:text-text-primary transition-colors">
               Methodology
             </Link>
             <span>v2.4.1</span>
           </div>
         </div>
 
-        <div className="mt-4 text-[10px] text-[#475569] leading-relaxed">
+        <div className="mt-4 text-[10px] text-text-muted leading-relaxed">
           Disclaimer: RugSol provides algorithmically computed token heuristics for research and informational purposes only. On-chain simulations and scoring cannot guarantee future contract behavior or replace independent due diligence. Trade at your own risk.
         </div>
       </div>

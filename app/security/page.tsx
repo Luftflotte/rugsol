@@ -67,7 +67,7 @@ const practices = [
 
 export default function SecurityPage() {
   return (
-    <div className="min-h-screen bg-[#08090d] text-[#f1f5f9]">
+    <div className="min-h-screen bg-bg-main text-text-primary">
       <Navbar />
 
       <main className="pt-20 md:pt-28 pb-20">

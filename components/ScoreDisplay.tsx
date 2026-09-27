@@ -77,7 +77,7 @@ export function ScoreDisplay({
       {/* Precision Circular Telemetry Dial */}
       <div className="relative w-36 h-36 flex items-center justify-center">
         {/* Calibrated Tick Marks ring */}
-        <div className="absolute inset-0 rounded-full border border-[#1e2433]" />
+        <div className="absolute inset-0 rounded-full border border-border-color" />
 
         <svg className="w-full h-full transform -rotate-90 relative z-10" viewBox="0 0 128 128">
           {/* Background track */}
@@ -85,7 +85,7 @@ export function ScoreDisplay({
             cx="64"
             cy="64"
             r={radius}
-            stroke="#161b26"
+            stroke="var(--border-color)"
             strokeWidth={strokeWidth}
             fill="transparent"
           />
@@ -115,9 +115,9 @@ export function ScoreDisplay({
             >
               {displayScore}
             </span>
-            <span className="text-xs text-[#64748b] font-medium ml-1">/100</span>
+            <span className="text-xs text-text-muted font-medium ml-1">/100</span>
           </div>
-          <span className="text-[10px] font-mono uppercase tracking-widest text-[#94a3b8] mt-0.5">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-text-muted mt-0.5">
             Safety Score
           </span>
         </div>
@@ -144,7 +144,7 @@ export function ScoreDisplay({
           <InfoTooltip
             content={
               <div className="space-y-2 font-sans">
-                <p className="font-bold text-[#f8fafc]">Scoring Architecture</p>
+                <p className="font-bold text-text-primary">Scoring Architecture</p>
                 <div className="space-y-1 text-xs">
                   <p><span className="text-emerald-400 font-mono font-bold">A (80-100):</span> Low risk, audited parameters verified.</p>
                   <p><span className="text-lime-400 font-mono font-bold">B (60-79):</span> Acceptable risk, minor warnings detected.</p>
@@ -159,7 +159,7 @@ export function ScoreDisplay({
         </div>
 
         {/* Status diagnosis tag */}
-        <span className="text-[11px] font-mono text-[#64748b]">
+        <span className="text-[11px] font-mono text-text-muted">
           {isSafe
             ? "✓ CONTRACT VERIFIED BY ENGINE"
             : isMedium

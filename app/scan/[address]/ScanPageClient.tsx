@@ -475,7 +475,7 @@ export default function ScanPageClient() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#08090d] text-[#f1f5f9] font-sans antialiased selection:bg-[#38bdf8]/30">
+    <div className="min-h-screen flex flex-col bg-bg-main text-text-primary font-sans antialiased selection:bg-[#38bdf8]/30">
       <Navbar />
 
       <main className="flex-1 pt-14 pb-16">

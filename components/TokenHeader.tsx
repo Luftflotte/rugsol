@@ -176,7 +176,7 @@ export function TokenHeader({ name, symbol, image, address, priceData, mode }: T
                 <span className="text-[#64748b] mr-1">MCAP:</span>
                 <span className="text-[#f1f5f9] font-semibold">{formatCompact(priceData.marketCap)}</span>
               </div>
-              <span className="text-[#1e2433]">|</span>
+              <span className="text-border-color">|</span>
               <div className="flex items-center gap-1">
                 <span className="text-[#64748b]">NETWORK:</span>
                 <span className="text-emerald-400 flex items-center gap-1 font-semibold">

@@ -302,112 +302,164 @@ html.light body {
   color: #090d16;
 }
 
-/* Background surfaces */
-html[data-theme="light"] .bg-\[\#08090d\],
-html.light .bg-\[\#08090d\] {
+/* Background surfaces - wildcard attribute selectors match 100% of DOM nodes */
+html[data-theme="light"] [class*="bg-[#08090d]"],
+html.light [class*="bg-[#08090d]"] {
   background-color: #f8fafc !important;
 }
 
-html[data-theme="light"] .bg-\[\#090b10\],
-html.light .bg-\[\#090b10\] {
+html[data-theme="light"] [class*="bg-[#090b10]"],
+html[data-theme="light"] [class*="bg-[#0a0d14]"],
+html.light [class*="bg-[#090b10]"],
+html.light [class*="bg-[#0a0d14]"] {
   background-color: #f1f5f9 !important;
 }
 
-html[data-theme="light"] .bg-\[\#0e1118\],
-html.light .bg-\[\#0e1118\] {
+html[data-theme="light"] [class*="bg-[#0e1118]"],
+html[data-theme="light"] [class*="bg-[#111113]"],
+html.light [class*="bg-[#0e1118]"],
+html.light [class*="bg-[#111113]"] {
   background-color: #ffffff !important;
   box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
 }
 
-html[data-theme="light"] .bg-\[\#121622\],
-html[data-theme="light"] .bg-\[\#131722\],
-html[data-theme="light"] .bg-\[\#141824\],
-html[data-theme="light"] .bg-\[\#161b26\],
-html.light .bg-\[\#121622\],
-html.light .bg-\[\#131722\],
-html.light .bg-\[\#141824\],
-html.light .bg-\[\#161b26\] {
+html[data-theme="light"] [class*="bg-[#121622]"],
+html[data-theme="light"] [class*="bg-[#121620]"],
+html[data-theme="light"] [class*="bg-[#131722]"],
+html[data-theme="light"] [class*="bg-[#141824]"],
+html[data-theme="light"] [class*="bg-[#161b26]"],
+html[data-theme="light"] [class*="bg-[#161b2a]"],
+html.light [class*="bg-[#121622]"],
+html.light [class*="bg-[#121620]"],
+html.light [class*="bg-[#131722]"],
+html.light [class*="bg-[#141824]"],
+html.light [class*="bg-[#161b26]"],
+html.light [class*="bg-[#161b2a]"] {
   background-color: #f1f5f9 !important;
 }
 
-html[data-theme="light"] .bg-\[\#0a0d14\],
-html.light .bg-\[\#0a0d14\] {
+html[data-theme="light"] [class*="bg-[#1a2030]"],
+html[data-theme="light"] [class*="bg-[#1e2433]"],
+html.light [class*="bg-[#1a2030]"],
+html.light [class*="bg-[#1e2433]"] {
+  background-color: #e2e8f0 !important;
+}
+
+html[data-theme="light"] [class*="bg-[#141014]"],
+html.light [class*="bg-[#141014]"] {
+  background-color: #fef2f2 !important;
+}
+
+html[data-theme="light"] [class*="bg-[#18181b]"],
+html.light [class*="bg-[#18181b]"] {
   background-color: #f8fafc !important;
 }
 
 /* Borders & Dividers */
-html[data-theme="light"] .border-\[\#1e2433\],
-html[data-theme="light"] .border-\[\#161b26\],
-html.light .border-\[\#1e2433\],
-html.light .border-\[\#161b26\] {
+html[data-theme="light"] [class*="border-[#1e2433]"],
+html[data-theme="light"] [class*="border-[#161b26]"],
+html[data-theme="light"] [class*="border-[#c0c0c0]"],
+html.light [class*="border-[#1e2433]"],
+html.light [class*="border-[#161b26]"],
+html.light [class*="border-[#c0c0c0]"] {
   border-color: #e2e8f0 !important;
 }
 
-html[data-theme="light"] .divide-\[\#1e2433\] > :not([hidden]) ~ :not([hidden]),
-html[data-theme="light"] .divide-\[\#161b26\] > :not([hidden]) ~ :not([hidden]),
-html.light .divide-\[\#1e2433\] > :not([hidden]) ~ :not([hidden]),
-html.light .divide-\[\#161b26\] > :not([hidden]) ~ :not([hidden]) {
+html[data-theme="light"] [class*="border-[#2a3449]"],
+html.light [class*="border-[#2a3449]"] {
+  border-color: #cbd5e1 !important;
+}
+
+html[data-theme="light"] [class*="divide-[#1e2433]"] > :not([hidden]) ~ :not([hidden]),
+html[data-theme="light"] [class*="divide-[#161b26]"] > :not([hidden]) ~ :not([hidden]),
+html.light [class*="divide-[#1e2433]"] > :not([hidden]) ~ :not([hidden]),
+html.light [class*="divide-[#161b26]"] > :not([hidden]) ~ :not([hidden]) {
   border-color: #e2e8f0 !important;
 }
 
-/* Typography */
-html[data-theme="light"] .text-\[\#f8fafc\],
-html[data-theme="light"] .text-\[\#f1f5f9\],
-html[data-theme="light"] .text-\[\#f3f4f6\],
-html.light .text-\[\#f8fafc\],
-html.light .text-\[\#f1f5f9\],
-html.light .text-\[\#f3f4f6\] {
+/* Typography - High contrast readability */
+html[data-theme="light"] [class*="text-[#f8fafc]"],
+html[data-theme="light"] [class*="text-[#f1f5f9]"],
+html[data-theme="light"] [class*="text-[#f3f4f6]"],
+html[data-theme="light"] [class*="text-[#e8e8e8]"],
+html.light [class*="text-[#f8fafc]"],
+html.light [class*="text-[#f1f5f9]"],
+html.light [class*="text-[#f3f4f6]"],
+html.light [class*="text-[#e8e8e8]"] {
   color: #090d16 !important;
 }
 
-html[data-theme="light"] .text-\[\#94a3b8\],
-html[data-theme="light"] .text-\[\#9ca3af\],
-html.light .text-\[\#94a3b8\],
-html.light .text-\[\#9ca3af\] {
+/* Light gray text in dark mode becomes high-contrast charcoal in light mode */
+html[data-theme="light"] [class*="text-[#e2e8f0]"],
+html.light [class*="text-[#e2e8f0]"] {
+  color: #1e293b !important;
+}
+
+html[data-theme="light"] [class*="text-[#94a3b8]"],
+html[data-theme="light"] [class*="text-[#9ca3af]"],
+html[data-theme="light"] [class*="text-[#d4d4d8]"],
+html.light [class*="text-[#94a3b8]"],
+html.light [class*="text-[#9ca3af]"],
+html.light [class*="text-[#d4d4d8]"] {
   color: #334155 !important;
 }
 
-html[data-theme="light"] .text-\[\#64748b\],
-html[data-theme="light"] .text-\[\#6b7280\],
-html.light .text-\[\#64748b\],
-html.light .text-\[\#6b7280\] {
+html[data-theme="light"] [class*="text-[#64748b]"],
+html[data-theme="light"] [class*="text-[#6b7280]"],
+html[data-theme="light"] [class*="text-[#475569]"],
+html.light [class*="text-[#64748b]"],
+html.light [class*="text-[#6b7280]"],
+html.light [class*="text-[#475569]"] {
   color: #64748b !important;
 }
 
+/* Separator text bullets */
+html[data-theme="light"] [class*="text-[#1e2433]"],
+html.light [class*="text-[#1e2433]"] {
+  color: #cbd5e1 !important;
+}
+
 /* Hovers */
-html[data-theme="light"] .hover\:bg-\[\#121622\]:hover,
-html[data-theme="light"] .hover\:bg-\[\#161b26\]:hover,
-html[data-theme="light"] .hover\:bg-\[\#1a2030\]:hover,
-html.light .hover\:bg-\[\#121622\]:hover,
-html.light .hover\:bg-\[\#161b26\]:hover,
-html.light .hover\:bg-\[\#1a2030\]:hover {
+html[data-theme="light"] [class*="hover:bg-[#121622]"]:hover,
+html[data-theme="light"] [class*="hover:bg-[#161b26]"]:hover,
+html[data-theme="light"] [class*="hover:bg-[#161b2a]"]:hover,
+html[data-theme="light"] [class*="hover:bg-[#121620]"]:hover,
+html.light [class*="hover:bg-[#121622]"]:hover,
+html.light [class*="hover:bg-[#161b26]"]:hover,
+html.light [class*="hover:bg-[#161b2a]"]:hover,
+html.light [class*="hover:bg-[#121620]"]:hover {
   background-color: #f1f5f9 !important;
 }
 
-html[data-theme="light"] .hover\:border-\[\#38bdf8\]\/40:hover,
-html.light .hover\:border-\[\#38bdf8\]\/40:hover {
+html[data-theme="light"] [class*="hover:bg-[#1a2030]"]:hover,
+html.light [class*="hover:bg-[#1a2030]"]:hover {
+  background-color: #e2e8f0 !important;
+}
+
+html[data-theme="light"] [class*="hover:border-[#38bdf8]"]:hover,
+html.light [class*="hover:border-[#38bdf8]"]:hover {
   border-color: #0284c7 !important;
 }
 
 /* Accents tuned for high contrast on light paper */
-html[data-theme="light"] .text-\[\#38bdf8\],
-html.light .text-\[\#38bdf8\] {
+html[data-theme="light"] [class*="text-[#38bdf8]"],
+html.light [class*="text-[#38bdf8]"] {
   color: #0284c7 !important;
 }
 
-html[data-theme="light"] .bg-\[\#38bdf8\],
-html.light .bg-\[\#38bdf8\] {
+html[data-theme="light"] [class*="bg-[#38bdf8]"],
+html.light [class*="bg-[#38bdf8]"] {
   background-color: #0284c7 !important;
   color: #ffffff !important;
 }
 
-html[data-theme="light"] .bg-\[\#38bdf8\]\/10,
-html.light .bg-\[\#38bdf8\]\/10 {
+html[data-theme="light"] [class*="bg-[#38bdf8]/10"],
+html.light [class*="bg-[#38bdf8]/10"] {
   background-color: rgba(2, 132, 199, 0.08) !important;
 }
 
-html[data-theme="light"] .border-\[\#38bdf8\]\/30,
-html.light .border-\[\#38bdf8\]\/30 {
+html[data-theme="light"] [class*="border-[#38bdf8]/30"],
+html.light [class*="border-[#38bdf8]/30"] {
   border-color: rgba(2, 132, 199, 0.3) !important;
 }
 
@@ -484,4 +536,12 @@ html.light .glass-card:hover {
 html[data-theme="light"] .bg-bg-card,
 html.light .bg-bg-card {
   box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
+}
+
+/* Progress bar tracks in light mode */
+html[data-theme="light"] .h-1\.5[class*="bg-[#161b26]"],
+html[data-theme="light"] .h-3[class*="bg-[#161b26]"],
+html.light .h-1\.5[class*="bg-[#161b26]"],
+html.light .h-3[class*="bg-[#161b26]"] {
+  background-color: #e2e8f0 !important;
 }
