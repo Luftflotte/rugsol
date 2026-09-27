@@ -26,7 +26,7 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border-color bg-bg-main/90 backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
-        <div className="flex h-13 items-center justify-between gap-4">
+        <div className="relative flex h-13 items-center justify-between gap-4">
           
           {/* Logo & Terminal Tag */}
           <div className="flex items-center gap-3">
@@ -36,8 +36,8 @@ export function Navbar() {
             </span>
           </div>
 
-          {/* Network Live Ticker (Middle) */}
-          <div className="hidden lg:flex items-center gap-4 text-xs font-mono text-text-muted border border-border-color/60 bg-bg-card px-3 py-1 rounded-md">
+          {/* Network Live Ticker (Mathematically Centered) */}
+          <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-4 text-xs font-mono text-text-muted border border-border-color/60 bg-bg-card px-3 py-1 rounded-md pointer-events-none select-none">
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-text-secondary">Mainnet Beta</span>
