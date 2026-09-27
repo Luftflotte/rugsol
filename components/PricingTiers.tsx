@@ -171,17 +171,10 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
   const isHero = tier.style === "hero";
   const isTechnical = tier.style === "technical";
 
-  const cardBg = isHero
-    ? isDark
-      ? "bg-gradient-to-b from-[#18181b]/80 to-[#0c0c0e]/90 border border-[#c0c0c0]/30 shadow-[0_0_40px_-10px_rgba(192,192,192,0.15),_inset_0_1px_0_rgba(255,255,255,0.06)] hover:shadow-[0_0_50px_-10px_rgba(192,192,192,0.25)]"
-      : "bg-gradient-to-b from-white to-gray-50/90 border border-gray-300/60 shadow-[0_0_40px_-10px_rgba(0,0,0,0.08),_inset_0_1px_0_rgba(255,255,255,0.8)] hover:shadow-[0_0_50px_-10px_rgba(0,0,0,0.12)]"
-    : isTechnical
-    ? isDark
-      ? "bg-[#111113]/70 border border-zinc-700/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] hover:border-zinc-600/60"
-      : "bg-white/70 border border-gray-200/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] hover:border-gray-300/70"
-    : isDark
-    ? "bg-[#111113]/60 border border-zinc-800/50 hover:border-zinc-700/60"
-    : "bg-white/60 border border-gray-200/50 hover:border-gray-300/60";
+  // Simplified card backgrounds matching site design
+  const cardBg = isDark
+    ? "bg-bg-card border border-border-color hover:border-border-color/80"
+    : "bg-white border border-gray-200 hover:border-gray-300";
 
   return (
     <motion.div
@@ -191,42 +184,23 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
       animate="visible"
       whileHover={{ y: -4, transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] } }}
       className={`
-        relative flex flex-col rounded-2xl ${compact ? "p-4 sm:p-5" : "p-6 sm:p-8"}
+        relative flex flex-col rounded-xl ${compact ? "p-5 sm:p-6" : "p-6 sm:p-8"}
         ${cardBg}
-        ${isHero ? "md:scale-[1.03] md:z-10" : ""}
+        ${isHero ? "md:scale-[1.02] md:z-10" : ""}
         transition-all duration-300
       `}
     >
-      {/* Hero top shimmer line */}
+      {/* Top accent line for hero/API tiers */}
       {isHero && (
-        <div className={`absolute inset-x-0 top-0 h-px rounded-t-2xl ${
-          isDark
-            ? "bg-gradient-to-r from-transparent via-[#d4d4d8]/50 to-transparent"
-            : "bg-gradient-to-r from-transparent via-gray-300/60 to-transparent"
+        <div className={`absolute inset-x-0 top-0 h-0.5 rounded-t-xl ${
+          isDark ? "bg-emerald-500/30" : "bg-emerald-500/40"
         }`} />
       )}
 
-      {/* API top shimmer line */}
       {isTechnical && (
-        <div className={`absolute inset-x-0 top-0 h-px rounded-t-2xl ${
-          isDark
-            ? "bg-gradient-to-r from-transparent via-blue-400/30 to-transparent"
-            : "bg-gradient-to-r from-transparent via-blue-300/40 to-transparent"
+        <div className={`absolute inset-x-0 top-0 h-0.5 rounded-t-xl ${
+          isDark ? "bg-blue-500/30" : "bg-blue-500/40"
         }`} />
-      )}
-
-      {/* Badge */}
-      {tier.badge && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className={`inline-flex items-center gap-1.5 px-4 py-1 rounded-full text-xs font-semibold tracking-wider uppercase whitespace-nowrap backdrop-blur-md ${
-            isDark
-              ? "bg-[#18181b]/80 border border-[#c0c0c0]/25 text-[#d4d4d8] shadow-[0_0_12px_-3px_rgba(192,192,192,0.1)]"
-              : "bg-white/80 border border-gray-300/50 text-gray-600 shadow-[0_0_12px_-3px_rgba(0,0,0,0.06)]"
-          }`}>
-            <Sparkles className={`w-3 h-3 ${isDark ? "text-[#e8e8e8]" : "text-gray-500"}`} />
-            {tier.badge}
-          </span>
-        </div>
       )}
 
       {/* Header + Price */}
@@ -234,19 +208,7 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
         <h3
           className={`
             ${compact ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl"} font-bold tracking-tight mb-1
-            ${
-              isHero
-                ? isDark
-                  ? "bg-gradient-to-r from-white via-[#c0c0c0] to-white bg-clip-text text-transparent"
-                  : "bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 bg-clip-text text-transparent"
-                : isTechnical
-                ? isDark
-                  ? "font-mono text-zinc-400"
-                  : "font-mono text-gray-500"
-                : isDark
-                ? "text-zinc-400"
-                : "text-gray-500"
-            }
+            ${isDark ? "text-text-primary" : "text-gray-900"}
           `}
         >
           {tier.name}
@@ -256,25 +218,13 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
         {tier.price && (
           <div className={`${compact ? "mt-2 mb-1" : "mt-3 mb-1"} flex items-baseline gap-0.5`}>
             <span className={`font-bold ${
-              isHero
-                ? `${compact ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl"} ${
-                    isDark
-                      ? "bg-gradient-to-r from-white via-[#c0c0c0] to-white bg-clip-text text-transparent"
-                      : "bg-gradient-to-r from-gray-900 via-gray-600 to-gray-900 bg-clip-text text-transparent"
-                  }`
-                : isTechnical
-                ? `${compact ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"} font-mono ${
-                    isDark ? "text-zinc-300" : "text-gray-600"
-                  }`
-                : `${compact ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl"} ${
-                    isDark ? "text-zinc-600" : "text-gray-400"
-                  }`
-            }`}>
+              compact ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl"
+            } ${isDark ? "text-text-primary" : "text-gray-900"}`}>
               {tier.price}
             </span>
             {tier.period && (
               <span className={`text-sm font-normal ml-1 ${
-                isDark ? "text-zinc-500" : "text-gray-400"
+                isDark ? "text-text-muted" : "text-gray-500"
               }`}>
                 {tier.period}
               </span>
@@ -283,9 +233,7 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
         )}
 
         <p className={`text-sm ${
-          isHero
-            ? isDark ? "text-zinc-400" : "text-gray-500"
-            : isDark ? "text-zinc-600" : "text-gray-400"
+          isDark ? "text-text-secondary" : "text-gray-600"
         }`}>
           {tier.subtext}
         </p>
@@ -295,54 +243,46 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
       <div className={`divider-premium ${compact ? "my-3" : "my-4 sm:my-6"} ${isHero ? "opacity-60" : "opacity-30"}`} />
 
       {/* Features */}
-      <ul className={`flex-1 ${compact ? "space-y-1.5 mb-4" : "space-y-3 mb-8"}`}>
+      <ul className={`flex-1 ${compact ? "space-y-2 mb-4" : "space-y-3 mb-6"}`}>
         {tier.features.map((feature, i) => (
           <li
             key={i}
             className={`flex items-start gap-3 text-sm leading-relaxed ${
               feature.disabled
-                ? isDark ? "text-zinc-600 opacity-50" : "text-gray-400 opacity-50"
-                : feature.highlight
-                ? isDark ? "text-white font-semibold" : "text-gray-900 font-semibold"
-                : isHero
-                ? isDark ? "text-zinc-300" : "text-gray-600"
-                : isTechnical
-                ? isDark ? "text-zinc-400" : "text-gray-500"
-                : isDark ? "text-zinc-400" : "text-gray-500"
+                ? isDark ? "text-text-muted opacity-50" : "text-gray-400 opacity-50"
+                : isDark ? "text-text-secondary" : "text-gray-600"
             }`}
           >
             <span className="mt-0.5 shrink-0">
               {feature.disabled ? (
-                <EyeOff className={`w-4 h-4 ${isDark ? "text-zinc-700" : "text-gray-300"}`} />
-              ) : isHero ? (
-                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-green-500/10">
-                  <span className={`block w-1.5 h-1.5 rounded-full ${isDark ? "bg-green-400/70" : "bg-green-500/70"}`} />
-                </span>
-              ) : isTechnical ? (
-                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-blue-500/10">
-                  <span className={`block w-1.5 h-1.5 rounded-full ${isDark ? "bg-blue-400/70" : "bg-blue-500/70"}`} />
-                </span>
+                <EyeOff className={`w-4 h-4 ${isDark ? "text-text-muted" : "text-gray-300"}`} />
               ) : (
-                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-zinc-500/10">
-                  <span className={`block w-1.5 h-1.5 rounded-full ${isDark ? "bg-zinc-500/70" : "bg-gray-400/70"}`} />
-                </span>
+                <Check className={`w-4 h-4 ${
+                  isHero
+                    ? "text-emerald-500"
+                    : isTechnical
+                    ? "text-blue-500"
+                    : isDark ? "text-text-muted" : "text-gray-400"
+                }`} />
               )}
             </span>
             <span>{feature.text}</span>
           </li>
         ))}
         {isHero && (
-          <li className={`text-xs pt-1 ${isDark ? "text-zinc-500" : "text-gray-400"}`}>+ all Visitor tier features</li>
+          <li className={`text-xs pt-1 ${isDark ? "text-text-muted" : "text-gray-400"}`}>
+            + all Visitor tier features
+          </li>
         )}
       </ul>
 
       {/* Button */}
       {tier.button.variant === "primary" ? (
         <button
-          className={`noir-connect w-full ${compact ? "py-2.5 px-4" : "py-3 px-6"} rounded-xl font-semibold text-sm
+          className={`noir-connect w-full ${compact ? "py-2.5 px-4" : "py-3 px-6"} rounded-lg font-semibold text-sm
             ${isDark
-              ? "bg-gradient-to-r from-white to-[#d4d4d8] text-[#09090b] hover:from-[#f0f0f0] hover:to-[#c0c0c0] hover:shadow-[0_0_24px_-4px_rgba(255,255,255,0.2)]"
-              : "bg-gradient-to-r from-gray-900 to-gray-700 text-white hover:from-gray-800 hover:to-gray-600 hover:shadow-[0_0_24px_-4px_rgba(0,0,0,0.15)]"
+              ? "bg-emerald-500 text-white hover:bg-emerald-400"
+              : "bg-emerald-600 text-white hover:bg-emerald-500"
             }
             active:scale-[0.98] hover:scale-[1.01]
             transition-all duration-200 cursor-pointer flex items-center justify-center gap-2`}
@@ -353,10 +293,10 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
       ) : tier.button.variant === "outline" ? (
         <Link
           href="/api-docs"
-          className={`w-full ${compact ? "py-2.5 px-4" : "py-3 px-6"} rounded-xl font-semibold text-sm font-mono
+          className={`w-full ${compact ? "py-2.5 px-4" : "py-3 px-6"} rounded-lg font-semibold text-sm
             ${isDark
-              ? "border border-zinc-600/60 text-zinc-400 hover:bg-blue-500/[0.04] hover:border-zinc-500/70 hover:text-zinc-300"
-              : "border border-gray-300/80 text-gray-500 hover:bg-blue-50/50 hover:border-gray-400/70 hover:text-gray-700"
+              ? "border border-border-color text-text-secondary hover:bg-bg-secondary hover:border-border-color/80 hover:text-text-primary"
+              : "border border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 hover:text-gray-900"
             }
             active:scale-[0.98] hover:scale-[1.01]
             transition-all duration-200 cursor-pointer flex items-center justify-center gap-2`}
@@ -367,10 +307,10 @@ function TierCard({ tier, index, instant, compact, isDark }: { tier: Tier; index
       ) : (
         <button
           disabled
-          className={`w-full ${compact ? "py-2.5 px-4" : "py-3 px-6"} rounded-xl font-semibold text-sm
+          className={`w-full ${compact ? "py-2.5 px-4" : "py-3 px-6"} rounded-lg font-semibold text-sm
             ${isDark
-              ? "bg-zinc-800/50 text-zinc-600 border border-zinc-800/60"
-              : "bg-gray-100/80 text-gray-400 border border-gray-200/60"
+              ? "bg-bg-secondary text-text-muted border border-border-color"
+              : "bg-gray-100 text-gray-400 border border-gray-200"
             }
             cursor-not-allowed flex items-center justify-center gap-2`}
         >
@@ -393,9 +333,9 @@ export function PricingTiers({ instant, compact }: { instant?: boolean; compact?
 
   return (
     <section id="api" className="scroll-mt-20">
-      <div className={`text-center ${compact ? "mb-8" : "mb-12"}`}>
+      <div className={`text-center ${compact ? "mb-6" : "mb-12"}`}>
         <h2 className={`${compact ? "text-xl sm:text-2xl" : "text-3xl sm:text-4xl"} font-bold text-text-primary mb-2`}>
-          {compact ? "Want more?" : <>Unlimited Scans, <span className="gradient-text">Free Forever</span></>}
+          {compact ? "Want more?" : "Unlimited Scans, Free Forever"}
         </h2>
         {!compact && (
           <p className="text-text-secondary text-base max-w-xl mx-auto">
@@ -404,7 +344,7 @@ export function PricingTiers({ instant, compact }: { instant?: boolean; compact?
         )}
       </div>
 
-      <div className={`grid grid-cols-1 ${compact ? "sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-5" : "md:grid-cols-3 gap-6 lg:gap-8"} items-start`}>
+      <div className={`grid grid-cols-1 ${compact ? "sm:grid-cols-3 gap-3 sm:gap-4" : "md:grid-cols-3 gap-6"} items-start`}>
         {tiers.map((tier, i) => (
           <TierCard key={tier.name} tier={tier} index={i} instant={instant} compact={compact} isDark={isDark} />
         ))}

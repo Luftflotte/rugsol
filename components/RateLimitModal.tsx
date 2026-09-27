@@ -217,21 +217,21 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
           initial="hidden"
           animate="visible"
           exit="exit"
-          className={`fixed inset-0 backdrop-blur-sm ${
-            isDark ? "bg-black/50 max-md:bg-black/70" : "bg-white/60 max-md:bg-white/80"
+          className={`fixed inset-0 ${
+            isDark ? "bg-black/60" : "bg-gray-900/20 backdrop-blur-sm"
           }`}
           onClick={onClose}
         />
 
-        {/* Close Button — fixed top-right */}
+        {/* Close Button */}
         <motion.button
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { delay: 0.3 } }}
           onClick={onClose}
-          className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-200 cursor-pointer ${
+          className={`fixed top-4 right-4 sm:top-6 sm:right-6 z-50 w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-200 cursor-pointer ${
             isDark
-              ? "bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-400 hover:text-zinc-200"
-              : "bg-gray-100/80 hover:bg-gray-200/80 text-gray-500 hover:text-gray-700"
+              ? "bg-bg-card hover:bg-bg-secondary text-text-secondary hover:text-text-primary border border-border-color"
+              : "bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 border border-gray-200 shadow-sm"
           }`}
         >
           <X className="w-5 h-5" />
@@ -248,27 +248,21 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
           onClick={(e) => e.stopPropagation()}
         >
           {/* ========== Header Section ========== */}
-          <div className="text-center mb-4 sm:mb-6">
+          <div className="text-center mb-6">
             {/* Icon */}
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="inline-flex mb-3"
+              className="inline-flex mb-4"
             >
-              <div className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center ${
+              <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
                 isDark
-                  ? "bg-gradient-to-br from-zinc-800/80 to-zinc-900/80 border border-[#c0c0c0]/20 shadow-[0_0_30px_-8px_rgba(192,192,192,0.15)]"
-                  : "bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200/60 shadow-[0_0_30px_-8px_rgba(0,0,0,0.08)]"
+                  ? "bg-bg-card border border-border-color"
+                  : "bg-white border border-gray-200 shadow-sm"
               }`}>
-                <Shield className={`w-6 h-6 sm:w-7 sm:h-7 ${
-                  isDark ? "text-[#c0c0c0]" : "text-gray-500"
-                }`} />
-                {/* Subtle glow behind icon */}
-                <div className={`absolute inset-0 rounded-xl ${
-                  isDark
-                    ? "bg-gradient-to-br from-[#c0c0c0]/5 to-transparent"
-                    : "bg-gradient-to-br from-gray-300/10 to-transparent"
+                <Shield className={`w-7 h-7 ${
+                  isDark ? "text-emerald-500" : "text-emerald-600"
                 }`} />
               </div>
             </motion.div>
@@ -278,11 +272,11 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.25 }}
-              className={`text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mb-2 ${
-                isDark ? "text-white" : "text-gray-900"
+              className={`text-2xl sm:text-3xl font-bold tracking-tight mb-2 ${
+                isDark ? "text-text-primary" : "text-gray-900"
               }`}
             >
-              Free Scans <span className="gradient-text">Exhausted</span>
+              Free Scans Exhausted
             </motion.h2>
 
             {/* Subtitle */}
@@ -291,7 +285,7 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.3 }}
               className={`text-sm sm:text-base max-w-lg mx-auto leading-relaxed ${
-                isDark ? "text-zinc-400" : "text-gray-500"
+                isDark ? "text-text-secondary" : "text-gray-600"
               }`}
             >
               Choose a tier below to continue scanning.
@@ -302,7 +296,7 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.35 }}
-              className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-3"
+              className="flex flex-wrap items-center justify-center gap-3 mt-4"
             >
               {[
                 { icon: <CheckCircle2 className="w-3 h-3" />, text: "Free forever" },
@@ -311,11 +305,11 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
               ].map((badge, i) => (
                 <span
                   key={i}
-                  className={`inline-flex items-center gap-1 text-[10px] sm:text-xs font-medium ${
-                    isDark ? "text-zinc-500" : "text-gray-400"
+                  className={`inline-flex items-center gap-1.5 text-xs font-medium ${
+                    isDark ? "text-text-muted" : "text-gray-500"
                   }`}
                 >
-                  <span className={isDark ? "text-green-400/70" : "text-green-600/70"}>
+                  <span className="text-emerald-500">
                     {badge.icon}
                   </span>
                   {badge.text}
