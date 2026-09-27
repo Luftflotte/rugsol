@@ -44,24 +44,19 @@ const sections = [
       "We implement industry-standard security measures to protect the Platform infrastructure. All connections are encrypted via HTTPS. However, no method of electronic transmission is 100% secure, and we cannot guarantee absolute security.",
   },
   {
-    title: "8. Telegram Bot",
-    content:
-      "If you interact with our Telegram bot, we process your Telegram chat ID and message content to provide scan results. We do not store message history beyond what is needed to fulfill the current request. We do not access your Telegram contacts or profile information beyond your public display name.",
-  },
-  {
-    title: "9. Children's Privacy",
+    title: "8. Children's Privacy",
     content:
       "RugSol is not intended for use by individuals under the age of 18. We do not knowingly collect information from minors.",
   },
   {
-    title: "10. Changes to This Policy",
+    title: "9. Changes to This Policy",
     content:
       "We may update this Privacy Policy periodically. Changes will be posted on this page with an updated revision date. Your continued use of the Platform after changes constitutes acceptance of the updated policy.",
   },
   {
-    title: "11. Contact",
+    title: "10. Contact",
     content:
-      "For privacy-related inquiries, please contact us through our official Telegram channel or GitHub repository.",
+      "For privacy-related inquiries, please reach out via our official X (Twitter) account @RugSolScanner or GitHub repository.",
   },
 ];
 

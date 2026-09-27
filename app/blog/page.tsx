@@ -134,11 +134,11 @@ export default function BlogPage() {
             <div className="glass-card p-6 sm:p-8 rounded-2xl text-center">
               <h2 className="text-lg font-bold text-text-primary mb-2">Stay in the loop</h2>
               <p className="text-sm text-text-secondary mb-6 max-w-md mx-auto">
-                Follow us on Twitter and join our Telegram for the latest security research and platform updates.
+                Follow us on Twitter for the latest security research, protocol vulnerability disclosures, and platform updates.
               </p>
               <div className="flex items-center justify-center gap-3">
                 <a
-                  href="https://twitter.com"
+                  href="https://x.com/RugSolScanner"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-premium inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium"
@@ -146,15 +146,7 @@ export default function BlogPage() {
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
-                  Twitter
-                </a>
-                <a
-                  href="https://t.me/rugsolinfobot"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium border border-border-color/50 text-text-primary hover:bg-bg-secondary/50 transition-colors"
-                >
-                  Telegram
+                  Twitter / X
                 </a>
               </div>
             </div>

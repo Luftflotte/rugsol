@@ -195,7 +195,7 @@ export default function AboutPage() {
           {/* Integrations */}
           <section className="mb-20">
             <h2 className="text-xl font-semibold text-text-primary mb-2 px-1">Integrations</h2>
-            <p className="text-sm text-text-secondary mb-8 px-1">Use RugSol programmatically or get alerts in Telegram.</p>
+            <p className="text-sm text-text-secondary mb-8 px-1">Use RugSol programmatically in your trading bots and analytics tools.</p>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="glass-card p-5 rounded-2xl">
@@ -205,27 +205,27 @@ export default function AboutPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
                     </svg>
                   </div>
-                  <h3 className="text-sm font-semibold text-text-primary">Public API</h3>
+                  <h3 className="text-sm font-semibold text-text-primary">Public REST API</h3>
                 </div>
                 <p className="text-sm text-text-secondary leading-relaxed mb-3">
                   POST to <code className="text-xs px-1.5 py-0.5 rounded bg-[var(--silver-accent)]/10 text-text-primary font-mono">/api/scan</code> with a token address to get a full security report as JSON.
                 </p>
-                <p className="text-xs text-text-secondary">No API key required for basic usage.</p>
+                <p className="text-xs text-text-secondary">Sub-100ms response time directly from RPC nodes.</p>
               </div>
 
               <div className="glass-card p-5 rounded-2xl">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-9 h-9 rounded-lg bg-[var(--silver-accent)]/10 flex items-center justify-center silver-accent">
                     <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <h3 className="text-sm font-semibold text-text-primary">Telegram Bot</h3>
+                  <h3 className="text-sm font-semibold text-text-primary">Trading Bot Webhooks</h3>
                 </div>
                 <p className="text-sm text-text-secondary leading-relaxed mb-3">
-                  Scan tokens directly from Telegram with inline commands. Get instant alerts for your groups.
+                  Filter new token deployments, bonding curve migrations, and liquidity events before executing trades.
                 </p>
-                <p className="text-xs text-text-secondary">Add the bot to any group for real-time monitoring.</p>
+                <p className="text-xs text-text-secondary">Designed for automated MEV and sniper bot architectures.</p>
               </div>
             </div>
           </section>

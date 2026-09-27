@@ -37,12 +37,12 @@ export function Footer() {
               </a>
               <span className="text-[#1e2433]">•</span>
               <a
-                href="https://t.me/rugsolinfobot"
+                href="https://x.com/RugSolScanner"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-[#f1f5f9] transition-colors"
               >
-                Telegram Bot
+                Twitter / X
               </a>
               <span className="text-[#1e2433]">•</span>
               <Link href="/api-docs" className="hover:text-[#f1f5f9] transition-colors">
@@ -68,18 +68,16 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a
-                  href="https://t.me/rugsolinfobot"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href="/scoring"
                   className="hover:text-[#38bdf8] transition-colors"
                 >
-                  &gt; @rugsolinfobot (TG)
-                </a>
+                  &gt; Scoring Engine
+                </Link>
               </li>
               <li>
                 <span className="text-[#64748b] cursor-not-allowed">
-                  &gt; Sniper Bot Radar (Beta)
+                  &gt; Real-Time Radar (Beta)
                 </span>
               </li>
             </ul>

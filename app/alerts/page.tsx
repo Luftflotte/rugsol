@@ -68,23 +68,23 @@ const alertTypes = [
 
 const channels = [
   {
-    name: "Telegram",
-    desc: "Receive alerts directly in DMs or group chats via our bot.",
-    available: true,
-  },
-  {
     name: "Discord",
     desc: "Webhook integration for your Discord server channels.",
     available: true,
   },
   {
-    name: "Email",
-    desc: "Digest alerts delivered to your inbox — daily or instant.",
+    name: "Webhooks",
+    desc: "Custom HTTP webhooks for automated sniper and trading bot handling.",
     available: true,
   },
   {
-    name: "Webhook",
-    desc: "Custom HTTP webhooks for programmatic alert handling.",
+    name: "Browser Push",
+    desc: "Instant desktop alerts for flagged tokens and high-risk deployments.",
+    available: true,
+  },
+  {
+    name: "Email",
+    desc: "Digest alerts delivered to your inbox — daily or instant.",
     available: true,
   },
 ];
@@ -220,20 +220,18 @@ export default function AlertsPage() {
             <div className="glass-card rounded-2xl p-8 sm:p-12">
               <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-3">Start monitoring now</h2>
               <p className="text-sm text-text-secondary mb-6 max-w-md mx-auto leading-relaxed">
-                Add our Telegram bot and set up your first alert in under a minute.
+                Connect our real-time REST API and set up automated security alerts in under a minute.
               </p>
               <div className="flex items-center justify-center gap-3">
-                <a
-                  href="https://t.me/rugsolinfobot"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href="/api-docs"
                   className="btn-premium inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium"
                 >
-                  Set up alerts
+                  View API Docs
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                </a>
+                </Link>
                 <Link
                   href="/docs"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium border border-border-color/50 text-text-primary hover:bg-bg-secondary/50 transition-colors"

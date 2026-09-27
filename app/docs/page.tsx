@@ -40,12 +40,12 @@ const quickLinks = [
     ),
   },
   {
-    title: "Telegram Bot",
-    desc: "Set up and use the RugSol bot in Telegram.",
-    href: "#telegram",
+    title: "Scoring Methodology",
+    desc: "Understand our algorithmic risk deductions and audit grades.",
+    href: "/scoring",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
       </svg>
     ),
   },
@@ -171,49 +171,6 @@ export default function DocsPage() {
             </div>
           </section>
 
-          {/* Telegram Bot */}
-          <section id="telegram" className="mb-16">
-            <h2 className="text-xl font-semibold text-text-primary mb-2">Telegram Bot</h2>
-            <p className="text-sm text-text-secondary mb-8">Scan tokens directly from Telegram without visiting the website.</p>
-
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-text-primary mb-2">Usage</h3>
-                  <p className="text-sm text-text-secondary leading-relaxed mb-3">
-                    Send a token mint address directly to{" "}
-                    <a href="https://t.me/rugsolinfobot" target="_blank" rel="noopener noreferrer" className="text-text-primary underline underline-offset-2 decoration-[var(--silver-accent)]/50 hover:decoration-[var(--silver-accent)]">
-                      @rugsolinfobot
-                    </a>{" "}
-                    and receive an instant security report.
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-semibold text-text-primary mb-2">Group Integration</h3>
-                  <p className="text-sm text-text-secondary leading-relaxed">
-                    Add the bot to any Telegram group. Members can paste token addresses and the bot will
-                    automatically respond with a security summary. Great for trading groups and alpha channels.
-                  </p>
-                </div>
-
-                <div className="pt-2">
-                  <a
-                    href="https://t.me/rugsolinfobot"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-premium inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium"
-                  >
-                    Open Telegram Bot
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </section>
-
           {/* FAQ */}
           <section>
             <h2 className="text-xl font-semibold text-text-primary mb-2">FAQ</h2>
@@ -223,7 +180,7 @@ export default function DocsPage() {
               {[
                 {
                   q: "Is RugSol free to use?",
-                  a: "Yes. The web scanner and Telegram bot are free for all users with no account required.",
+                  a: "Yes. The web scanner and basic REST API are free for all users with no account required.",
                 },
                 {
                   q: "How accurate is the scoring?",

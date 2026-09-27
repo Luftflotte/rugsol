@@ -66,7 +66,7 @@ const sections = [
   {
     title: "12. Contact",
     content:
-      "For questions regarding these Terms of Service, please reach out through our official Telegram channel or GitHub repository.",
+      "For questions regarding these Terms of Service, please reach out through our official X (Twitter) @RugSolScanner or GitHub repository.",
   },
 ];
 

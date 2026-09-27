@@ -88,7 +88,7 @@ export default function RootLayout({
                 "Honeypot detection via swap simulation",
                 "Liquidity pool verification",
                 "Pump.fun bonding curve tracking",
-                "Telegram bot integration",
+                "On-chain holder forensics",
                 "REST API for trading bots",
               ],
             }),

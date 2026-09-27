@@ -133,7 +133,7 @@ export default function Home() {
                 <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">PUBLIC</span>
               </div>
               <p className="text-xs text-text-secondary">
-                Integrate instant token security checks directly into Telegram sniper bots, copy traders, and indexing pipelines.
+                Integrate instant token security checks directly into automated trading bots, copy trading systems, and execution pipelines.
               </p>
             </div>
             <div className="flex items-center gap-3 shrink-0">

@@ -116,7 +116,7 @@ export default function SecurityPage() {
                 <div className="flex items-start gap-3">
                   <span className="text-sm silver-accent font-mono">01</span>
                   <p className="text-sm text-text-secondary">
-                    Contact us via Telegram or GitHub with a detailed description of the vulnerability.
+                    Contact us via GitHub Security Advisory or X (Twitter) with a detailed description of the vulnerability.
                   </p>
                 </div>
                 <div className="flex items-start gap-3">

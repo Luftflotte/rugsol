@@ -222,7 +222,7 @@ print(f"Score: {result['score']} | Grade: {result['grade']}")`}</pre>
                 </div>
               </div>
               <p className="text-xs text-text-secondary mt-4 text-center">
-                Need higher limits? Contact us on Telegram for enterprise access.
+                Need higher limits? Contact us on X (Twitter) @RugSolScanner for dedicated enterprise endpoints.
               </p>
             </div>
           </section>
