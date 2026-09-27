@@ -61,11 +61,41 @@ const securityChecks = [
 ];
 
 const grades = [
-  { grade: "A", range: "80 — 100", label: "Safe", color: "#22c55e" },
-  { grade: "B", range: "60 — 79", label: "Low Risk", color: "#84cc16" },
-  { grade: "C", range: "40 — 59", label: "Moderate Risk", color: "#eab308" },
-  { grade: "D", range: "20 — 39", label: "High Risk", color: "#f97316" },
-  { grade: "F", range: "0 — 19", label: "Likely Scam", color: "#ef4444" },
+  {
+    grade: "A",
+    range: "80 — 100",
+    label: "VERIFIED SAFE",
+    badgeColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+    desc: "Passed core smart contract & authority checks. Deep liquidity, non-freezable, healthy holder distribution.",
+  },
+  {
+    grade: "B",
+    range: "60 — 79",
+    label: "LOW RISK",
+    badgeColor: "bg-lime-500/10 text-lime-400 border-lime-500/30",
+    desc: "Minor risk warnings detected (e.g. low token age or moderate concentration). Low exploit probability.",
+  },
+  {
+    grade: "C",
+    range: "40 — 59",
+    label: "MODERATE RISK",
+    badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+    desc: "Noticeable risk factors: unlocked liquidity pool, suspicious sniper wallets, or whale concentration.",
+  },
+  {
+    grade: "D",
+    range: "20 — 39",
+    label: "HIGH RISK",
+    badgeColor: "bg-orange-500/10 text-orange-400 border-orange-500/30",
+    desc: "Severe vulnerability vectors: thin liquidity, large deployer holding, or multi-wallet cluster dumping patterns.",
+  },
+  {
+    grade: "F",
+    range: "0 — 19",
+    label: "CRITICAL / SCAM",
+    badgeColor: "bg-rose-500/10 text-rose-400 border-rose-500/30",
+    desc: "Automatic critical override: Honeypot sell simulation failed, active mint authority, or zero liquidity.",
+  },
 ];
 
 export default function AboutPage() {
@@ -133,30 +163,54 @@ export default function AboutPage() {
             </div>
           </section>
 
-          {/* Scoring */}
+          {/* Scoring System */}
           <section className="mb-20">
-            <h2 className="text-xl font-semibold text-text-primary mb-2 px-1">Scoring system</h2>
-            <p className="text-sm text-text-secondary mb-8 px-1">
-              Tokens start at 100 points. Each risk factor deducts points. Critical failures like honeypot detection or active mint authority result in an automatic F grade.
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 px-1">
+              <div>
+                <h2 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase flex items-center gap-2">
+                  <span className="text-[#38bdf8]">//</span> AUDIT SCORING ARCHITECTURE
+                </h2>
+                <p className="text-xs text-[#94a3b8] mt-1">
+                  Algorithmic risk evaluation starting at 100 points. Penalties deduct points; critical exploits trigger an automatic Grade F.
+                </p>
+              </div>
+              <span className="text-[10px] font-mono text-[#64748b] bg-[#0e1118] px-2.5 py-1 rounded border border-[#1e2433] shrink-0 self-start sm:self-auto">
+                BASE: 100 PTS
+              </span>
+            </div>
 
-            <div className="glass-card rounded-2xl overflow-hidden">
-              <div className="grid grid-cols-[auto_1fr_auto] text-sm">
-                {grades.map((g, i) => (
-                  <div key={g.grade} className={`contents ${i < grades.length - 1 ? "[&>*]:border-b [&>*]:border-border-color/30" : ""}`}>
-                    <div className="px-5 py-3.5 flex items-center gap-3">
-                      <span
-                        className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold text-white"
-                        style={{ backgroundColor: g.color }}
-                      >
-                        {g.grade}
+            <div className="bg-[#0e1118] border border-[#1e2433] rounded-xl overflow-hidden shadow-xl">
+              <div className="hidden sm:grid grid-cols-[110px_110px_150px_1fr] gap-3 px-4 py-2.5 bg-[#121622] border-b border-[#1e2433] text-[10px] font-mono text-[#64748b] uppercase tracking-wider font-semibold">
+                <span>Grade</span>
+                <span>Score Range</span>
+                <span>Threat Verdict</span>
+                <span>Audit Criteria</span>
+              </div>
+
+              <div className="divide-y divide-[#161b26]">
+                {grades.map((g) => (
+                  <div
+                    key={g.grade}
+                    className="grid grid-cols-1 sm:grid-cols-[110px_110px_150px_1fr] gap-2 sm:gap-3 p-3.5 sm:px-4 sm:py-3 hover:bg-[#121622] transition-colors items-center"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex items-center justify-center font-mono font-bold text-xs px-2.5 py-0.5 rounded border uppercase tracking-wider ${g.badgeColor}`}>
+                        Grade {g.grade}
                       </span>
                     </div>
-                    <div className="px-4 py-3.5 flex items-center text-text-secondary font-mono text-xs tracking-wider">
-                      {g.range}
+
+                    <div className="font-mono text-xs text-[#f8fafc] tabular-nums font-semibold">
+                      {g.range} PTS
                     </div>
-                    <div className="px-5 py-3.5 flex items-center text-text-secondary text-sm">
-                      {g.label}
+
+                    <div>
+                      <span className="text-[11px] font-mono font-bold text-[#e2e8f0]">
+                        {g.label}
+                      </span>
+                    </div>
+
+                    <div className="text-xs text-[#94a3b8] leading-relaxed font-sans">
+                      {g.desc}
                     </div>
                   </div>
                 ))}
