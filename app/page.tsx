@@ -14,12 +14,6 @@ export default function Home() {
           
           {/* Hero Section */}
           <div className="text-center max-w-3xl mx-auto mb-14">
-            {/* Minimalist Sub-header */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-bg-card border border-border-color mb-5 text-xs font-mono text-text-secondary">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>Real-Time Solana Token Audit</span>
-            </div>
-
             {/* Main Title */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-text-primary mb-4">
               Instant Solana Token Security & Risk Intelligence
