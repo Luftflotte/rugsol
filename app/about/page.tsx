@@ -7,7 +7,7 @@ const securityChecks = [
     title: "Authority Analysis",
     desc: "Detects active mint and freeze authorities that could be exploited to print tokens or freeze wallets.",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 text-[#38bdf8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
       </svg>
     ),
@@ -16,7 +16,7 @@ const securityChecks = [
     title: "Holder Distribution",
     desc: "Analyzes top 10 holders, concentration risk, and identifies wallet types to flag insider accumulation.",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 text-[#38bdf8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
       </svg>
     ),
@@ -25,7 +25,7 @@ const securityChecks = [
     title: "Honeypot Detection",
     desc: "Simulates a sell transaction via Jupiter to verify that holders can actually sell their tokens.",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 text-[#38bdf8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
       </svg>
     ),
@@ -34,7 +34,7 @@ const securityChecks = [
     title: "Liquidity Analysis",
     desc: "Checks DEX pool sizes, LP lock/burn status, or Pump.fun bonding curve progress depending on platform.",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 text-[#38bdf8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
       </svg>
     ),
@@ -43,7 +43,7 @@ const securityChecks = [
     title: "Sniper & Bundle Detection",
     desc: "Identifies wallets that bought in the same block as deployment and detects coordinated Jito bundles.",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 text-[#38bdf8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7.5 3.75H6A2.25 2.25 0 003.75 6v1.5M16.5 3.75H18A2.25 2.25 0 0120.25 6v1.5m0 9V18A2.25 2.25 0 0118 20.25h-1.5m-9 0H6A2.25 2.25 0 013.75 18v-1.5M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     ),
@@ -52,7 +52,7 @@ const securityChecks = [
     title: "Dev Wallet Tracking",
     desc: "Tracks the deployer wallet balance and sell activity to detect insider dumps and linked wallet clusters.",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4 text-[#38bdf8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
@@ -100,63 +100,74 @@ const grades = [
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen premium-bg text-text-primary">
+    <div className="min-h-screen bg-[#08090d] text-[#f1f5f9]">
       <Navbar />
 
       <main className="pt-20 md:pt-28 pb-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 
           {/* Hero */}
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--silver-accent)]/10 border border-[var(--silver-accent)]/30 mb-8 backdrop-blur-sm">
-              <span className="text-sm font-medium silver-accent tracking-wide">On-chain security analysis</span>
+          <div className="mb-14">
+            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[#0e1118] border border-[#1e2433] mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] animate-pulse" />
+              <span className="text-[11px] font-mono text-[#94a3b8] uppercase tracking-wider">
+                ON-CHAIN FORENSIC SECURITY ENGINE
+              </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-6">
-              <span className="text-text-primary">Understand the risk</span>
-              <br />
-              <span className="gradient-text">before you trade</span>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold tracking-tight text-[#f8fafc] mb-3">
+              UNDERSTAND THE RISK BEFORE YOU TRADE
             </h1>
-            <p className="text-base sm:text-lg text-text-secondary max-w-2xl mx-auto leading-relaxed">
-              RugSol analyzes Solana tokens in real-time, running 8+ independent security checks
-              to produce a risk score from 0 to 100. No sign-up required — full scanning and scoring
-              is available without creating an account or logging in.
+            <p className="text-sm text-[#94a3b8] max-w-3xl leading-relaxed">
+              RugSol analyzes Solana token contracts in real time, executing 8+ independent algorithmic
+              security checks to generate a composite risk score (0-100). No registration or account setup required.
             </p>
           </div>
 
           {/* How it works */}
-          <section className="mb-20">
-            <h2 className="text-xl font-semibold text-text-primary mb-2 px-1">How it works</h2>
-            <p className="text-sm text-text-secondary mb-8 px-1">Paste a token address and get a comprehensive report in seconds.</p>
+          <section className="mb-14">
+            <div className="mb-4 px-1">
+              <h2 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase flex items-center gap-2">
+                <span className="text-[#38bdf8]">//</span> AUDIT WORKFLOW
+              </h2>
+              <p className="text-xs text-[#94a3b8] mt-1">From token mint address to full forensic verification report in milliseconds.</p>
+            </div>
 
-            <div className="grid sm:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-3 gap-3">
               {[
-                { step: "01", title: "Enter address", desc: "Paste any Solana token mint address or Pump.fun token." },
-                { step: "02", title: "On-chain scan", desc: "We run parallel checks against the blockchain, Jupiter, DexScreener, and more." },
-                { step: "03", title: "Get your score", desc: "Receive a 0-100 risk score, letter grade, and detailed breakdown of every finding." },
+                { step: "01", title: "Target Identification", desc: "Paste any Solana mint address, Raydium pair, or Pump.fun bonding curve token." },
+                { step: "02", title: "Parallel RPC Scan", desc: "Direct queries to Helius RPC, DexScreener, Jupiter routing, and on-chain token state." },
+                { step: "03", title: "Forensic Synthesis", desc: "Receive an instant 0-100 risk score, letter grade, and detailed breakdown of each vulnerability." },
               ].map((item) => (
-                <div key={item.step} className="glass-card p-5 rounded-2xl">
-                  <span className="text-xs font-mono silver-accent tracking-widest">{item.step}</span>
-                  <h3 className="text-base font-semibold text-text-primary mt-2 mb-1">{item.title}</h3>
-                  <p className="text-sm text-text-secondary leading-relaxed">{item.desc}</p>
+                <div key={item.step} className="bg-[#0e1118] border border-[#1e2433] p-5 rounded-xl hover:border-[#38bdf8]/40 transition-colors">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[11px] font-mono font-bold text-[#38bdf8] tracking-widest">[{item.step}]</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#1e2433]" />
+                  </div>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#f8fafc] mb-2">{item.title}</h3>
+                  <p className="text-xs text-[#94a3b8] leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
           </section>
 
           {/* Security Checks */}
-          <section className="mb-20">
-            <h2 className="text-xl font-semibold text-text-primary mb-2 px-1">Security checks</h2>
-            <p className="text-sm text-text-secondary mb-8 px-1">Every scan runs these checks in parallel. Failed checks are flagged but never crash the report.</p>
+          <section className="mb-14">
+            <div className="mb-4 px-1">
+              <h2 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase flex items-center gap-2">
+                <span className="text-[#38bdf8]">//</span> INTEGRATED TELEMETRY VECTORS
+              </h2>
+              <p className="text-xs text-[#94a3b8] mt-1">Multi-angle contract verification executed simultaneously without blocking scanner throughput.</p>
+            </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-3">
               {securityChecks.map((check) => (
-                <div key={check.title} className="glass-card p-5 rounded-2xl flex gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-[var(--silver-accent)]/10 flex items-center justify-center shrink-0 silver-accent">
+                <div key={check.title} className="bg-[#0e1118] border border-[#1e2433] p-4 rounded-xl hover:border-[#38bdf8]/40 transition-colors flex gap-3.5">
+                  <div className="w-8 h-8 rounded-lg bg-[#121622] border border-[#1e2433] flex items-center justify-center shrink-0">
                     {check.icon}
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-text-primary mb-1">{check.title}</h3>
-                    <p className="text-sm text-text-secondary leading-relaxed">{check.desc}</p>
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#f8fafc] mb-1">{check.title}</h3>
+                    <p className="text-xs text-[#94a3b8] leading-relaxed">{check.desc}</p>
                   </div>
                 </div>
               ))}
@@ -164,7 +175,7 @@ export default function AboutPage() {
           </section>
 
           {/* Scoring System */}
-          <section className="mb-20">
+          <section className="mb-14">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 px-1">
               <div>
                 <h2 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase flex items-center gap-2">
@@ -219,85 +230,107 @@ export default function AboutPage() {
           </section>
 
           {/* Platform Support */}
-          <section className="mb-20">
-            <h2 className="text-xl font-semibold text-text-primary mb-2 px-1">Platform support</h2>
-            <p className="text-sm text-text-secondary mb-8 px-1">The scanner auto-detects the token platform and adjusts checks accordingly.</p>
+          <section className="mb-14">
+            <div className="mb-4 px-1">
+              <h2 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase flex items-center gap-2">
+                <span className="text-[#38bdf8]">//</span> PLATFORM RECOGNITION MATRIX
+              </h2>
+              <p className="text-xs text-[#94a3b8] mt-1">Automatic liquidity engine identification and tailored vulnerability profiling.</p>
+            </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <div className="glass-card p-5 rounded-2xl">
-                <h3 className="text-sm font-semibold text-text-primary mb-2">DEX Tokens</h3>
-                <ul className="text-sm text-text-secondary space-y-1.5 leading-relaxed">
-                  <li className="flex items-start gap-2"><span className="silver-accent mt-0.5">-</span>Full liquidity pool analysis</li>
-                  <li className="flex items-start gap-2"><span className="silver-accent mt-0.5">-</span>LP lock & burn verification</li>
-                  <li className="flex items-start gap-2"><span className="silver-accent mt-0.5">-</span>Authority & metadata checks</li>
-                  <li className="flex items-start gap-2"><span className="silver-accent mt-0.5">-</span>Mutable metadata flagged as risk</li>
+              <div className="bg-[#0e1118] border border-[#1e2433] p-5 rounded-xl hover:border-[#38bdf8]/40 transition-colors">
+                <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#1e2433]">
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#f8fafc]">DEX Pools (Raydium / Orca / Meteora)</h3>
+                  <span className="text-[10px] font-mono text-[#38bdf8] bg-[#38bdf8]/10 px-2 py-0.5 rounded border border-[#38bdf8]/30">LIVE POOL</span>
+                </div>
+                <ul className="text-xs text-[#94a3b8] space-y-2 leading-relaxed font-mono">
+                  <li className="flex items-start gap-2"><span className="text-[#38bdf8]">&gt;</span>Full liquidity depth and quote pool balance</li>
+                  <li className="flex items-start gap-2"><span className="text-[#38bdf8]">&gt;</span>LP token lock & burn verification</li>
+                  <li className="flex items-start gap-2"><span className="text-[#38bdf8]">&gt;</span>Mint and freeze authority revocation audit</li>
+                  <li className="flex items-start gap-2"><span className="text-[#38bdf8]">&gt;</span>Mutable metadata flagged as security vector</li>
                 </ul>
               </div>
 
-              <div className="glass-card p-5 rounded-2xl">
-                <h3 className="text-sm font-semibold text-text-primary mb-2">Pump.fun Tokens</h3>
-                <ul className="text-sm text-text-secondary space-y-1.5 leading-relaxed">
-                  <li className="flex items-start gap-2"><span className="silver-accent mt-0.5">-</span>Bonding curve progress tracking</li>
-                  <li className="flex items-start gap-2"><span className="silver-accent mt-0.5">-</span>LP check replaced with curve state</li>
-                  <li className="flex items-start gap-2"><span className="silver-accent mt-0.5">-</span>Metadata mutability expected</li>
-                  <li className="flex items-start gap-2"><span className="silver-accent mt-0.5">-</span>Migration status detection</li>
+              <div className="bg-[#0e1118] border border-[#1e2433] p-5 rounded-xl hover:border-[#38bdf8]/40 transition-colors">
+                <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#1e2433]">
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#f8fafc]">Pump.fun Bonding Curve</h3>
+                  <span className="text-[10px] font-mono text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/30">CURVE STATE</span>
+                </div>
+                <ul className="text-xs text-[#94a3b8] space-y-2 leading-relaxed font-mono">
+                  <li className="flex items-start gap-2"><span className="text-purple-400">&gt;</span>Bonding curve progress and SOL remaining telemetry</li>
+                  <li className="flex items-start gap-2"><span className="text-purple-400">&gt;</span>Curve lock state monitored in real-time</li>
+                  <li className="flex items-start gap-2"><span className="text-purple-400">&gt;</span>Raydium migration readiness detection</li>
+                  <li className="flex items-start gap-2"><span className="text-purple-400">&gt;</span>Genesis sniper bundle & dev dump analytics</li>
                 </ul>
               </div>
             </div>
           </section>
 
           {/* Integrations */}
-          <section className="mb-20">
-            <h2 className="text-xl font-semibold text-text-primary mb-2 px-1">Integrations</h2>
-            <p className="text-sm text-text-secondary mb-8 px-1">Use RugSol programmatically in your trading bots and analytics tools.</p>
+          <section className="mb-14">
+            <div className="mb-4 px-1">
+              <h2 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase flex items-center gap-2">
+                <span className="text-[#38bdf8]">//</span> PROGRAMMATIC INTEGRATION
+              </h2>
+              <p className="text-xs text-[#94a3b8] mt-1">Connect RugSol intelligence into your automated trading execution layer.</p>
+            </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <div className="glass-card p-5 rounded-2xl">
+              <div className="bg-[#0e1118] border border-[#1e2433] p-5 rounded-xl hover:border-[#38bdf8]/40 transition-colors">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-lg bg-[var(--silver-accent)]/10 flex items-center justify-center silver-accent">
-                    <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 rounded-lg bg-[#121622] border border-[#1e2433] flex items-center justify-center text-[#38bdf8]">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
                     </svg>
                   </div>
-                  <h3 className="text-sm font-semibold text-text-primary">Public REST API</h3>
+                  <div>
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#f8fafc]">REST Scan API</h3>
+                    <span className="text-[10px] font-mono text-[#64748b]">HTTP POST /api/scan</span>
+                  </div>
                 </div>
-                <p className="text-sm text-text-secondary leading-relaxed mb-3">
-                  POST to <code className="text-xs px-1.5 py-0.5 rounded bg-[var(--silver-accent)]/10 text-text-primary font-mono">/api/scan</code> with a token address to get a full security report as JSON.
+                <p className="text-xs text-[#94a3b8] leading-relaxed mb-3">
+                  Send a token mint address to receive comprehensive risk score, findings, and authority flags as standardized JSON.
                 </p>
-                <p className="text-xs text-text-secondary">Sub-100ms response time directly from RPC nodes.</p>
+                <p className="text-[11px] font-mono text-[#38bdf8]">Latency: &lt;100ms via optimized Solana RPC nodes</p>
               </div>
 
-              <div className="glass-card p-5 rounded-2xl">
+              <div className="bg-[#0e1118] border border-[#1e2433] p-5 rounded-xl hover:border-[#38bdf8]/40 transition-colors">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-lg bg-[var(--silver-accent)]/10 flex items-center justify-center silver-accent">
-                    <svg className="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 rounded-lg bg-[#121622] border border-[#1e2433] flex items-center justify-center text-purple-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <h3 className="text-sm font-semibold text-text-primary">Trading Bot Webhooks</h3>
+                  <div>
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#f8fafc]">Trading Bot Webhooks</h3>
+                    <span className="text-[10px] font-mono text-[#64748b]">Event-driven triggers</span>
+                  </div>
                 </div>
-                <p className="text-sm text-text-secondary leading-relaxed mb-3">
-                  Filter new token deployments, bonding curve migrations, and liquidity events before executing trades.
+                <p className="text-xs text-[#94a3b8] leading-relaxed mb-3">
+                  Filter new token deployments, bonding curve migrations, and liquidity unlock events before executing automated buy transactions.
                 </p>
-                <p className="text-xs text-text-secondary">Designed for automated MEV and sniper bot architectures.</p>
+                <p className="text-[11px] font-mono text-purple-400">Targeted for custom sniper and MEV bots</p>
               </div>
             </div>
           </section>
 
           {/* CTA */}
           <section className="text-center">
-            <div className="glass-card rounded-2xl p-8 sm:p-12">
-              <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-3">Ready to check a token?</h2>
-              <p className="text-sm text-text-secondary mb-6 max-w-md mx-auto leading-relaxed">
-                Paste any Solana token address and get an instant security report.
+            <div className="bg-[#0e1118] border border-[#1e2433] rounded-xl p-8 sm:p-10">
+              <h2 className="text-xl sm:text-2xl font-mono font-bold text-[#f8fafc] mb-2 uppercase tracking-wide">
+                INITIALIZE TOKEN SECURITY AUDIT
+              </h2>
+              <p className="text-xs text-[#94a3b8] mb-6 max-w-md mx-auto leading-relaxed">
+                Paste any Solana contract address or Raydium pair into the terminal command bar for instant diagnosis.
               </p>
               <Link
                 href="/"
-                className="btn-premium inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded bg-[#38bdf8] text-[#08090d] hover:bg-[#38bdf8]/90 font-mono font-bold text-xs uppercase tracking-wider transition-colors shadow-lg shadow-[#38bdf8]/20"
               >
-                Start scanning
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                Launch Terminal
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </Link>
             </div>
