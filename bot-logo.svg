@@ -1,0 +1,40 @@
+<svg width="512" height="512" viewBox="-3 -3 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect x="-3" y="-3" width="54" height="54" rx="6" fill="#09090b"/>
+
+  <!-- Outer hexagon (regular, R=21, center 24,24) -->
+  <path
+    d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z"
+    stroke="#c0c0c0"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+    fill="none"
+    opacity="0.6"
+  />
+
+  <!-- Inner hexagon (regular, R=13, center 24,24) -->
+  <path
+    d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z"
+    fill="rgba(192,192,192,0.08)"
+    stroke="#c0c0c0"
+    stroke-width="1"
+    stroke-linejoin="round"
+    opacity="0.8"
+  />
+
+  <!-- Shield -->
+  <path
+    d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z"
+    fill="#c0c0c0"
+  />
+
+  <!-- Checkmark -->
+  <path
+    d="M20.5 23.5L23 26L28 20.5"
+    stroke="#09090b"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+</svg>
