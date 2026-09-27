@@ -108,12 +108,6 @@ export default function AboutPage() {
 
           {/* Hero */}
           <div className="mb-14">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[#0e1118] border border-[#1e2433] mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] animate-pulse" />
-              <span className="text-[11px] font-mono text-[#94a3b8] uppercase tracking-wider">
-                ON-CHAIN FORENSIC SECURITY ENGINE
-              </span>
-            </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold tracking-tight text-[#f8fafc] mb-3">
               UNDERSTAND THE RISK BEFORE YOU TRADE
             </h1>

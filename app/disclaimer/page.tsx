@@ -5,123 +5,107 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Disclaimer — RugSol",
-  description: "Important disclaimers about using RugSol token security analysis.",
+  description: "Important operational and risk disclaimers regarding RugSol token security analysis.",
 };
+
+const disclaimerSections = [
+  {
+    index: "01",
+    title: "No Infallibility of Algorithmic Heuristics",
+    content:
+      "Risk scores (0-100), letter grades (A-F), and security verdicts are computed algorithmically from snapshot on-chain data. They reflect a point-in-time assessment. A Grade A rating does not certify financial viability or guarantee safety. Conversely, a Grade D/F does not conclusively establish malicious intent. On-chain variables can shift within milliseconds.",
+  },
+  {
+    index: "02",
+    title: "Scope & Limitations of On-Chain Scanning",
+    content:
+      "RugSol monitors structural smart contract vectors: mint/freeze authority revocation, LP lock/burn state, holder concentration, and automated Jupiter sell simulation. Off-chain risks—such as developer impersonation, social engineering, off-chain treasury drainage, or coordinated syndicate dumping—fall outside algorithmic contract scanning.",
+  },
+  {
+    index: "03",
+    title: "Upstream Dependency & Data Integrity",
+    content:
+      "Analysis relies upon distributed infrastructure: Helius RPCs, Birdeye market feeds, Jupiter swap routing, and Solana mainnet validator consensus. RugSol does not control network latency, split-second RPC drops, or upstream indexer inconsistencies.",
+  },
+  {
+    index: "04",
+    title: "Total Assumption of Capital Risk",
+    content:
+      "By interacting with the Platform, you acknowledge: (a) cryptocurrency trading carries extreme volatility and total risk of capital loss; (b) past on-chain stability does not guarantee future solvency; (c) users bear sole accountability for execution; (d) RugSol incurs no liability for trading losses.",
+  },
+  {
+    index: "05",
+    title: "Zero Commercial Endorsement",
+    content:
+      "The indexing or display of any token address within RugSol search histories or recent scans does not constitute an endorsement, token sponsorship, or audit certification. All contract analyses are triggered strictly on-demand by user queries.",
+  },
+];
 
 export default function DisclaimerPage() {
   return (
-    <div className="min-h-screen premium-bg text-text-primary">
+    <div className="min-h-screen bg-[#08090d] text-[#f1f5f9]">
       <Navbar />
 
       <main className="pt-20 md:pt-28 pb-20">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--silver-accent)]/10 border border-[var(--silver-accent)]/30 mb-6 backdrop-blur-sm">
-              <span className="text-sm font-medium silver-accent tracking-wide">Legal</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-              Disclaimer
+          {/* Header - No pill badge */}
+          <div className="mb-10">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold tracking-tight text-[#f8fafc] mb-3">
+              RISK DISCLAIMER
             </h1>
-            <p className="text-sm text-text-muted">
-              Last updated: February 1, 2026
-            </p>
+            <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-[#64748b]">
+              <span>LEGAL SPECIFICATION V2.0</span>
+              <span>//</span>
+              <span>EFFECTIVE: FEBRUARY 1, 2026</span>
+              <span>//</span>
+              <span className="text-amber-400">NON-FINANCIAL ADVISORY DISCLOSURE</span>
+            </div>
           </div>
 
-          {/* Main Warning */}
-          <div className="glass-card p-6 rounded-2xl border border-amber-500/20 bg-amber-500/5 mb-8">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-text-primary mb-2">Important Notice</h2>
-                <p className="text-sm text-text-secondary leading-relaxed">
-                  RugSol is an informational tool only. It does <strong className="text-text-primary">not</strong> provide
-                  financial advice, investment recommendations, or guarantees of any kind. Cryptocurrency
-                  trading involves substantial risk of loss. Always do your own research (DYOR) before
-                  making any trading or investment decisions.
-                </p>
-              </div>
+          {/* Main Warning Banner */}
+          <div className="bg-[#0e1118] border border-amber-500/30 bg-amber-500/[0.03] p-5 rounded-xl mb-8 flex items-start gap-4">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 text-amber-400 font-mono font-bold text-sm mt-0.5">
+              !
+            </div>
+            <div>
+              <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 mb-1.5">
+                MANDATORY REGULATORY & TRADING NOTICE
+              </h2>
+              <p className="text-xs text-[#94a3b8] leading-relaxed">
+                RugSol is strictly an on-chain forensic analytics software instrument. It does <strong className="text-[#f1f5f9]">not</strong> provide financial, investment, or legal advice. Trading Solana tokens involves severe market volatility and potential for complete loss of capital. Always conduct independent technical due diligence prior to executing trades.
+              </p>
             </div>
           </div>
 
           {/* Sections */}
-          <div className="space-y-6">
-            <div className="glass-card p-6 rounded-2xl">
-              <h2 className="text-base font-semibold text-text-primary mb-3">
-                No Guarantee of Accuracy
-              </h2>
-              <p className="text-sm text-text-secondary leading-relaxed">
-                Risk scores, letter grades, and security assessments are generated by automated algorithms
-                analyzing publicly available on-chain data. These results represent a point-in-time analysis
-                and may not reflect the current state of a token. A high score (A or B grade) does not mean
-                a token is safe to invest in. A low score (D or F grade) does not constitute a definitive
-                determination that a token is a scam. Token conditions can change rapidly after analysis.
-              </p>
-            </div>
-
-            <div className="glass-card p-6 rounded-2xl">
-              <h2 className="text-base font-semibold text-text-primary mb-3">
-                Limitations of Automated Analysis
-              </h2>
-              <p className="text-sm text-text-secondary leading-relaxed">
-                Our analysis covers common rug pull vectors including mint/freeze authority abuse, holder
-                concentration, liquidity manipulation, and honeypot mechanisms. However, new attack vectors
-                and sophisticated scams may not be detected. Social engineering, off-chain fraud, team
-                abandonment, and market manipulation are examples of risks that cannot be fully assessed
-                through on-chain analysis alone.
-              </p>
-            </div>
-
-            <div className="glass-card p-6 rounded-2xl">
-              <h2 className="text-base font-semibold text-text-primary mb-3">
-                Third-Party Data
-              </h2>
-              <p className="text-sm text-text-secondary leading-relaxed">
-                RugSol relies on data from third-party providers including blockchain RPC nodes, price
-                aggregators, and DEX APIs. We do not control the accuracy, completeness, or availability
-                of this data. Service interruptions from third-party providers may result in incomplete
-                or unavailable scan results.
-              </p>
-            </div>
-
-            <div className="glass-card p-6 rounded-2xl">
-              <h2 className="text-base font-semibold text-text-primary mb-3">
-                Assumption of Risk
-              </h2>
-              <p className="text-sm text-text-secondary leading-relaxed">
-                By using RugSol, you acknowledge and accept that: (a) cryptocurrency trading is inherently
-                risky; (b) you may lose some or all of your invested capital; (c) past security scores
-                do not predict future token behavior; (d) you are solely responsible for your own trading
-                decisions; (e) RugSol bears no liability for any financial losses incurred.
-              </p>
-            </div>
-
-            <div className="glass-card p-6 rounded-2xl">
-              <h2 className="text-base font-semibold text-text-primary mb-3">
-                Not an Endorsement
-              </h2>
-              <p className="text-sm text-text-secondary leading-relaxed">
-                The appearance of any token on the RugSol platform does not constitute an endorsement,
-                recommendation, or certification. We analyze tokens submitted by users and do not curate,
-                promote, or recommend any specific token or project.
-              </p>
-            </div>
+          <div className="space-y-3">
+            {disclaimerSections.map((section) => (
+              <div
+                key={section.index}
+                className="bg-[#0e1118] border border-[#1e2433] p-5 rounded-xl hover:border-[#38bdf8]/40 transition-colors"
+              >
+                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[#161b26]">
+                  <span className="text-xs font-mono font-bold text-[#38bdf8]">
+                    {section.index} //
+                  </span>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#f8fafc]">
+                    {section.title}
+                  </h3>
+                </div>
+                <p className="text-xs text-[#94a3b8] leading-relaxed font-sans">
+                  {section.content}
+                </p>
+              </div>
+            ))}
           </div>
 
-          {/* CTA */}
-          <div className="mt-12 text-center">
-            <p className="text-sm text-text-muted mb-4">
-              By continuing to use RugSol, you acknowledge that you have read and understood this disclaimer.
-            </p>
+          {/* Return CTA */}
+          <div className="mt-10 text-center">
             <Link
               href="/"
-              className="btn-premium inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded bg-[#38bdf8] text-[#08090d] hover:bg-[#38bdf8]/90 font-mono font-bold text-xs uppercase tracking-wider transition-colors shadow-lg shadow-[#38bdf8]/20"
             >
-              Back to Scanner
+              Return to Terminal
             </Link>
           </div>
         </div>

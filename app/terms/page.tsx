@@ -4,105 +4,171 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Terms of Service — RugSol",
-  description: "Terms of Service for using the RugSol platform.",
+  description: "Terms of Service and operational protocol for using the RugSol platform.",
 };
 
 const sections = [
   {
-    title: "1. Acceptance of Terms",
+    index: "01",
+    title: "Acceptance of Terms",
     content:
-      'By accessing or using RugSol ("the Platform"), you agree to be bound by these Terms of Service. If you do not agree to these terms, you must not use the Platform. We reserve the right to modify these terms at any time, and your continued use constitutes acceptance of any changes.',
+      'By accessing or querying RugSol ("the Platform"), including through our web interface, REST APIs, or automated integrations, you enter into a binding agreement governed by these Terms of Service. If you do not consent to all provisions herein, discontinue use immediately. We reserve the unilateral right to update these terms at any time; your continued interaction with the Platform represents full acceptance of revisions.',
   },
   {
-    title: "2. Description of Service",
+    index: "02",
+    title: "Description of Service",
     content:
-      "RugSol provides on-chain security analysis tools for Solana-based tokens. The Platform performs automated risk assessments including authority checks, holder distribution analysis, liquidity verification, honeypot detection, and other security evaluations. Results are generated algorithmically and presented for informational purposes only.",
+      "RugSol provides programmatic, real-time security analysis for Solana blockchain tokens. The Platform executes parallel algorithmic evaluations covering mint/freeze authorities, holder concentration curves, DEX liquidity depth, lock/burn telemetry, and automated Jupiter sell simulation (honeypot detection). All outputs represent static, snapshot-in-time diagnostics compiled solely for technical research and informational purposes.",
   },
   {
-    title: "3. No Financial Advice",
+    index: "03",
+    title: "No Financial Advice",
     content:
-      "Nothing on this Platform constitutes financial, investment, legal, or tax advice. Token scores, risk ratings, letter grades, and any other outputs are the result of automated analysis and should not be the sole basis for any investment or trading decision. You are solely responsible for your own financial decisions.",
+      "Nothing generated, displayed, or communicated by the Platform constitutes financial, legal, investment, or tax counsel. Security scores (0-100), letter grades (A-F), and risk flags are algorithmic outputs derived from public on-chain heuristics and must not serve as the basis for trading or capital allocation decisions. You assume 100% responsibility and liability for your financial operations.",
   },
   {
-    title: "4. Accuracy of Information",
+    index: "04",
+    title: "Accuracy of Telemetry",
     content:
-      "While we strive for accuracy, RugSol does not guarantee that any analysis, score, or data presented on the Platform is complete, accurate, or up-to-date. Blockchain data may change rapidly, and our analysis reflects a point-in-time snapshot. A high score does not guarantee token safety, and a low score does not guarantee a token is a scam.",
+      "While our heuristic engines query verified RPC endpoints, RugSol provides no warranties regarding the accuracy, completeness, or infallibility of any metric. Smart contract exploit vectors evolve rapidly, and malicious actors actively obfuscate fraudulent logic. A Grade A rating does not guarantee security, nor does a low score indisputably prove illicit intent.",
   },
   {
-    title: "5. User Responsibilities",
+    index: "05",
+    title: "User Obligations & Fair Use",
     content:
-      "You agree to use the Platform lawfully and not to: (a) attempt to reverse-engineer, decompile, or extract source code; (b) use automated systems to scrape data at excessive rates; (c) misrepresent RugSol analysis results; (d) use the Platform for market manipulation or fraudulent purposes; (e) circumvent any rate limiting or access controls.",
+      "Users agree to interact with the Platform strictly in compliance with applicable laws and agree not to: (a) reverse-engineer or disrupt internal scoring engines; (b) launch volumetric denial-of-service attacks or bypass rate limit controls; (c) falsify or misattribute audit report data; (d) utilize Platform telemetry to coordinate market abuse or pump-and-dump operations.",
   },
   {
-    title: "6. API Usage",
+    index: "06",
+    title: "API Access & Rate Quotas",
     content:
-      "Access to the RugSol API is provided subject to rate limits and fair use policies. We reserve the right to restrict or terminate API access for any account that exceeds reasonable usage limits or engages in abusive behavior. Commercial use of the API requires prior written consent.",
+      "Public REST API endpoints (/api/scan, /api/stats) are governed by automated rate limiters. We reserve the authority to throttle, blacklist, or terminate access for IP addresses or entities demonstrating abusive traffic patterns or excessive concurrent RPC strain. Commercial high-frequency consumption requires prior operational approval.",
   },
   {
-    title: "7. Intellectual Property",
+    index: "07",
+    title: "Intellectual Property Rights",
     content:
-      "All content, branding, scoring methodologies, and software on the Platform are the intellectual property of RugSol. You may not reproduce, distribute, or create derivative works without explicit written permission. You may share individual scan results with proper attribution.",
+      "All proprietary software, algorithm definitions, user interface designs, and brand trademarks remain the exclusive intellectual property of RugSol. You are permitted to share individual contract audit reports and diagnostic cards provided appropriate attribution to RugSol is preserved.",
   },
   {
-    title: "8. Limitation of Liability",
+    index: "08",
+    title: "Limitation of Absolute Liability",
     content:
-      'The Platform is provided "as is" without warranties of any kind. RugSol, its founders, contributors, and affiliates shall not be liable for any direct, indirect, incidental, consequential, or punitive damages arising from your use of the Platform, including but not limited to financial losses from trading decisions influenced by our analysis.',
+      'The Platform is provided on an "AS IS" and "AS AVAILABLE" basis without express or implied warranties. In no event shall RugSol, its developers, or infrastructure operators be liable for direct, indirect, incidental, or catastrophic capital losses resulting from smart contract exploits, rug pulls, or trading actions taken in reliance upon Platform outputs.',
   },
   {
-    title: "9. Third-Party Services",
+    index: "09",
+    title: "Third-Party Data Dependencies",
     content:
-      "The Platform relies on third-party data sources including Helius, Birdeye, Jupiter, DexScreener, and Solana blockchain nodes. We are not responsible for the availability, accuracy, or reliability of third-party services. Disruptions to these services may affect Platform functionality.",
+      "Platform operations depend upon external distributed infrastructure, including Helius RPCs, Jupiter Aggregator routing, Birdeye market data, and Solana blockchain validator consensus. RugSol disclaims all liability for outages, latency degradation, or data inaccuracies originating from upstream third-party services.",
   },
   {
-    title: "10. Termination",
+    index: "10",
+    title: "Service Modification & Termination",
     content:
-      "We reserve the right to suspend or terminate access to the Platform at any time, for any reason, without prior notice. Upon termination, your right to use the Platform ceases immediately.",
+      "We reserve the discretionary authority to modify, restrict, or decommission any Platform feature or endpoint without prior notice or indemnity. Upon termination, authorization to query RugSol telemetry ceases with immediate effect.",
   },
   {
-    title: "11. Governing Law",
+    index: "11",
+    title: "Governing Jurisdiction",
     content:
-      "These Terms shall be governed by and construed in accordance with applicable laws. Any disputes arising from these Terms shall be resolved through binding arbitration.",
+      "These Terms shall be interpreted and enforced in accordance with standard international commercial arbitration principles. Any claims or disputes arising under these provisions shall be submitted to confidential, binding arbitration.",
   },
   {
-    title: "12. Contact",
+    index: "12",
+    title: "Official Communications",
     content:
-      "For questions regarding these Terms of Service, please reach out through our official X (Twitter) @RugSolScanner or GitHub repository.",
+      "Direct technical inquiries, vulnerability disclosures, or terms clarification requests to our verified communications channels via X (@RugSolScanner) or our open source repository on GitHub.",
   },
 ];
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen premium-bg text-text-primary">
+    <div className="min-h-screen bg-[#08090d] text-[#f1f5f9]">
       <Navbar />
 
       <main className="pt-20 md:pt-28 pb-20">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--silver-accent)]/10 border border-[var(--silver-accent)]/30 mb-6 backdrop-blur-sm">
-              <span className="text-sm font-medium silver-accent tracking-wide">Legal</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-              Terms of Service
+          {/* Header - No pill badge */}
+          <div className="mb-10">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold tracking-tight text-[#f8fafc] mb-3">
+              TERMS OF SERVICE
             </h1>
-            <p className="text-sm text-text-muted">
-              Last updated: February 1, 2026
-            </p>
+            <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-[#64748b]">
+              <span>SPECIFICATION V2.1</span>
+              <span>//</span>
+              <span>EFFECTIVE: FEBRUARY 1, 2026</span>
+              <span>//</span>
+              <span className="text-emerald-400 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                ACTIVE LEGAL PROTOCOL
+              </span>
+            </div>
           </div>
 
-          {/* Content */}
-          <div className="space-y-6">
+          {/* Critical Risk & Non-Custodial Advisory */}
+          <div className="bg-[#0e1118] border border-amber-500/30 bg-amber-500/[0.02] p-4 sm:p-5 rounded-xl mb-8 flex items-start gap-3.5">
+            <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0 text-amber-400 font-mono font-bold text-xs mt-0.5">
+              !
+            </div>
+            <div>
+              <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 mb-1">
+                DISCLAIMER & NON-CUSTODIAL NATURE
+              </h2>
+              <p className="text-xs text-[#94a3b8] leading-relaxed">
+                RugSol is an automated blockchain analytics instrument. Scores and grades represent point-in-time heuristic estimations and do not constitute financial advice, audit guarantees, or investment recommendations. Trading Solana tokens involves catastrophic risk of loss.
+              </p>
+            </div>
+          </div>
+
+          {/* Sections List */}
+          <div className="space-y-3">
             {sections.map((section) => (
-              <div key={section.title} className="glass-card p-6 rounded-2xl">
-                <h2 className="text-base font-semibold text-text-primary mb-3">
-                  {section.title}
-                </h2>
-                <p className="text-sm text-text-secondary leading-relaxed">
+              <div
+                key={section.index}
+                className="bg-[#0e1118] border border-[#1e2433] p-5 rounded-xl hover:border-[#38bdf8]/40 transition-colors"
+              >
+                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[#161b26]">
+                  <span className="text-xs font-mono font-bold text-[#38bdf8]">
+                    {section.index} //
+                  </span>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#f8fafc]">
+                    {section.title}
+                  </h3>
+                </div>
+                <p className="text-xs text-[#94a3b8] leading-relaxed font-sans">
                   {section.content}
                 </p>
               </div>
             ))}
           </div>
+
+          {/* Quick Contact & Verification */}
+          <div className="mt-8 p-4 bg-[#0e1118] border border-[#1e2433] rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono text-[#64748b]">
+            <div>
+              <span>OFFICIAL DISCLOSURES & REPOSITORIES</span>
+            </div>
+            <div className="flex items-center gap-4 text-[#38bdf8]">
+              <a
+                href="https://x.com/RugSolScanner"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                X: @RugSolScanner
+              </a>
+              <span>•</span>
+              <a
+                href="https://github.com/Luftflotte/rugsol"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+              >
+                GitHub
+              </a>
+            </div>
+          </div>
+
         </div>
       </main>
 

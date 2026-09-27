@@ -4,90 +4,121 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — RugSol",
-  description: "Privacy Policy for the RugSol platform.",
+  description: "Privacy Policy and on-chain data collection guidelines for the RugSol platform.",
 };
 
 const sections = [
   {
-    title: "1. Information We Collect",
+    index: "01",
+    title: "Zero Personal Data Collection",
     content:
-      "RugSol is designed with privacy in mind. We do not require user accounts, email addresses, or personal information to use the token scanner. The only data processed is the publicly available on-chain data associated with the Solana token addresses you submit for analysis.",
+      "RugSol is designed with privacy-first architecture. We do not require accounts, logins, email addresses, phone numbers, or identity verification. The only data processed is public on-chain telemetry associated with the Solana token addresses queried through our interface.",
   },
   {
-    title: "2. Usage Data",
+    index: "02",
+    title: "Telemetry & Usage Analytics",
     content:
-      "We may collect anonymized usage data including: pages visited, scan frequency, browser type, device type, and general geographic region. This data is used exclusively for improving Platform performance and user experience. We do not link usage data to individual identities.",
+      "We may monitor aggregate, anonymized infrastructure telemetry including page visits, request rates, network latency, and basic geographic clusters. This operational logging is used exclusively to optimize RPC routing and prevent abusive bot saturation. No usage telemetry is mapped to individual user identities.",
   },
   {
-    title: "3. Blockchain Data",
+    index: "03",
+    title: "Public Blockchain Data",
     content:
-      "Token addresses submitted for scanning are used to query public blockchain data. All information retrieved (holder data, authority status, liquidity, transactions) is publicly available on the Solana blockchain. We do not collect or store wallet private keys, seed phrases, or transaction signing capabilities.",
+      "Queries executed on the Platform interact with the public Solana ledger. All metrics (holder balances, authority states, liquidity pools, transaction volumes) exist in the public domain. RugSol does not store, request, or handle private keys, mnemonic phrases, or transaction execution signatures.",
   },
   {
-    title: "4. Cookies & Local Storage",
+    index: "04",
+    title: "Client-Side Local Storage",
     content:
-      "We use minimal local storage to remember your theme preference (light/dark mode) and recent scan history for convenience. No third-party tracking cookies are used. You can clear this data at any time through your browser settings.",
+      "Minimal browser local storage is utilized to persist user interface preferences (recent scans and command bar history). No cross-site advertising or third-party behavioral cookies are installed. Users can clear local cached entries at any time via browser settings.",
   },
   {
-    title: "5. Third-Party Services",
+    index: "05",
+    title: "Third-Party Data Providers",
     content:
-      "Our Platform integrates with third-party APIs (Helius, Birdeye, Jupiter, DexScreener) to retrieve blockchain and market data. These services may have their own privacy policies. We do not share user-identifying information with these services — only public token addresses needed to fulfill scan requests.",
+      "The Platform routes queries through upstream infrastructure providers including Helius RPC, Birdeye, DexScreener, and Jupiter. Only public token mint hashes are forwarded to execute diagnostics. No personal telemetry or IP fingerprints are shared with third-party vendors for commercial monetization.",
   },
   {
-    title: "6. Data Retention",
+    index: "06",
+    title: "Cache TTL & Data Purging",
     content:
-      "Scan results may be cached temporarily to improve performance. We do not maintain long-term databases of user activity or scan history associated with identifiable individuals. Cached results are automatically purged on a regular basis.",
+      "Scan outputs are retained in volatile in-memory cache for up to 300 seconds to minimize redundant RPC strain. RugSol does not preserve permanent transaction histories linked to specific IP addresses. Expired cache entries are continuously purged.",
   },
   {
-    title: "7. Data Security",
+    index: "07",
+    title: "Security Protocols",
     content:
-      "We implement industry-standard security measures to protect the Platform infrastructure. All connections are encrypted via HTTPS. However, no method of electronic transmission is 100% secure, and we cannot guarantee absolute security.",
+      "All communications between client terminals and RugSol infrastructure are secured via TLS/HTTPS encryption. While rigorous infrastructure hardening is implemented, no internet-connected platform can guarantee absolute immunity from interception.",
   },
   {
-    title: "8. Children's Privacy",
+    index: "08",
+    title: "Policy Revisions",
     content:
-      "RugSol is not intended for use by individuals under the age of 18. We do not knowingly collect information from minors.",
+      "We may calibrate this Privacy Policy to reflect architectural or protocol enhancements. Updates become operational upon publication. Continued use of the scanner constitutes acknowledgment of updated terms.",
   },
   {
-    title: "9. Changes to This Policy",
+    index: "09",
+    title: "Official Privacy Contact",
     content:
-      "We may update this Privacy Policy periodically. Changes will be posted on this page with an updated revision date. Your continued use of the Platform after changes constitutes acceptance of the updated policy.",
-  },
-  {
-    title: "10. Contact",
-    content:
-      "For privacy-related inquiries, please reach out via our official X (Twitter) account @RugSolScanner or GitHub repository.",
+      "Inquiries regarding data practices or telemetry disclosures may be directed through our verified technical channel on X (@RugSolScanner) or our open source repository.",
   },
 ];
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen premium-bg text-text-primary">
+    <div className="min-h-screen bg-[#08090d] text-[#f1f5f9]">
       <Navbar />
 
       <main className="pt-20 md:pt-28 pb-20">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--silver-accent)]/10 border border-[var(--silver-accent)]/30 mb-6 backdrop-blur-sm">
-              <span className="text-sm font-medium silver-accent tracking-wide">Legal</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-              Privacy Policy
+          {/* Header - No pill badge */}
+          <div className="mb-10">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold tracking-tight text-[#f8fafc] mb-3">
+              PRIVACY POLICY
             </h1>
-            <p className="text-sm text-text-muted">
-              Last updated: February 1, 2026
-            </p>
+            <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-[#64748b]">
+              <span>SPECIFICATION V1.4</span>
+              <span>//</span>
+              <span>EFFECTIVE: FEBRUARY 1, 2026</span>
+              <span>//</span>
+              <span className="text-emerald-400 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                NON-CUSTODIAL & NO-ACCOUNT ARCHITECTURE
+              </span>
+            </div>
           </div>
 
-          {/* Content */}
-          <div className="space-y-6">
+          {/* Privacy Guarantee Box */}
+          <div className="bg-[#0e1118] border border-emerald-500/30 bg-emerald-500/[0.02] p-4 sm:p-5 rounded-xl mb-8 flex items-start gap-3.5">
+            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0 text-emerald-400 font-mono font-bold text-xs mt-0.5">
+              ✓
+            </div>
+            <div>
+              <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 mb-1">
+                ANONYMOUS & PRIVATE BY DESIGN
+              </h2>
+              <p className="text-xs text-[#94a3b8] leading-relaxed">
+                RugSol does not require registration, email collection, or wallet signature verification for scanning. We only query public Solana blockchain data.
+              </p>
+            </div>
+          </div>
+
+          {/* Sections */}
+          <div className="space-y-3">
             {sections.map((section) => (
-              <div key={section.title} className="glass-card p-6 rounded-2xl">
-                <h2 className="text-base font-semibold text-text-primary mb-3">
-                  {section.title}
-                </h2>
-                <p className="text-sm text-text-secondary leading-relaxed">
+              <div
+                key={section.index}
+                className="bg-[#0e1118] border border-[#1e2433] p-5 rounded-xl hover:border-[#38bdf8]/40 transition-colors"
+              >
+                <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[#161b26]">
+                  <span className="text-xs font-mono font-bold text-[#38bdf8]">
+                    {section.index} //
+                  </span>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-[#f8fafc]">
+                    {section.title}
+                  </h3>
+                </div>
+                <p className="text-xs text-[#94a3b8] leading-relaxed font-sans">
                   {section.content}
                 </p>
               </div>
