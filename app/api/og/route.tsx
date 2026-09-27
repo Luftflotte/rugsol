@@ -10,7 +10,7 @@ function sanitizeForLatinFont(text: string): string {
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
-  const chunkSize = 8192; // Process in chunks to avoid stack overflow
+  const chunkSize = 8192;
   let binary = "";
 
   for (let i = 0; i < bytes.byteLength; i += chunkSize) {
@@ -46,31 +46,23 @@ async function fetchAndOptimizeImage(url: string | null): Promise<string | null>
     const contentType = res.headers.get("content-type") || "image/png";
     if (!contentType.startsWith("image/")) return null;
 
-    // Проверяем размер изображения (лимит 500KB для безопасности)
     const contentLength = res.headers.get("content-length");
     if (contentLength && parseInt(contentLength) > 500000) {
-      console.warn(`Image too large: ${contentLength} bytes`);
       return null;
     }
 
     const arrayBuffer = await res.arrayBuffer();
-
-    // Дополнительная проверка размера после загрузки
     if (arrayBuffer.byteLength > 500000) {
-      console.warn(`Image buffer too large: ${arrayBuffer.byteLength} bytes`);
       return null;
     }
 
-    // Безопасная конвертация в base64
     try {
       const base64 = arrayBufferToBase64(arrayBuffer);
       return `data:${contentType};base64,${base64}`;
-    } catch (e) {
-      console.error("Failed to convert image to base64:", e);
+    } catch {
       return null;
     }
-  } catch (e) {
-    console.error("Failed to fetch image:", e);
+  } catch {
     return null;
   }
 }
@@ -92,88 +84,196 @@ async function loadFonts() {
 
 function renderHomepageCard(fonts: { interReg: ArrayBuffer; interBold: ArrayBuffer; jbMono: ArrayBuffer; jbMonoBold: ArrayBuffer }) {
   const { interReg, interBold, jbMono, jbMonoBold } = fonts;
+  const dateStr = new Date().toLocaleString("en-GB", { timeZone: "UTC", hour12: false }).replace(",", "") + " UTC";
+
   return new ImageResponse(
     (
-      <div style={{ width: 1200, height: 630, display: "flex", flexDirection: "column", background: "linear-gradient(150deg, #080d08 0%, #0b130b 45%, #090f09 100%)", fontFamily: "Inter", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", backgroundImage: "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)", backgroundSize: "64px 64px" }} />
-        <div style={{ position: "absolute", width: 700, height: 700, borderRadius: "50%", background: "#22c55e", opacity: 0.04, filter: "blur(140px)", right: -120, top: -120, display: "flex" }} />
-        <div style={{ position: "absolute", width: 500, height: 500, borderRadius: "50%", background: "#22c55e", opacity: 0.03, filter: "blur(100px)", left: -100, bottom: -200, display: "flex" }} />
-        <div style={{ height: 5, width: "100%", background: "linear-gradient(90deg, transparent 0%, #22c55e 50%, transparent 100%)", display: "flex" }} />
+      <div
+        style={{
+          width: 1200,
+          height: 630,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          background: "#08090d",
+          fontFamily: "Inter",
+          position: "relative",
+          overflow: "hidden",
+          padding: "36px 48px",
+          boxSizing: "border-box",
+        }}
+      >
+        {/* Ambient Top Accent Bar */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 3,
+            background: "linear-gradient(90deg, #38bdf8 0%, #10b981 50%, #38bdf8 100%)",
+            display: "flex",
+          }}
+        />
 
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 36, position: "relative", padding: "0 72px" }}>
-          {/* Logo + title */}
-          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <svg width="72" height="72" viewBox="0 0 48 48" fill="none" style={{ display: "flex" }}><path d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z" stroke="#c0c0c0" strokeWidth="1.5" strokeLinejoin="round" fill="none"/><path d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z" fill="rgba(192,192,192,0.08)" stroke="#c0c0c0" strokeWidth="1" strokeLinejoin="round"/><path d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z" fill="#c0c0c0"/><path d="M20.5 23.5L23 26L28 20.5" stroke="#0a0a0a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
+        {/* Technical Grid Pattern */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: "flex",
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+          }}
+        />
+
+        {/* Top Header Row */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative", zIndex: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <svg width="36" height="36" viewBox="0 0 48 48" fill="none" style={{ display: "flex" }}>
+              <path d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z" stroke="#38bdf8" strokeWidth="1.5" strokeLinejoin="round" fill="none" />
+              <path d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z" fill="rgba(56,189,248,0.08)" stroke="#38bdf8" strokeWidth="1" strokeLinejoin="round" />
+              <path d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z" fill="#38bdf8" />
+              <path d="M20.5 23.5L23 26L28 20.5" stroke="#08090d" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </svg>
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ fontSize: 64, fontWeight: 900, color: "#ffffff", letterSpacing: "-2px", lineHeight: 1, display: "flex" }}>RugSol</span>
-              <span style={{ fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.25)", letterSpacing: "6px", textTransform: "uppercase", marginTop: 6, display: "flex" }}>Token Scanner</span>
+              <span style={{ fontSize: 24, fontWeight: 800, color: "#f8fafc", letterSpacing: "-0.5px", lineHeight: 1, display: "flex" }}>
+                RugSol
+              </span>
+              <span style={{ fontSize: 10, fontFamily: "JetBrains Mono", color: "#64748b", letterSpacing: "2px", textTransform: "uppercase", marginTop: 4, display: "flex" }}>
+                SECURITY PROTOCOL // SOLANA
+              </span>
             </div>
           </div>
 
-          {/* Tagline */}
-          <span style={{ fontSize: 28, fontWeight: 500, color: "rgba(255,255,255,0.4)", textAlign: "center", maxWidth: 700, lineHeight: 1.4, display: "flex" }}>Instant rug pull detection for Solana tokens</span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "6px 14px",
+              borderRadius: 6,
+              background: "#0e1118",
+              border: "1px solid #1e2433",
+            }}
+          >
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", display: "flex" }} />
+            <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: "#10b981", fontWeight: 700, display: "flex" }}>
+              MAINNET ACTIVE // FAST RPC
+            </span>
+          </div>
+        </div>
 
-          {/* Feature pills */}
-          <div style={{ display: "flex", gap: 16, marginTop: 12 }}>
-            {["On-chain Analysis", "Honeypot Detection", "Holder Clustering", "Pump.fun Support"].map((f, i) => (
-              <span key={i} style={{ fontSize: 15, fontWeight: 600, padding: "10px 22px", borderRadius: 100, background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.18)", color: "rgba(34,197,94,0.7)", display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", opacity: 0.6, display: "flex" }} />
-                {f}
-              </span>
+        {/* Center Hero Block */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 20, position: "relative", zIndex: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 16px", borderRadius: 20, background: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.2)" }}>
+            <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", fontWeight: 700, color: "#38bdf8", letterSpacing: "1px", textTransform: "uppercase", display: "flex" }}>
+              AUTOMATED SMART CONTRACT FORENSICS
+            </span>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <span style={{ fontSize: 52, fontWeight: 900, color: "#f8fafc", letterSpacing: "-1.5px", lineHeight: 1.1, display: "flex" }}>
+              Real-Time Solana Token Audit
+            </span>
+            <span style={{ fontSize: 20, color: "#94a3b8", maxWidth: 780, marginTop: 14, lineHeight: 1.4, display: "flex" }}>
+              Instant threat intelligence, honeypot simulation, liquidity lock forensics, and holder clustering analysis.
+            </span>
+          </div>
+
+          {/* 4 Feature Telemetry Cards */}
+          <div style={{ display: "flex", gap: 14, marginTop: 12, width: "100%", maxWidth: 1080 }}>
+            {[
+              { tag: "[ HONEYPOT ]", title: "Sell Simulator", desc: "Simulates route via Jupiter API" },
+              { tag: "[ LP LOCK ]", title: "Liquidity Audit", desc: "Burn & lock status across DEXs" },
+              { tag: "[ PRIVILEGES ]", title: "Authority Forensics", desc: "Mint & freeze privilege verification" },
+              { tag: "[ WHALES ]", title: "Cluster Forensics", desc: "Concentration & block-0 snipers" },
+            ].map((f, i) => (
+              <div
+                key={i}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 6,
+                  padding: "16px 14px",
+                  borderRadius: 10,
+                  background: "#0e1118",
+                  border: "1px solid #1e2433",
+                }}
+              >
+                <span style={{ fontSize: 10, fontFamily: "JetBrains Mono", color: "#38bdf8", fontWeight: 700, display: "flex" }}>
+                  {f.tag}
+                </span>
+                <span style={{ fontSize: 15, fontWeight: 700, color: "#f8fafc", display: "flex" }}>
+                  {f.title}
+                </span>
+                <span style={{ fontSize: 11, color: "#64748b", lineHeight: 1.3, display: "flex" }}>
+                  {f.desc}
+                </span>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Footer */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "22px 72px", background: "rgba(0,0,0,0.4)", borderTop: "1px solid rgba(255,255,255,0.03)" }}>
-          <div style={{ display: "flex", alignItems: "center", padding: "10px 28px", borderRadius: 100, background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.15)" }}>
-            <span style={{ fontFamily: "JetBrains Mono", fontSize: 22, fontWeight: 700, color: "#22c55e", letterSpacing: "0.5px", display: "flex" }}>rugsol.xyz</span>
+        {/* Bottom Footer Row */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            borderTop: "1px solid #1e2433",
+            paddingTop: 16,
+            position: "relative",
+            zIndex: 10,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: "#64748b", display: "flex" }}>
+              TERMINAL AUDITOR v2.4
+            </span>
+            <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: "#334155", display: "flex" }}>|</span>
+            <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: "#64748b", display: "flex" }}>
+              TIMESTAMP: {dateStr}
+            </span>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: "7px 18px",
+              borderRadius: 6,
+              background: "rgba(56,189,248,0.1)",
+              border: "1px solid rgba(56,189,248,0.25)",
+            }}
+          >
+            <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, fontWeight: 700, color: "#38bdf8", letterSpacing: "0.5px", display: "flex" }}>
+              rugsol.xyz
+            </span>
           </div>
         </div>
       </div>
     ),
-    { width: 1200, height: 630, headers: {
-      "Content-Disposition": 'inline; filename="rugsol-og.png"',
-      "Cache-Control": "public, max-age=86400, s-maxage=86400",
-    }, fonts: [
-      { name: "Inter", data: interReg, weight: 400 },
-      { name: "Inter", data: interBold, weight: 700 },
-      { name: "JetBrains Mono", data: jbMono, weight: 400 },
-      { name: "JetBrains Mono", data: jbMonoBold, weight: 700 },
-    ]}
-  );
-}
-
-function hashAddress(address: string): {
-  blur1X: number; blur1Y: number; blur1Size: number;
-  blur2X: number; blur2Y: number; blur2Size: number;
-  gridOffset: number; gridRotation: number;
-  hueShift: number; cornerSeed: string;
-  decorAngle: number; decorDistance: number;
-} {
-  const hash = (s: string, max: number) => {
-    let h = 0;
-    for (let i = 0; i < s.length; i++) {
-      h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    {
+      width: 1200,
+      height: 630,
+      headers: {
+        "Content-Disposition": 'inline; filename="rugsol-og.png"',
+        "Cache-Control": "public, max-age=86400, s-maxage=86400",
+      },
+      fonts: [
+        { name: "Inter", data: interReg, weight: 400 },
+        { name: "Inter", data: interBold, weight: 700 },
+        { name: "JetBrains Mono", data: jbMono, weight: 400 },
+        { name: "JetBrains Mono", data: jbMonoBold, weight: 700 },
+      ],
     }
-    return Math.abs(h) % max;
-  };
-
-  const addr = address || "default";
-  return {
-    blur1X: -80 + hash(addr + "b1x", 160),
-    blur1Y: -160 + hash(addr + "b1y", 100),
-    blur1Size: 500 + hash(addr + "b1s", 400),
-    blur2X: -200 + hash(addr + "b2x", 200),
-    blur2Y: -250 + hash(addr + "b2y", 200),
-    blur2Size: 400 + hash(addr + "b2s", 300),
-    gridOffset: hash(addr + "grid", 32),
-    gridRotation: hash(addr + "rot", 15) - 7,
-    hueShift: hash(addr + "hue", 20) - 10,
-    cornerSeed: addr.slice(-8),
-    decorAngle: hash(addr + "da", 360),
-    decorDistance: 100 + hash(addr + "dd", 150),
-  };
+  );
 }
 
 export async function GET(request: NextRequest) {
@@ -187,13 +287,12 @@ export async function GET(request: NextRequest) {
     }
 
     const address = searchParams.get("address") || "";
-    const unique = hashAddress(address);
     const rawName = sanitizeForLatinFont(searchParams.get("name") || "Unknown");
     const name = rawName.length > 20 ? rawName.slice(0, 18) + "..." : rawName;
     const symbol = sanitizeForLatinFont(searchParams.get("symbol") || "TOKEN");
     const score = Math.max(0, Math.min(100, parseInt(searchParams.get("score") || "0") || 0));
     const grade = searchParams.get("grade") || "F";
-    const gradeLabel = searchParams.get("label") || "Likely Scam";
+    const gradeLabel = searchParams.get("label") || "High Risk";
     const image = searchParams.get("image");
     const mode = (searchParams.get("mode") || "dex").toUpperCase();
     const rawPrice = searchParams.get("price") || "$0.00";
@@ -207,10 +306,6 @@ export async function GET(request: NextRequest) {
     const sell = searchParams.get("sell") || "Yes";
     const mint = searchParams.get("mint") || "Revoked";
     const penalty = Math.min(100, Math.max(0, parseInt(searchParams.get("penalty") || "0") || 0));
-    const tagsParam = searchParams.get("tags") || "";
-    const tags = tagsParam ? tagsParam.split(",").filter(Boolean) : ["Analyzed"];
-    const tagPointsParam = searchParams.get("tagPoints") || "";
-    const tagPointsList = tagPointsParam ? tagPointsParam.split(",").map(Number) : [];
     const isLight = searchParams.get("theme") === "light";
 
     const fonts = await loadFonts();
@@ -218,229 +313,740 @@ export async function GET(request: NextRequest) {
 
     // Workaround: Skip WebP images — Satori doesn't support WebP decoding
     let tokenImage: string | null = null;
-    if (image?.toLowerCase().endsWith('.webp')) {
-      console.warn('Skipping WebP image — not supported by Satori');
+    if (image?.toLowerCase().endsWith(".webp")) {
       tokenImage = null;
     } else {
       tokenImage = await fetchAndOptimizeImage(image);
     }
 
-    let theme = { bg: "linear-gradient(150deg, #0d0808 0%, #130b0b 45%, #0f0909 100%)", ac: "#ef4444", acDim: "rgba(239,68,68,0.6)", acBg: "rgba(239,68,68,0.1)", acBorder: "rgba(239,68,68,0.18)" };
-    if (score >= 60) theme = { bg: "linear-gradient(150deg, #080d08 0%, #0b130b 45%, #090f09 100%)", ac: "#22c55e", acDim: "rgba(34,197,94,0.6)", acBg: "rgba(34,197,94,0.1)", acBorder: "rgba(34,197,94,0.18)" };
-    else if (score >= 40) theme = { bg: "linear-gradient(150deg, #0d0b08 0%, #13100b 45%, #0f0c09 100%)", ac: "#f59e0b", acDim: "rgba(245,158,11,0.6)", acBg: "rgba(245,158,11,0.1)", acBorder: "rgba(245,158,11,0.18)" };
+    // Determine status color & severity
+    const isSafe = score >= 70;
+    const isMedium = score >= 40 && score < 70;
+    const statusColor = isSafe ? "#10b981" : isMedium ? "#f59e0b" : "#ef4444";
 
-    if (isLight) {
-      if (score >= 60) theme.bg = "linear-gradient(150deg, #f7faf7 0%, #eef6ee 45%, #f4faf4 100%)";
-      else if (score >= 40) theme.bg = "linear-gradient(150deg, #faf8f5 0%, #f7f2eb 45%, #faf6f1 100%)";
-      else theme.bg = "linear-gradient(150deg, #faf5f5 0%, #f7ebeb 45%, #faf2f2 100%)";
-    }
+    // Palette tokens
+    const c = isLight
+      ? {
+          bg: "#f8fafc",
+          cardBg: "#ffffff",
+          chipBg: "#f1f5f9",
+          border: "#e2e8f0",
+          borderStrong: "#cbd5e1",
+          textPrimary: "#0f172a",
+          textSecondary: "#475569",
+          textMuted: "#64748b",
+          gridColor: "rgba(0, 0, 0, 0.035)",
+          brandCyan: "#0284c7",
+          subtleAccent: isSafe ? "rgba(16, 185, 129, 0.08)" : isMedium ? "rgba(245, 158, 11, 0.08)" : "rgba(239, 68, 68, 0.08)",
+          subtleBorder: isSafe ? "rgba(16, 185, 129, 0.25)" : isMedium ? "rgba(245, 158, 11, 0.25)" : "rgba(239, 68, 68, 0.25)",
+        }
+      : {
+          bg: "#08090d",
+          cardBg: "#0e1118",
+          chipBg: "#141824",
+          border: "#1e2433",
+          borderStrong: "#2d374d",
+          textPrimary: "#f8fafc",
+          textSecondary: "#94a3b8",
+          textMuted: "#64748b",
+          gridColor: "rgba(255, 255, 255, 0.025)",
+          brandCyan: "#38bdf8",
+          subtleAccent: isSafe ? "rgba(16, 185, 129, 0.08)" : isMedium ? "rgba(245, 158, 11, 0.08)" : "rgba(239, 68, 68, 0.08)",
+          subtleBorder: isSafe ? "rgba(16, 185, 129, 0.25)" : isMedium ? "rgba(245, 158, 11, 0.25)" : "rgba(239, 68, 68, 0.25)",
+        };
 
-    const c = isLight ? {
-      text: "#0a0a0a",
-      textSoft: "rgba(0,0,0,0.5)",
-      textDim: "rgba(0,0,0,0.35)",
-      textGhost: "rgba(0,0,0,0.18)",
-      textMuted: "rgba(0,0,0,0.25)",
-      cardBg: "rgba(0,0,0,0.025)",
-      subtle: "rgba(0,0,0,0.06)",
-      subtler: "rgba(0,0,0,0.04)",
-      grid: "rgba(0,0,0,0.03)",
-      footerBg: "rgba(0,0,0,0.04)",
-      footerBorder: "rgba(0,0,0,0.06)",
-      svgStroke: "rgba(0,0,0,0.3)",
-      svgFill: "rgba(0,0,0,0.08)",
-      svgShield: "rgba(0,0,0,0.3)",
-      svgCheck: "rgba(255,255,255,0.9)",
-      svgLine: "rgba(0,0,0,0.12)",
-      glow: 0.06,
-    } : {
-      text: "#ffffff",
-      textSoft: "rgba(255,255,255,0.3)",
-      textDim: "rgba(255,255,255,0.25)",
-      textGhost: "rgba(255,255,255,0.18)",
-      textMuted: "rgba(255,255,255,0.16)",
-      cardBg: "rgba(255,255,255,0.015)",
-      subtle: "rgba(255,255,255,0.04)",
-      subtler: "rgba(255,255,255,0.04)",
-      grid: "rgba(255,255,255,0.02)",
-      footerBg: "rgba(0,0,0,0.4)",
-      footerBorder: "rgba(255,255,255,0.03)",
-      svgStroke: "rgba(255,255,255,0.25)",
-      svgFill: "rgba(255,255,255,0.06)",
-      svgShield: "rgba(255,255,255,0.25)",
-      svgCheck: "rgba(0,0,0,0.7)",
-      svgLine: "rgba(255,255,255,0.12)",
-      glow: 0.04,
-    };
+    const dateStr = new Date().toLocaleString("en-GB", { timeZone: "UTC", hour12: false }).replace(",", "") + " UTC";
 
-    const circum = 680;
-    const offset = circum * (1 - score / 100);
-    const dateStr = new Date().toLocaleString('en-GB', { timeZone: 'UTC', hour12: false }).replace(',', '') + ' UTC';
+    // Telemetry metric states
+    const isLiqCritical = liq === "$0" || liq === "0" || liq === "0%";
+    const top10Num = parseFloat(top10) || 0;
+    const isTop10Critical = top10Num > 60;
+    const isTop10Warning = top10Num > 40;
+    const isSellOk = sell === "Yes";
+    const isMintRevoked = mint === "Revoked" || mint === "Locked";
 
-    let m3Color = "#22c55e";
+    let lpStatusColor = "#10b981";
+    let lpStatusLabel = "PERMANENT";
+    let lpStatusValue = lock;
     if (mode === "PUMP") {
-        const snipers = parseInt(lock) || 0;
-        if (snipers > 5) m3Color = "#ef4444";
-        else if (snipers > 0) m3Color = "#f59e0b";
+      const snipers = parseInt(lock) || 0;
+      lpStatusValue = `${snipers} Snipers`;
+      if (snipers > 5) {
+        lpStatusColor = "#ef4444";
+        lpStatusLabel = "BOT HEAVY";
+      } else if (snipers > 0) {
+        lpStatusColor = "#f59e0b";
+        lpStatusLabel = "EARLY SNIPES";
+      } else {
+        lpStatusColor = "#10b981";
+        lpStatusLabel = "CLEAN LAUNCH";
+      }
     } else {
-        if (lock === "No" || lock === "Active" || lock === "0") m3Color = "#ef4444";
+      if (lock === "Burned" || lock === "100% Burned") {
+        lpStatusColor = "#10b981";
+        lpStatusLabel = "BURNED";
+      } else if (lock === "Locked") {
+        lpStatusColor = "#10b981";
+        lpStatusLabel = "LOCKED";
+      } else {
+        lpStatusColor = "#ef4444";
+        lpStatusLabel = "UNLOCKED";
+      }
     }
 
-    // Score ring enhancements — tick marks + arc cap
-    const tickCount = 40;
-    const filledTicks = Math.floor(score * tickCount / 100);
-    const ticks = Array.from({ length: tickCount }, (_, i) => {
-      const a = -Math.PI / 2 + i * (2 * Math.PI / tickCount);
-      const isLong = i % 10 === 0;
-      const oR = 130, iR = isLong ? 117 : 122;
-      return { x1: 135 + iR * Math.cos(a), y1: 135 + iR * Math.sin(a), x2: 135 + oR * Math.cos(a), y2: 135 + oR * Math.sin(a), isLong, filled: i < filledTicks };
-    });
-    const endA = -Math.PI / 2 + (score / 100) * 2 * Math.PI;
-    const capX = 135 + 108 * Math.cos(endA);
-    const capY = 135 + 108 * Math.sin(endA);
+    // Geometry for circular telemetry dial (R = 64, circumference = 2 * PI * 64 = 402.12)
+    const dialRadius = 64;
+    const dialCircumference = 402.12;
+    const dialOffset = dialCircumference * (1 - score / 100);
 
-    const gridSize = 48 + unique.gridOffset;
+    // Truncated display address
+    const displayAddress = address.length > 28 ? `${address.slice(0, 12)}...${address.slice(-12)}` : address;
 
     return new ImageResponse(
       (
-        <div style={{ width: 1200, height: 630, display: "flex", flexDirection: "column", background: theme.bg, fontFamily: "Inter", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, display: "flex", backgroundImage: `linear-gradient(${c.grid} 1px, transparent 1px), linear-gradient(90deg, ${c.grid} 1px, transparent 1px)`, backgroundSize: `${gridSize}px ${gridSize}px`, transform: `rotate(${unique.gridRotation}deg)` }} />
-          <div style={{ position: "absolute", width: unique.blur1Size, height: unique.blur1Size, borderRadius: "50%", background: theme.ac, opacity: c.glow, filter: "blur(140px)", right: unique.blur1X, top: unique.blur1Y, display: "flex" }} />
-          <div style={{ position: "absolute", width: unique.blur2Size, height: unique.blur2Size, borderRadius: "50%", background: theme.ac, opacity: 0.025, filter: "blur(100px)", left: unique.blur2X, bottom: unique.blur2Y, display: "flex" }} />
-          <div style={{ position: "absolute", width: 3, height: 3, borderRadius: "50%", background: c.textGhost, opacity: 0.15, left: 50 + (unique.decorDistance * Math.cos(unique.decorAngle * Math.PI / 180)), top: 50 + (unique.decorDistance * Math.sin(unique.decorAngle * Math.PI / 180)), display: "flex" }} />
-          <div style={{ position: "absolute", width: 2, height: 2, borderRadius: "50%", background: c.textGhost, opacity: 0.1, left: 100 + (unique.decorDistance * 0.7 * Math.cos((unique.decorAngle + 120) * Math.PI / 180)), top: 200 + (unique.decorDistance * 0.7 * Math.sin((unique.decorAngle + 120) * Math.PI / 180)), display: "flex" }} />
-          <div style={{ position: "absolute", width: 4, height: 4, borderRadius: "50%", background: c.textGhost, opacity: 0.08, right: 150 + (unique.decorDistance * 0.5 * Math.cos((unique.decorAngle + 240) * Math.PI / 180)), bottom: 100 + (unique.decorDistance * 0.5 * Math.sin((unique.decorAngle + 240) * Math.PI / 180)), display: "flex" }} />
-          <div style={{ height: 5, width: "100%", background: `linear-gradient(90deg, transparent 0%, ${theme.ac} 50%, transparent 100%)`, display: "flex" }} />
+        <div
+          style={{
+            width: 1200,
+            height: 630,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            background: c.bg,
+            fontFamily: "Inter",
+            position: "relative",
+            overflow: "hidden",
+            padding: "28px 40px 22px",
+            boxSizing: "border-box",
+          }}
+        >
+          {/* Top Status Accent Bar */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 3,
+              background: statusColor,
+              display: "flex",
+            }}
+          />
 
-          <div style={{ flex: 1, display: "flex", padding: "52px 72px 32px", gap: 40, position: "relative" }}>
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-start", gap: 60 }}>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-                  <div style={{ width: 90, height: 90, borderRadius: 22, background: c.subtler, border: `1px solid ${c.subtle}`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                    {tokenImage ? <img src={tokenImage} width="90" height="90" style={{ objectFit: "cover" }} /> : <span style={{ fontSize: 36, fontWeight: 800, color: c.textGhost, display: "flex" }}>{symbol[0]}</span>}
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    <div style={{ display: "flex", flexDirection: "row", alignItems: "flex-end", flexWrap: "nowrap", gap: 16 }}>
-                      <span style={{ fontSize: 44, fontWeight: 800, color: c.text, letterSpacing: "-1px", lineHeight: 1, display: "flex" }}>{name}</span>
-                      <span style={{ fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 7, textTransform: "uppercase", background: mode === "PUMP" ? "rgba(249,115,22,0.14)" : "rgba(34,197,94,0.14)", color: mode === "PUMP" ? "#fb923c" : "#4ade80", border: `1px solid ${mode === "PUMP" ? "rgba(249,115,22,0.25)" : "rgba(34,197,94,0.25)"}`, display: "flex", alignItems: "center", marginBottom: 4 }}>{mode === "PUMP" ? "PUMP.FUN" : "DEX"}</span>
-                      <span style={{ fontSize: 22, color: c.textSoft, fontWeight: 500, lineHeight: 1, display: "flex", marginBottom: 7 }}>${symbol}</span>
-                    </div>
-                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 15, color: c.textMuted, letterSpacing: "0.5px", display: "flex" }}>{address}</span>
-                  </div>
+          {/* Grid Pattern */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: "flex",
+              backgroundImage: `linear-gradient(${c.gridColor} 1px, transparent 1px), linear-gradient(90deg, ${c.gridColor} 1px, transparent 1px)`,
+              backgroundSize: "32px 32px",
+            }}
+          />
+
+          {/* Radial Ambient Glow behind Score Gauge */}
+          <div
+            style={{
+              position: "absolute",
+              width: 500,
+              height: 500,
+              borderRadius: "50%",
+              background: `radial-gradient(circle, ${statusColor}14 0%, transparent 70%)`,
+              right: -60,
+              top: 40,
+              display: "flex",
+            }}
+          />
+
+          {/* 1. Header Row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              position: "relative",
+              zIndex: 10,
+            }}
+          >
+            {/* Left: Avatar + Token Metadata */}
+            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+              <div
+                style={{
+                  width: 58,
+                  height: 58,
+                  borderRadius: 12,
+                  background: c.chipBg,
+                  border: `1px solid ${c.border}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden",
+                  flexShrink: 0,
+                }}
+              >
+                {tokenImage ? (
+                  <img src={tokenImage} width="58" height="58" style={{ objectFit: "cover" }} />
+                ) : (
+                  <span style={{ fontSize: 24, fontWeight: 800, color: c.brandCyan, fontFamily: "JetBrains Mono", display: "flex" }}>
+                    {symbol.slice(0, 3)}
+                  </span>
+                )}
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 28, fontWeight: 800, color: c.textPrimary, letterSpacing: "-0.5px", lineHeight: 1, display: "flex" }}>
+                    {name}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontFamily: "JetBrains Mono",
+                      fontWeight: 700,
+                      padding: "3px 8px",
+                      borderRadius: 4,
+                      background: mode === "PUMP" ? "rgba(249,115,22,0.12)" : "rgba(56,189,248,0.12)",
+                      color: mode === "PUMP" ? "#fb923c" : c.brandCyan,
+                      border: mode === "PUMP" ? "1px solid rgba(249,115,22,0.25)" : "1px solid rgba(56,189,248,0.25)",
+                      display: "flex",
+                    }}
+                  >
+                    {mode === "PUMP" ? "[ PUMP.FUN ]" : "[ DEX POOL ]"}
+                  </span>
+                  <span style={{ fontSize: 18, fontWeight: 700, color: c.brandCyan, fontFamily: "JetBrains Mono", display: "flex" }}>
+                    ${symbol}
+                  </span>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", marginTop: 36 }}>
-                  <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
-                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 54, fontWeight: 700, color: c.text, letterSpacing: "-2.5px", lineHeight: 1, display: "flex" }}>{price}</span>
-                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 24, fontWeight: 600, color: change.startsWith("-") ? "#ef4444" : change === "0%" ? c.textDim : "#22c55e", lineHeight: 1, display: "flex", marginBottom: 5 }}>{change}</span>
-                  </div>
-                  <div style={{ fontFamily: "JetBrains Mono", fontSize: 18, color: c.textDim, marginTop: 10, letterSpacing: "0.5px", display: "flex" }}>MC {mcap}</div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 36 }}>
-                   <span style={{ fontFamily: "JetBrains Mono", fontSize: 15, fontWeight: 600, color: penalty === 0 ? "rgba(34,197,94,0.6)" : penalty >= 50 ? "rgba(239,68,68,0.7)" : penalty >= 25 ? "rgba(245,158,11,0.7)" : "rgba(234,179,8,0.6)", display: "flex" }}>{penalty === 0 ? "No penalties" : `-${penalty} points`}</span>
-                   <div style={{ flex: 1, height: 7, background: theme.acBg, borderRadius: 4, overflow: "hidden", display: "flex" }}>
-                      <div style={{ height: "100%", borderRadius: 4, width: `${Math.min(100, (penalty / 100) * 100)}%`, background: penalty >= 50 ? "linear-gradient(90deg, #ef4444, #ef4444bb)" : penalty >= 25 ? "linear-gradient(90deg, #f59e0b, #f59e0bbb)" : "linear-gradient(90deg, #eab308, #eab308bb)", display: "flex" }} />
-                   </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 12, color: c.textMuted, display: "flex" }}>
+                    {displayAddress}
+                  </span>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#334155", display: "flex" }}>|</span>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#10b981", fontWeight: 600, display: "flex" }}>
+                    SOLANA MAINNET
+                  </span>
                 </div>
               </div>
-              <div style={{ display: "flex", borderRadius: 16, overflow: "hidden", border: `1px solid ${c.subtle}` }}>
+            </div>
+
+            {/* Right: Telemetry Stamp */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-end",
+                gap: 3,
+                padding: "8px 14px",
+                borderRadius: 8,
+                background: c.cardBg,
+                border: `1px solid ${c.border}`,
+              }}
+            >
+              <span style={{ fontSize: 10, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 600, letterSpacing: "1px", display: "flex" }}>
+                [ ON-CHAIN TELEMETRY // 8+ VECTORS ]
+              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor, display: "flex" }} />
+                <span style={{ fontSize: 12, fontFamily: "JetBrains Mono", color: statusColor, fontWeight: 700, display: "flex" }}>
+                  {isSafe ? "AUDIT VERIFIED CLEAN" : isMedium ? "WARNINGS DETECTED" : "CRITICAL RISK IDENTIFIED"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Middle Content Grid (Left Telemetry + Right Dial) */}
+          <div style={{ display: "flex", gap: 20, alignItems: "stretch", position: "relative", zIndex: 10, flex: 1, margin: "16px 0" }}>
+            {/* Left Column: Price, Deductions, 5 Metrics */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              {/* Price & Market Cap Row */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 48, fontWeight: 800, color: c.textPrimary, letterSpacing: "-1.5px", lineHeight: 1, display: "flex" }}>
+                    {price}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: "JetBrains Mono",
+                      fontSize: 15,
+                      fontWeight: 700,
+                      padding: "4px 10px",
+                      borderRadius: 6,
+                      background: change.startsWith("-") ? "rgba(239,68,68,0.12)" : "rgba(16,185,129,0.12)",
+                      color: change.startsWith("-") ? "#ef4444" : "#10b981",
+                      border: change.startsWith("-") ? "1px solid rgba(239,68,68,0.25)" : "1px solid rgba(16,185,129,0.25)",
+                      display: "flex",
+                    }}
+                  >
+                    {change}
+                  </span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, color: c.textSecondary, fontWeight: 600, display: "flex" }}>
+                    MCAP: {mcap}
+                  </span>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#334155", display: "flex" }}>|</span>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, color: c.textMuted, display: "flex" }}>
+                    ENGINE: RUGSOL v2.4
+                  </span>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#334155", display: "flex" }}>|</span>
+                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, color: c.textMuted, display: "flex" }}>
+                    INTEGRITY: REAL-TIME ON-CHAIN
+                  </span>
+                </div>
+              </div>
+
+              {/* Security Deductions Status Banner */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "11px 18px",
+                  borderRadius: 8,
+                  background: penalty === 0 ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.08)",
+                  border: penalty === 0 ? "1px solid rgba(16,185,129,0.22)" : "1px solid rgba(239,68,68,0.22)",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  {penalty === 0 ? (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ display: "flex" }}>
+                      <path d="M20 6L9 17L4 12" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style={{ display: "flex" }}>
+                      <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#ef4444" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                  <span style={{ fontSize: 12, fontFamily: "JetBrains Mono", fontWeight: 700, color: penalty === 0 ? "#10b981" : "#ef4444", display: "flex" }}>
+                    {penalty === 0
+                      ? "0 PENALTIES DETECTED — ALL 8 SMART CONTRACT VECTORS CLEAN"
+                      : `-${penalty} PTS DEDUCTIONS — ${penalty >= 50 ? "CRITICAL RISK VECTORS COMPROMISED" : "RISK ANOMALIES DETECTED"}`}
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", color: penalty === 0 ? "#10b981" : "#ef4444", fontWeight: 700, display: "flex" }}>
+                    {penalty === 0 ? "0 DEDUCTIONS" : `-${penalty} PTS`}
+                  </span>
+                  <div style={{ width: 100, height: 6, borderRadius: 3, background: c.border, overflow: "hidden", display: "flex" }}>
+                    <div
+                      style={{
+                        height: "100%",
+                        width: penalty === 0 ? "100%" : `${Math.min(100, (penalty / 100) * 100)}%`,
+                        background: penalty === 0 ? "#10b981" : penalty >= 50 ? "#ef4444" : "#f59e0b",
+                        display: "flex",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 5 Core Telemetry Metric Cards */}
+              <div style={{ display: "flex", gap: 10, width: "100%" }}>
+                {/* Metric 1: Liquidity */}
+                <div
+                  style={{
+                    flex: 1,
+                    background: c.cardBg,
+                    border: `1px solid ${c.border}`,
+                    borderRadius: 10,
+                    padding: "14px 12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    height: 98,
+                  }}
+                >
+                  <span style={{ fontSize: 9, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", display: "flex" }}>
+                    {mode === "PUMP" ? "CURVE" : "LIQUIDITY"}
+                  </span>
+                  <span style={{ fontSize: 18, fontFamily: "JetBrains Mono", color: isLiqCritical ? "#ef4444" : "#10b981", fontWeight: 800, display: "flex" }}>
+                    {liq}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontFamily: "JetBrains Mono",
+                      fontWeight: 700,
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      background: isLiqCritical ? "rgba(239,68,68,0.12)" : "rgba(16,185,129,0.12)",
+                      color: isLiqCritical ? "#ef4444" : "#10b981",
+                      border: isLiqCritical ? "1px solid rgba(239,68,68,0.25)" : "1px solid rgba(16,185,129,0.25)",
+                      alignSelf: "flex-start",
+                      display: "flex",
+                    }}
+                  >
+                    {isLiqCritical ? "ZERO POOL" : mode === "PUMP" ? "PROGRESS" : "HEALTHY"}
+                  </span>
+                </div>
+
+                {/* Metric 2: Top 10 */}
+                <div
+                  style={{
+                    flex: 1,
+                    background: c.cardBg,
+                    border: `1px solid ${c.border}`,
+                    borderRadius: 10,
+                    padding: "14px 12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    height: 98,
+                  }}
+                >
+                  <span style={{ fontSize: 9, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", display: "flex" }}>
+                    TOP 10 WHALES
+                  </span>
+                  <span style={{ fontSize: 18, fontFamily: "JetBrains Mono", color: isTop10Critical ? "#ef4444" : isTop10Warning ? "#f59e0b" : "#10b981", fontWeight: 800, display: "flex" }}>
+                    {top10}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontFamily: "JetBrains Mono",
+                      fontWeight: 700,
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      background: isTop10Critical
+                        ? "rgba(239,68,68,0.12)"
+                        : isTop10Warning
+                        ? "rgba(245,158,11,0.12)"
+                        : "rgba(16,185,129,0.12)",
+                      color: isTop10Critical ? "#ef4444" : isTop10Warning ? "#f59e0b" : "#10b981",
+                      border: isTop10Critical
+                        ? "1px solid rgba(239,68,68,0.25)"
+                        : isTop10Warning
+                        ? "1px solid rgba(245,158,11,0.25)"
+                        : "1px solid rgba(16,185,129,0.25)",
+                      alignSelf: "flex-start",
+                      display: "flex",
+                    }}
+                  >
+                    {isTop10Critical ? "DANGEROUS" : isTop10Warning ? "CAUTION" : "DECENTRAL"}
+                  </span>
+                </div>
+
+                {/* Metric 3: LP Status */}
+                <div
+                  style={{
+                    flex: 1,
+                    background: c.cardBg,
+                    border: `1px solid ${c.border}`,
+                    borderRadius: 10,
+                    padding: "14px 12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    height: 98,
+                  }}
+                >
+                  <span style={{ fontSize: 9, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", display: "flex" }}>
+                    {mode === "PUMP" ? "SNIPERS" : "LP STATUS"}
+                  </span>
+                  <span style={{ fontSize: 18, fontFamily: "JetBrains Mono", color: lpStatusColor, fontWeight: 800, display: "flex" }}>
+                    {lpStatusValue}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontFamily: "JetBrains Mono",
+                      fontWeight: 700,
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      background: `${lpStatusColor}18`,
+                      color: lpStatusColor,
+                      border: `1px solid ${lpStatusColor}35`,
+                      alignSelf: "flex-start",
+                      display: "flex",
+                    }}
+                  >
+                    {lpStatusLabel}
+                  </span>
+                </div>
+
+                {/* Metric 4: Honeypot */}
+                <div
+                  style={{
+                    flex: 1,
+                    background: c.cardBg,
+                    border: `1px solid ${c.border}`,
+                    borderRadius: 10,
+                    padding: "14px 12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    height: 98,
+                  }}
+                >
+                  <span style={{ fontSize: 9, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", display: "flex" }}>
+                    HONEYPOT
+                  </span>
+                  <span style={{ fontSize: 18, fontFamily: "JetBrains Mono", color: isSellOk ? "#10b981" : "#ef4444", fontWeight: 800, display: "flex" }}>
+                    {isSellOk ? "Passed" : "Trap"}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontFamily: "JetBrains Mono",
+                      fontWeight: 700,
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      background: isSellOk ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)",
+                      color: isSellOk ? "#10b981" : "#ef4444",
+                      border: isSellOk ? "1px solid rgba(16,185,129,0.25)" : "1px solid rgba(239,68,68,0.25)",
+                      alignSelf: "flex-start",
+                      display: "flex",
+                    }}
+                  >
+                    {isSellOk ? "SELLABLE" : "HONEYPOT"}
+                  </span>
+                </div>
+
+                {/* Metric 5: Mint Authority */}
+                <div
+                  style={{
+                    flex: 1,
+                    background: c.cardBg,
+                    border: `1px solid ${c.border}`,
+                    borderRadius: 10,
+                    padding: "14px 12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    height: 98,
+                  }}
+                >
+                  <span style={{ fontSize: 9, fontFamily: "JetBrains Mono", color: c.textMuted, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase", display: "flex" }}>
+                    MINT PRIVILEGE
+                  </span>
+                  <span style={{ fontSize: 18, fontFamily: "JetBrains Mono", color: isMintRevoked ? "#10b981" : "#ef4444", fontWeight: 800, display: "flex" }}>
+                    {isMintRevoked ? "Revoked" : "Active"}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 9,
+                      fontFamily: "JetBrains Mono",
+                      fontWeight: 700,
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      background: isMintRevoked ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)",
+                      color: isMintRevoked ? "#10b981" : "#ef4444",
+                      border: isMintRevoked ? "1px solid rgba(16,185,129,0.25)" : "1px solid rgba(239,68,68,0.25)",
+                      alignSelf: "flex-start",
+                      display: "flex",
+                    }}
+                  >
+                    {isMintRevoked ? "IMMUTABLE" : "INFLATABLE"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Precision Score Dial Panel */}
+            <div
+              style={{
+                width: 320,
+                background: c.cardBg,
+                border: `1px solid ${c.border}`,
+                borderRadius: 14,
+                padding: "20px 16px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "space-between",
+                position: "relative",
+              }}
+            >
+              {/* Precision Radial Dial (170x170) */}
+              <div style={{ position: "relative", width: 170, height: 170, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {/* SVG Dial Gauge */}
+                <svg width="170" height="170" viewBox="0 0 170 170" style={{ position: "absolute", top: 0, left: 0, display: "flex" }}>
+                  {/* Calibrated outer tick ring */}
+                  <circle cx="85" cy="85" r="78" fill="none" stroke={c.border} strokeWidth="1" strokeDasharray="3 5" />
+                </svg>
+
+                {/* Progress SVG with -90deg rotation */}
+                <svg
+                  width="170"
+                  height="170"
+                  viewBox="0 0 170 170"
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    transform: "rotate(-90deg)",
+                    display: "flex",
+                  }}
+                >
+                  {/* Track circle */}
+                  <circle cx="85" cy="85" r={dialRadius} fill="none" stroke={c.border} strokeWidth="10" />
+                  {/* Progress active circle */}
+                  <circle
+                    cx="85"
+                    cy="85"
+                    r={dialRadius}
+                    fill="none"
+                    stroke={statusColor}
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                    strokeDasharray={dialCircumference}
+                    strokeDashoffset={dialOffset}
+                  />
+                </svg>
+
+                {/* Center Readout */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ display: "flex", alignItems: "baseline" }}>
+                    <span style={{ fontSize: 58, fontWeight: 800, fontFamily: "JetBrains Mono", color: statusColor, lineHeight: 1, display: "flex" }}>
+                      {score}
+                    </span>
+                    <span style={{ fontSize: 14, fontFamily: "JetBrains Mono", color: c.textMuted, marginLeft: 2, display: "flex" }}>
+                      /100
+                    </span>
+                  </div>
+                  <span style={{ fontSize: 9, fontFamily: "JetBrains Mono", color: c.textMuted, letterSpacing: "2px", textTransform: "uppercase", marginTop: 2, display: "flex" }}>
+                    SAFETY SCORE
+                  </span>
+                </div>
+              </div>
+
+              {/* Verdict Grade Chip */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  padding: "8px 18px",
+                  borderRadius: 6,
+                  background: `${statusColor}14`,
+                  border: `1px solid ${statusColor}35`,
+                  color: statusColor,
+                  fontFamily: "JetBrains Mono",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: "0.5px",
+                  width: "100%",
+                  boxSizing: "border-box",
+                }}
+              >
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: statusColor, display: "flex" }} />
+                <span>GRADE {grade} • {gradeLabel.toUpperCase()}</span>
+              </div>
+
+              {/* Security Vectors Pills with clean SVG icons */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center", width: "100%" }}>
                 {[
-                    { l: mode === "PUMP" ? "Curve" : "Liquidity", v: liq, c: (liq === "$0" || liq === "0" || liq === "0%") ? "#ef4444" : "#22c55e" },
-                    { l: "Top 10", v: top10, c: parseInt(top10) > 50 ? "#ef4444" : "#22c55e" },
-                    { l: mode === "PUMP" ? "Snipers" : "LP Lock", v: lock, c: m3Color },
-                    { l: "Sellable", v: sell, c: sell === "Yes" ? "#22c55e" : "#ef4444" },
-                    { l: "Mint", v: mint, c: (mint === "Revoked" || mint === "Locked") ? "#22c55e" : "#ef4444" }
-                ].map((m, i) => (
-                    <div key={i} style={{ flex: 1, padding: "22px 20px", background: c.cardBg, display: "flex", flexDirection: "column", gap: 10, borderLeft: i === 0 ? "0" : `1px solid ${c.subtle}` }}>
-                        <span style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: "2px", color: c.textDim, fontWeight: 600, display: "flex" }}>{m.l}</span>
-                        <span style={{ fontFamily: "JetBrains Mono", fontSize: 20, fontWeight: 700, color: m.c, display: "flex" }}>{m.v}</span>
-                    </div>
+                  { text: isMintRevoked ? "MINT REVOKED" : "MINT ACTIVE", pass: isMintRevoked },
+                  { text: lpStatusLabel === "BURNED" ? "LP BURNED" : lpStatusLabel === "LOCKED" ? "LP LOCKED" : "LP UNLOCKED", pass: lpStatusLabel === "BURNED" || lpStatusLabel === "LOCKED" },
+                  { text: isSellOk ? "HONEYPOT PASS" : "HONEYPOT FAIL", pass: isSellOk },
+                ].map((item, idx) => (
+                  <span
+                    key={idx}
+                    style={{
+                      fontSize: 10,
+                      fontFamily: "JetBrains Mono",
+                      fontWeight: 600,
+                      padding: "4px 8px",
+                      borderRadius: 4,
+                      background: item.pass ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.08)",
+                      border: item.pass ? "1px solid rgba(16,185,129,0.2)" : "1px solid rgba(239,68,68,0.2)",
+                      color: item.pass ? "#10b981" : "#ef4444",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 5,
+                    }}
+                  >
+                    {item.pass ? (
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style={{ display: "flex" }}>
+                        <path d="M20 6L9 17L4 12" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    ) : (
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style={{ display: "flex" }}>
+                        <path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                    <span>{item.text}</span>
+                  </span>
                 ))}
               </div>
             </div>
-            <div style={{ width: 1, alignSelf: "stretch", background: `linear-gradient(180deg, transparent 5%, ${c.subtle} 30%, ${c.subtle} 70%, transparent 95%)`, display: "flex" }} />
-            <div style={{ width: 360, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 22 }}>
-              <div style={{ position: "relative", width: 270, height: 270, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {/* Idea 3: Subtle accent fill inside ring */}
-                <div style={{ position: "absolute", width: 196, height: 196, borderRadius: "50%", background: theme.acBg, top: 37, left: 37, display: "flex" }} />
-                {/* Soft radial glow — Satori-compatible (no blur) */}
-                <div style={{ position: "absolute", width: 160, height: 160, borderRadius: "50%", background: `radial-gradient(circle, ${theme.ac}20 0%, transparent 70%)`, top: 55, left: 55, display: "flex" }} />
-                {/* Idea 1: Tick marks + Idea 6: Inner thin ring */}
-                <svg width="270" height="270" viewBox="0 0 270 270" style={{ position: "absolute", top: 0, left: 0, display: "flex" }}>
-                  {ticks.map((t, i) => (
-                    <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} stroke={t.filled ? theme.ac : c.subtle} strokeWidth={t.isLong ? 2.5 : 1.5} strokeLinecap="round" style={{ opacity: t.filled ? 0.7 : 0.4 }} />
-                  ))}
-                  <circle cx="135" cy="135" r="98" fill="none" stroke={c.subtle} strokeWidth="2" />
-                </svg>
-                {/* Main progress ring */}
-                <svg width="270" height="270" viewBox="0 0 270 270" style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)", display: "flex" }}>
-                  <circle cx="135" cy="135" r="108" fill="none" stroke={c.subtle} strokeWidth="12" />
-                  <circle cx="135" cy="135" r="108" fill="none" stroke={theme.ac} strokeWidth="14" strokeLinecap="round" strokeDasharray={circum} strokeDashoffset={offset} style={{ opacity: 0.85 }} />
-                </svg>
-                {/* Idea 8: Arc start & end cap markers */}
-                {score > 0 && score < 100 && (
-                  <svg width="270" height="270" viewBox="0 0 270 270" style={{ position: "absolute", top: 0, left: 0, display: "flex" }}>
-                    <circle cx={capX} cy={capY} r="5" fill={theme.ac} style={{ opacity: 0.9 }} />
-                    <circle cx="135" cy="27" r="4" fill={theme.acDim} style={{ opacity: 0.5 }} />
-                  </svg>
-                )}
-                {/* Score centered in circle, /100 slightly below */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", marginTop: 20 }}>
-                  <span style={{ fontSize: score === 100 ? 92 : 96, fontWeight: 900, color: theme.ac, letterSpacing: "-4px", lineHeight: 1, display: "flex" }}>{score}</span>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 16, color: c.textGhost, opacity: 0.5, marginTop: -2, display: "flex" }}>/ 100</span>
-                </div>
-              </div>
-              {/* Idea 4: Enhanced grade badge */}
-              <div style={{ fontSize: 22, fontWeight: 700, padding: "14px 36px", borderRadius: 100, background: theme.acBg, border: `2px solid ${theme.acBorder}`, color: theme.ac, letterSpacing: "0.5px", display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: theme.ac, display: "flex" }} />
-                Grade {grade} · {gradeLabel}
-              </div>
-              {/* Idea 5: Tags with severity dots */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", maxWidth: 340 }}>
-                {tags.map((t, i) => {
-                    const pts = tagPointsList[i] || 0;
-                    const tagColor = pts >= 30 ? "#ef4444" : pts >= 15 ? "#f59e0b" : pts > 0 ? "#eab308" : "#22c55e";
-                    return (
-                      <span key={i} style={{ fontSize: 13, fontWeight: 600, padding: "7px 16px", borderRadius: 100, background: `${tagColor}18`, border: `1px solid ${tagColor}30`, color: `${tagColor}cc`, display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ width: 7, height: 7, borderRadius: "50%", background: tagColor, display: "flex" }} />
-                        {t}
-                      </span>
-                    );
-                })}
-              </div>
-            </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 72px", background: c.footerBg, borderTop: `1px solid ${c.footerBorder}` }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-              <svg width="42" height="42" viewBox="0 0 48 48" fill="none" style={{ display: "flex", opacity: 0.35 }}><path d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z" stroke={isLight ? "#8b8b8b" : "#c0c0c0"} strokeWidth="1.5" strokeLinejoin="round" fill="none"/><path d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z" fill={isLight ? "rgba(139,139,139,0.08)" : "rgba(192,192,192,0.08)"} stroke={isLight ? "#8b8b8b" : "#c0c0c0"} strokeWidth="1" strokeLinejoin="round"/><path d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z" fill={isLight ? "#8b8b8b" : "#c0c0c0"}/><path d="M20.5 23.5L23 26L28 20.5" stroke={isLight ? "#f5f5f5" : "#0a0a0a"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/></svg>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <span style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.5px", lineHeight: 1.25, color: isLight ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.35)", display: "flex" }}>RugSol</span>
-                <span style={{ fontSize: 10, fontWeight: 600, color: isLight ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.15)", letterSpacing: "3px", textTransform: "uppercase", marginTop: 3, display: "flex" }}>Scanner</span>
+
+          {/* 3. Footer Row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              borderTop: `1px solid ${c.border}`,
+              paddingTop: 14,
+              position: "relative",
+              zIndex: 10,
+            }}
+          >
+            {/* Left: RugSol Terminal Brand */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <svg width="28" height="28" viewBox="0 0 48 48" fill="none" style={{ display: "flex" }}>
+                <path d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z" stroke="#38bdf8" strokeWidth="1.5" strokeLinejoin="round" fill="none" />
+                <path d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z" fill="rgba(56,189,248,0.08)" stroke="#38bdf8" strokeWidth="1" strokeLinejoin="round" />
+                <path d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z" fill="#38bdf8" />
+                <path d="M20.5 23.5L23 26L28 20.5" stroke="#08090d" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </svg>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                <span style={{ fontSize: 18, fontWeight: 800, color: c.textPrimary, letterSpacing: "-0.5px", display: "flex" }}>
+                  RugSol
+                </span>
+                <span style={{ fontSize: 10, fontFamily: "JetBrains Mono", color: c.textMuted, letterSpacing: "1.5px", textTransform: "uppercase", display: "flex" }}>
+                  TERMINAL AUDITOR v2.4
+                </span>
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-              <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, color: c.textMuted, display: "flex" }}>{dateStr}</span>
-              <div style={{ display: "flex", alignItems: "center", padding: "10px 24px", borderRadius: 100, background: `${theme.acBg}`, border: `1px solid ${theme.acBorder}` }}>
-                <span style={{ fontFamily: "JetBrains Mono", fontSize: 20, fontWeight: 700, color: theme.ac, letterSpacing: "0.5px", display: "flex" }}>rugsol.xyz</span>
-              </div>
+
+            {/* Center: Timestamp */}
+            <span style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: c.textMuted, display: "flex" }}>
+              TIMESTAMP: {dateStr}
+            </span>
+
+            {/* Right: Domain Pill */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "6px 16px",
+                borderRadius: 6,
+                background: "rgba(56,189,248,0.1)",
+                border: "1px solid rgba(56,189,248,0.25)",
+              }}
+            >
+              <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, fontWeight: 700, color: "#38bdf8", letterSpacing: "0.5px", display: "flex" }}>
+                rugsol.xyz
+              </span>
             </div>
-          </div>
-          <div style={{ position: "absolute", bottom: 8, right: 72, opacity: 0.03, display: "flex" }}>
-            <span style={{ fontFamily: "JetBrains Mono", fontSize: 9, color: c.textGhost, letterSpacing: "1px", display: "flex" }}>#{unique.cornerSeed}</span>
           </div>
         </div>
       ),
-      { width: 1200, height: 630, headers: {
-        "Content-Disposition": `inline; filename="rugsol-${symbol.toLowerCase()}-${score}.png"`,
-        "Cache-Control": "public, max-age=3600, s-maxage=3600",
-      }, fonts: [
-        { name: "Inter", data: interReg, weight: 400 },
-        { name: "Inter", data: interBold, weight: 700 },
-        { name: "JetBrains Mono", data: jbMono, weight: 400 },
-        { name: "JetBrains Mono", data: jbMonoBold, weight: 700 }
-      ]}
+      {
+        width: 1200,
+        height: 630,
+        headers: {
+          "Content-Disposition": `inline; filename="rugsol-${symbol.toLowerCase()}-${score}.png"`,
+          "Cache-Control": "public, max-age=3600, s-maxage=3600",
+        },
+        fonts: [
+          { name: "Inter", data: interReg, weight: 400 },
+          { name: "Inter", data: interBold, weight: 700 },
+          { name: "JetBrains Mono", data: jbMono, weight: 400 },
+          { name: "JetBrains Mono", data: jbMonoBold, weight: 700 },
+        ],
+      }
     );
-  } catch (error) { 
+  } catch (error) {
     console.error("OG Generation Error:", error);
-    return new Response("Error generating image", { status: 500 }); 
+    return new Response("Error generating image", { status: 500 });
   }
 }
