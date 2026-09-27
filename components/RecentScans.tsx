@@ -92,13 +92,21 @@ export function RecentScans() {
       {/* Live Feed Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {displayedScans.slice(0, 8).map((scan) => {
-          const isHighRisk = scan.score < 40;
-          const isSafe = scan.score >= 70;
-          const statusBg = isSafe
-            ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/25"
-            : isHighRisk
-            ? "text-rose-400 bg-rose-500/10 border-rose-500/25"
-            : "text-amber-400 bg-amber-500/10 border-amber-500/25";
+          // Match GRADES constants: A (80+), B (60-79), C (40-59), D (20-39), F (0-19)
+          const gradeA = scan.score >= 80;
+          const gradeB = scan.score >= 60 && scan.score < 80;
+          const gradeC = scan.score >= 40 && scan.score < 60;
+          const gradeD = scan.score >= 20 && scan.score < 40;
+
+          const statusBg = gradeA
+            ? "text-green-400 bg-green-500/10 border-green-500/25"           // A: green
+            : gradeB
+            ? "text-lime-400 bg-lime-500/10 border-lime-500/25"              // B: lime
+            : gradeC
+            ? "text-yellow-400 bg-yellow-500/10 border-yellow-500/25"        // C: yellow
+            : gradeD
+            ? "text-orange-400 bg-orange-500/10 border-orange-500/25"        // D: orange
+            : "text-rose-400 bg-rose-500/10 border-rose-500/25";             // F: red
 
           return (
             <Link

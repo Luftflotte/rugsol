@@ -299,9 +299,9 @@ export async function GET(request: NextRequest) {
     const displayPrice = rawPrice.startsWith("$") ? rawPrice : `$${rawPrice}`;
     const price = displayPrice.length > 14 ? displayPrice.slice(0, 12) + ".." : displayPrice;
     
-    // Safely format Market Cap without double dollar sign bug
-    const rawMcap = searchParams.get("mcap") || "0";
-    const displayMcap = rawMcap.startsWith("$") ? rawMcap : `$${rawMcap}`;
+    // Safely format Market Cap — strip any existing $ to avoid $$ bug
+    const rawMcap = (searchParams.get("mcap") || "0").replace(/^\$/, "");
+    const displayMcap = `$${rawMcap}`;
 
     const rawChange = (searchParams.get("change") || "0%").trim();
     let change = rawChange;
@@ -332,13 +332,17 @@ export async function GET(request: NextRequest) {
       tokenImage = await fetchAndOptimizeImage(image);
     }
 
-    // Status colors matching site design
-    const isSafe = score >= 60;
-    const isMedium = score >= 40 && score < 60;
+    // Status colors matching GRADES constants
+    // A (80+) = #22c55e green, B (60-79) = #84cc16 lime, C (40-59) = #eab308 yellow, D (20-39) = #f97316 orange, F (0-19) = #ef4444 red
+    const gradeA = score >= 80;
+    const gradeB = score >= 60 && score < 80;
+    const gradeC = score >= 40 && score < 60;
+    const gradeD = score >= 20 && score < 40;
+
     const theme = {
-      ac: isSafe ? "#10b981" : isMedium ? "#f59e0b" : "#ef4444",
-      acBg: isSafe ? "rgba(16, 185, 129, 0.1)" : isMedium ? "rgba(245, 158, 11, 0.1)" : "rgba(239, 68, 68, 0.1)",
-      acBorder: isSafe ? "rgba(16, 185, 129, 0.28)" : isMedium ? "rgba(245, 158, 11, 0.28)" : "rgba(239, 68, 68, 0.28)",
+      ac: gradeA ? "#22c55e" : gradeB ? "#84cc16" : gradeC ? "#eab308" : gradeD ? "#f97316" : "#ef4444",
+      acBg: gradeA ? "rgba(34, 197, 94, 0.1)" : gradeB ? "rgba(132, 204, 22, 0.1)" : gradeC ? "rgba(234, 179, 8, 0.1)" : gradeD ? "rgba(249, 115, 22, 0.1)" : "rgba(239, 68, 68, 0.1)",
+      acBorder: gradeA ? "rgba(34, 197, 94, 0.28)" : gradeB ? "rgba(132, 204, 22, 0.28)" : gradeC ? "rgba(234, 179, 8, 0.28)" : gradeD ? "rgba(249, 115, 22, 0.28)" : "rgba(239, 68, 68, 0.28)",
     };
 
     // Color palette matching site design
@@ -349,13 +353,13 @@ export async function GET(request: NextRequest) {
           subtler: "#f1f5f9",
           subtle: "#e2e8f0",
           text: "#0f172a",
-          textDim: "#64748b",
+          textDim: "#334155",
           textGhost: "rgba(0,0,0,0.25)",
-          textMuted: "#94a3b8",
+          textMuted: "#64748b",
           grid: "rgba(0,0,0,0.03)",
           footerBg: "#ffffff",
           footerBorder: "#e2e8f0",
-          brandCyan: "#0284c7",
+          brandAccent: "#0284c7",
         }
       : {
           bg: "#08090d",
@@ -363,13 +367,13 @@ export async function GET(request: NextRequest) {
           subtler: "#141824",
           subtle: "#1e2433",
           text: "#f8fafc",
-          textDim: "#94a3b8",
+          textDim: "#cbd5e1",
           textGhost: "rgba(255,255,255,0.25)",
-          textMuted: "#64748b",
+          textMuted: "#94a3b8",
           grid: "rgba(255,255,255,0.025)",
           footerBg: "#08090d",
           footerBorder: "#1e2433",
-          brandCyan: "#38bdf8",
+          brandAccent: "#10b981",
         };
 
     const dateStr = new Date().toLocaleString("en-GB", { timeZone: "UTC", hour12: false }).replace(",", "") + " UTC";
@@ -482,28 +486,31 @@ export async function GET(request: NextRequest) {
             {/* Left Column: Avatar + Name + Address -> Price -> Penalty -> 5-Cell Metric Bar */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               {/* 1. Avatar + Name + Address Row */}
-              <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-                <div
-                  style={{
-                    width: 78,
-                    height: 78,
-                    borderRadius: 18,
-                    background: c.subtler,
-                    border: `1.5px solid ${c.subtle}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    overflow: "hidden",
-                    flexShrink: 0,
-                  }}
-                >
-                  {tokenImage ? (
-                    <img src={tokenImage} width="78" height="78" style={{ objectFit: "cover" }} />
-                  ) : (
-                    <span style={{ fontSize: 32, fontWeight: 800, color: c.brandCyan, fontFamily: "JetBrains Mono", display: "flex" }}>
-                      {symbol.slice(0, 3)}
-                    </span>
-                  )}
+              <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+                <div style={{ position: "relative", width: 88, height: 88, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <div style={{ position: "absolute", inset: -3, borderRadius: 22, background: `linear-gradient(135deg, ${c.brandAccent}30, transparent 60%)`, display: "flex" }} />
+                  <div
+                    style={{
+                      width: 88,
+                      height: 88,
+                      borderRadius: 18,
+                      background: `linear-gradient(145deg, ${c.subtler}, ${c.cardBg})`,
+                      border: `1.5px solid ${c.subtle}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                      position: "relative",
+                    }}
+                  >
+                    {tokenImage ? (
+                      <img src={tokenImage} width="88" height="88" style={{ objectFit: "cover" }} />
+                    ) : (
+                      <span style={{ fontSize: 34, fontWeight: 800, color: c.brandAccent, fontFamily: "JetBrains Mono", display: "flex" }}>
+                        {symbol.slice(0, 2)}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -534,7 +541,7 @@ export async function GET(request: NextRequest) {
                   </div>
 
                   <div style={{ display: "flex", alignItems: "center" }}>
-                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, color: c.textMuted, letterSpacing: "0.5px", display: "flex" }}>
+                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, color: c.textDim, letterSpacing: "0.5px", display: "flex" }}>
                       {address}
                     </span>
                   </div>
@@ -561,40 +568,42 @@ export async function GET(request: NextRequest) {
                   </span>
                 </div>
 
-                <div style={{ fontFamily: "JetBrains Mono", fontSize: 16, color: c.textMuted, marginTop: 8, letterSpacing: "0.5px", fontWeight: 600, display: "flex" }}>
+                <div style={{ fontFamily: "JetBrains Mono", fontSize: 16, color: c.textDim, marginTop: 8, letterSpacing: "0.5px", fontWeight: 600, display: "flex" }}>
                   MC {displayMcap}
                 </div>
               </div>
 
-              {/* 3. Penalty Bar Row */}
+              {/* 3. Penalty Bar Row — Badge Style */}
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <span
-                  style={{
-                    fontFamily: "JetBrains Mono",
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: penalty === 0 ? "#10b981" : penalty >= 50 ? "#ef4444" : "#f59e0b",
-                    display: "flex",
-                  }}
-                >
-                  {penalty === 0 ? "No penalties" : `-${penalty} points deducted`}
-                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 14px", borderRadius: 8, background: penalty === 0 ? "rgba(16,185,129,0.08)" : penalty >= 50 ? "rgba(239,68,68,0.08)" : "rgba(245,158,11,0.08)" }}>
+                  <span
+                    style={{
+                      fontFamily: "JetBrains Mono",
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: penalty === 0 ? "#10b981" : penalty >= 50 ? "#ef4444" : "#f59e0b",
+                      display: "flex",
+                    }}
+                  >
+                    {penalty === 0 ? "No penalties" : `-${penalty} points`}
+                  </span>
+                </div>
 
-                <div style={{ flex: 1, height: 6, background: "rgba(255,255,255,0.06)", borderRadius: 3, overflow: "hidden", display: "flex" }}>
+                <div style={{ flex: 1, height: 7, background: c.subtler, borderRadius: 4, overflow: "hidden", display: "flex" }}>
                   <div
                     style={{
                       height: "100%",
-                      borderRadius: 3,
+                      borderRadius: 4,
                       width: penalty === 0 ? "0%" : `${Math.min(100, penalty)}%`,
-                      background: penalty >= 50 ? "#ef4444" : penalty >= 25 ? "#f59e0b" : "#eab308",
+                      background: penalty >= 50 ? "#ef4444" : penalty >= 25 ? "#f59e0b" : penalty > 0 ? "#eab308" : "transparent",
                       display: "flex",
                     }}
                   />
                 </div>
               </div>
 
-              {/* 4. Original 5-Cell Continuous Metric Bar */}
-              <div style={{ display: "flex", borderRadius: 14, overflow: "hidden", border: `1px solid ${c.subtle}`, background: c.cardBg, marginTop: 32 }}>
+              {/* 4. Metric Cards — Individual with colored accent bars */}
+              <div style={{ display: "flex", gap: 6 }}>
                 {[
                   { l: mode === "PUMP" ? "Curve" : "Liquidity", v: liq, c: (liq === "$0" || liq === "0" || liq === "0%") ? "#ef4444" : "#10b981" },
                   { l: "Top 10", v: top10, c: parseInt(top10) > 50 ? "#ef4444" : parseInt(top10) > 30 ? "#f59e0b" : "#10b981" },
@@ -602,39 +611,38 @@ export async function GET(request: NextRequest) {
                   { l: "Sellable", v: sell === "Yes" ? "Yes" : "Trap", c: sell === "Yes" ? "#10b981" : "#ef4444" },
                   { l: "Mint", v: mint === "Revoked" || mint === "Locked" ? "Revoked" : "Active", c: (mint === "Revoked" || mint === "Locked") ? "#10b981" : "#ef4444" },
                 ].map((m, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      flex: 1,
-                      padding: "18px 16px",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 8,
-                      borderLeft: i === 0 ? "0" : `1px solid ${c.subtle}`,
-                    }}
-                  >
-                    <span style={{ fontSize: 11, fontFamily: "JetBrains Mono", textTransform: "uppercase", letterSpacing: "1.5px", color: c.textMuted, fontWeight: 600, display: "flex" }}>
-                      {m.l}
-                    </span>
-                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 20, fontWeight: 800, color: m.c, display: "flex" }}>
-                      {m.v}
-                    </span>
+                  <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", borderRadius: 10, overflow: "hidden", border: `1px solid ${c.subtle}`, background: c.cardBg }}>
+                    <div style={{ height: 3, width: "100%", background: m.c, display: "flex" }} />
+                    <div style={{ padding: "18px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+                      <span style={{ fontSize: 10, fontFamily: "JetBrains Mono", textTransform: "uppercase", letterSpacing: "2px", color: c.textDim, fontWeight: 600, display: "flex" }}>
+                        {m.l}
+                      </span>
+                      <span style={{ fontFamily: "JetBrains Mono", fontSize: 18, fontWeight: 800, color: m.c, display: "flex" }}>
+                        {m.v}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
+            {/* Vertical Separator */}
+            <div style={{ width: 1, alignSelf: "stretch", background: c.subtle, display: "flex" }} />
+
             {/* Right Column: Original 270x270 Score Dial, Grade Badge, Tags */}
             <div style={{ width: 340, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", padding: "8px 0" }}>
-              {/* Circular Gauge with Calibrated Tick Marks */}
+              {/* Circular Gauge with Enhanced Glow */}
               <div style={{ position: "relative", width: 270, height: 270, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {/* Subtle accent fill inside ring */}
-                <div style={{ position: "absolute", width: 196, height: 196, borderRadius: "50%", background: theme.acBg, top: 37, left: 37, display: "flex" }} />
+                {/* Outer glow aura */}
+                <div style={{ position: "absolute", width: 260, height: 260, borderRadius: "50%", background: `radial-gradient(circle, ${theme.ac}14 0%, ${theme.ac}06 40%, transparent 70%)`, top: 5, left: 5, display: "flex" }} />
 
-                {/* Soft radial glow */}
-                <div style={{ position: "absolute", width: 160, height: 160, borderRadius: "50%", background: `radial-gradient(circle, ${theme.ac}20 0%, transparent 70%)`, top: 55, left: 55, display: "flex" }} />
+                {/* Inner accent fill */}
+                <div style={{ position: "absolute", width: 196, height: 196, borderRadius: "50%", background: `radial-gradient(circle, ${theme.acBg} 0%, ${c.cardBg} 100%)`, top: 37, left: 37, display: "flex" }} />
 
-                {/* Calibrated Tick Marks radiating outward */}
+                {/* Soft inner glow */}
+                <div style={{ position: "absolute", width: 160, height: 160, borderRadius: "50%", background: `radial-gradient(circle, ${theme.ac}1a 0%, transparent 60%)`, top: 55, left: 55, display: "flex" }} />
+
+                {/* Calibrated Tick Marks */}
                 <svg width="270" height="270" viewBox="0 0 270 270" style={{ position: "absolute", top: 0, left: 0, display: "flex" }}>
                   {ticks.map((t, i) => (
                     <line
@@ -646,54 +654,42 @@ export async function GET(request: NextRequest) {
                       stroke={theme.ac}
                       strokeWidth={t.isLong ? 2.5 : 1.5}
                       strokeLinecap="round"
-                      style={{ opacity: t.filled ? 0.95 : 0.22 }}
+                      style={{ opacity: t.filled ? 0.9 : 0.18 }}
                     />
                   ))}
+                  {/* Inner thin ring */}
+                  <circle cx="135" cy="135" r="98" fill="none" stroke={c.subtle} strokeWidth="1.5" />
+                  {/* Outer decorative ring */}
+                  <circle cx="135" cy="135" r="132" fill="none" stroke={c.subtle} strokeWidth="0.5" style={{ opacity: 0.3 }} />
                 </svg>
 
                 {/* Main Progress Ring */}
-                <svg
-                  width="270"
-                  height="270"
-                  viewBox="0 0 270 270"
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    transform: "rotate(-90deg)",
-                    display: "flex",
-                  }}
-                >
-                  <circle cx="135" cy="135" r="108" fill="none" stroke={c.subtle} strokeWidth="12" />
-                  <circle
-                    cx="135"
-                    cy="135"
-                    r="108"
-                    fill="none"
-                    stroke={theme.ac}
-                    strokeWidth="13"
-                    strokeLinecap="round"
-                    strokeDasharray={circum}
-                    strokeDashoffset={offset}
-                    style={{ opacity: 0.95 }}
-                  />
+                <svg width="270" height="270" viewBox="0 0 270 270" style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)", display: "flex" }}>
+                  <circle cx="135" cy="135" r="108" fill="none" stroke={c.subtle} strokeWidth="10" />
+                  <circle cx="135" cy="135" r="108" fill="none" stroke={theme.ac} strokeWidth="14" strokeLinecap="round" strokeDasharray={circum} strokeDashoffset={offset} style={{ opacity: 0.95 }} />
                 </svg>
 
                 {/* Arc Cap Marker */}
                 {score > 0 && score < 100 && (
                   <svg width="270" height="270" viewBox="0 0 270 270" style={{ position: "absolute", top: 0, left: 0, display: "flex" }}>
                     <circle cx={capX} cy={capY} r="5" fill={theme.ac} style={{ opacity: 0.95 }} />
+                    <circle cx="135" cy="27" r="3.5" fill={theme.ac} style={{ opacity: 0.4 }} />
                   </svg>
                 )}
 
-                {/* Score centered in circle, / 100 below */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontFamily: "Inter", fontSize: score === 100 ? 94 : 100, fontWeight: 900, color: theme.ac, letterSpacing: "-4px", lineHeight: 1, display: "flex" }}>
+                {/* Score centered in circle */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", marginTop: 16 }}>
+                  <span style={{ fontFamily: "Inter", fontSize: score === 100 ? 88 : 96, fontWeight: 900, color: theme.ac, letterSpacing: "-4px", lineHeight: 1, display: "flex" }}>
                     {score}
                   </span>
-                  <span style={{ fontFamily: "JetBrains Mono", fontSize: 16, color: c.textMuted, opacity: 0.65, marginTop: 4, display: "flex" }}>
-                    / 100
-                  </span>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, marginTop: 6 }}>
+                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 13, color: c.textDim, fontWeight: 700, display: "flex" }}>
+                      / 100
+                    </span>
+                    <span style={{ fontFamily: "JetBrains Mono", fontSize: 9, color: c.textDim, letterSpacing: "2px", textTransform: "uppercase", fontWeight: 700, display: "flex" }}>
+                      Safety Score
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -718,12 +714,16 @@ export async function GET(request: NextRequest) {
                 <span>Grade {grade} · {gradeLabel}</span>
               </div>
 
-              {/* Tags with severity dots */}
+              {/* Risk Indicators — only show warnings/issues, not redundant status badges */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", maxWidth: 360 }}>
-                {tags.map((t, i) => {
-                  const pts = tagPointsList[i] || 0;
-                  const tagColor = pts >= 30 ? "#ef4444" : pts >= 15 ? "#f59e0b" : pts > 0 ? "#eab308" : "#10b981";
-                  return (
+                {tags
+                  .map((t, i) => {
+                    const pts = tagPointsList[i] || 0;
+                    const tagColor = pts >= 30 ? "#ef4444" : pts >= 15 ? "#f59e0b" : pts > 0 ? "#eab308" : "#10b981";
+                    return { text: t, points: pts, color: tagColor };
+                  })
+                  .filter((tag) => tag.points > 0 || (tag.points === 0 && !["Safe", "Verified", "Low Risk", "Analyzed"].includes(tag.text)))
+                  .map((tag, i) => (
                     <span
                       key={i}
                       style={{
@@ -731,57 +731,57 @@ export async function GET(request: NextRequest) {
                         fontWeight: 600,
                         padding: "6px 14px",
                         borderRadius: 100,
-                        background: `${tagColor}15`,
-                        border: `1px solid ${tagColor}30`,
-                        color: `${tagColor}ee`,
+                        background: `${tag.color}15`,
+                        border: `1px solid ${tag.color}30`,
+                        color: `${tag.color}ee`,
                         display: "flex",
                         alignItems: "center",
                         gap: 7,
                       }}
                     >
-                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: tagColor, display: "flex" }} />
-                      {t}
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: tag.color, display: "flex" }} />
+                      {tag.text}
                     </span>
-                  );
-                })}
+                  ))}
               </div>
             </div>
           </div>
 
-          {/* Footer: RugSol Branding & Prominent Viral Domain */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "18px 60px",
-              background: c.footerBg,
-              borderTop: `1px solid ${c.footerBorder}`,
-              position: "relative",
-              zIndex: 10,
-            }}
-          >
+          {/* Footer */}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ height: 1, width: "100%", background: c.subtle, display: "flex" }} />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "18px 60px",
+                background: c.footerBg,
+                position: "relative",
+                zIndex: 10,
+              }}
+            >
             {/* Left: RugSol Brand */}
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <svg width="36" height="36" viewBox="0 0 48 48" fill="none" style={{ display: "flex" }}>
-                <path d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z" stroke="#38bdf8" strokeWidth="1.5" strokeLinejoin="round" fill="none" />
-                <path d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z" fill="rgba(56,189,248,0.08)" stroke="#38bdf8" strokeWidth="1" strokeLinejoin="round" />
-                <path d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z" fill="#38bdf8" />
-                <path d="M20.5 23.5L23 26L28 20.5" stroke="#08090d" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                <path d="M24 3L42.2 13.5L42.2 34.5L24 45L5.8 34.5L5.8 13.5Z" stroke={c.brandAccent} strokeWidth="1.5" strokeLinejoin="round" fill="none" />
+                <path d="M24 11L35.3 17.5L35.3 30.5L24 37L12.7 30.5L12.7 17.5Z" fill={`${c.brandAccent}14`} stroke={c.brandAccent} strokeWidth="1" strokeLinejoin="round" />
+                <path d="M24 15C19.5 15 16.5 16.5 16.5 19L16.5 24.5C16.5 29 19.5 32 24 34.5C28.5 32 31.5 29 31.5 24.5L31.5 19C31.5 16.5 28.5 15 24 15Z" fill={c.brandAccent} />
+                <path d="M20.5 23.5L23 26L28 20.5" stroke={c.bg} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
               </svg>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ fontSize: 22, fontWeight: 900, color: c.text, letterSpacing: "-0.5px", lineHeight: 1, display: "flex" }}>
                   RugSol
                 </span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: c.textMuted, letterSpacing: "3px", textTransform: "uppercase", marginTop: 3, display: "flex" }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: c.textDim, letterSpacing: "3px", textTransform: "uppercase", marginTop: 3, display: "flex" }}>
                   SCANNER
                 </span>
               </div>
             </div>
 
-            {/* Right: Timestamp + High-Visibility Domain Badge */}
+            {/* Right: Timestamp + Domain Badge */}
             <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-              <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, color: c.textMuted, display: "flex" }}>
+              <span style={{ fontFamily: "JetBrains Mono", fontSize: 14, color: c.textDim, display: "flex" }}>
                 {dateStr}
               </span>
 
@@ -789,17 +789,17 @@ export async function GET(request: NextRequest) {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  padding: "9px 24px",
-                  borderRadius: 100,
-                  background: "rgba(56, 189, 248, 0.12)",
-                  border: "2px solid #38bdf8",
-                  boxShadow: "0 0 20px rgba(56, 189, 248, 0.3)",
+                  padding: "10px 26px",
+                  borderRadius: 8,
+                  background: `${c.brandAccent}14`,
+                  border: `2px solid ${c.brandAccent}`,
                 }}
               >
-                <span style={{ fontFamily: "JetBrains Mono", fontSize: 19, fontWeight: 800, color: "#38bdf8", letterSpacing: "0.5px", display: "flex" }}>
-                  rugsol.xyz →
+                <span style={{ fontFamily: "JetBrains Mono", fontSize: 18, fontWeight: 800, color: c.brandAccent, letterSpacing: "0.5px", display: "flex" }}>
+                  rugsol.xyz
                 </span>
               </div>
+            </div>
             </div>
           </div>
         </div>

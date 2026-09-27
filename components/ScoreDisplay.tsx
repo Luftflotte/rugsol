@@ -59,18 +59,22 @@ export function ScoreDisplay({
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (displayScore / 100) * circumference;
 
-  const isCritical = grade === "F" || score < 30;
-  const isHighRisk = grade === "D" || (score >= 30 && score < 50);
-  const isMedium = grade === "C" || (score >= 50 && score < 70);
-  const isSafe = score >= 70;
+  // Match GRADES constants exactly: A (80+), B (60-79), C (40-59), D (20-39), F (0-19)
+  const isGradeA = grade === "A" || score >= 80;
+  const isGradeB = grade === "B" || (score >= 60 && score < 80);
+  const isGradeC = grade === "C" || (score >= 40 && score < 60);
+  const isGradeD = grade === "D" || (score >= 20 && score < 40);
+  const isGradeF = grade === "F" || score < 20;
 
-  const statusColor = isSafe
-    ? "#10b981"
-    : isMedium
-    ? "#eab308"
-    : isHighRisk
-    ? "#f97316"
-    : "#f43f5e";
+  const statusColor = isGradeA
+    ? "#22c55e"  // A: green
+    : isGradeB
+    ? "#84cc16"  // B: lime
+    : isGradeC
+    ? "#eab308"  // C: yellow
+    : isGradeD
+    ? "#f97316"  // D: orange
+    : "#ef4444"; // F: red
 
   return (
     <div className="flex flex-col items-center gap-4 w-full">
@@ -133,9 +137,9 @@ export function ScoreDisplay({
             color: statusColor,
           }}
         >
-          {isCritical ? (
+          {isGradeF ? (
             <ShieldAlert className="w-4 h-4 shrink-0" />
-          ) : isHighRisk || isMedium ? (
+          ) : isGradeD || isGradeC ? (
             <AlertTriangle className="w-4 h-4 shrink-0" />
           ) : (
             <ShieldCheck className="w-4 h-4 shrink-0" />
@@ -146,11 +150,11 @@ export function ScoreDisplay({
               <div className="space-y-2 font-sans">
                 <p className="font-bold text-text-primary">Scoring Architecture</p>
                 <div className="space-y-1 text-xs">
-                  <p><span className="text-emerald-400 font-mono font-bold">A (80-100):</span> Low risk, audited parameters verified.</p>
-                  <p><span className="text-lime-400 font-mono font-bold">B (60-79):</span> Acceptable risk, minor warnings detected.</p>
-                  <p><span className="text-amber-400 font-mono font-bold">C (40-59):</span> Moderate risk, noticeable vulnerabilities.</p>
-                  <p><span className="text-orange-400 font-mono font-bold">D (20-39):</span> High risk, significant liquidity/holder flags.</p>
-                  <p><span className="text-rose-400 font-mono font-bold">F (&lt;20):</span> Critical threat or honeypot contract.</p>
+                  <p><span className="text-green-400 font-mono font-bold">A (80-100):</span> Safe. Audited parameters verified.</p>
+                  <p><span className="text-lime-400 font-mono font-bold">B (60-79):</span> Low risk. Minor warnings detected.</p>
+                  <p><span className="text-yellow-400 font-mono font-bold">C (40-59):</span> Moderate risk. Noticeable vulnerabilities.</p>
+                  <p><span className="text-orange-400 font-mono font-bold">D (20-39):</span> High risk. Significant liquidity/holder flags.</p>
+                  <p><span className="text-rose-400 font-mono font-bold">F (&lt;20):</span> Likely scam. Critical threat or honeypot.</p>
                 </div>
               </div>
             }
@@ -160,11 +164,11 @@ export function ScoreDisplay({
 
         {/* Status diagnosis tag */}
         <span className="text-[11px] font-mono text-text-muted">
-          {isSafe
+          {isGradeA || isGradeB
             ? "✓ CONTRACT VERIFIED BY ENGINE"
-            : isMedium
+            : isGradeC
             ? "⚠ ELEVATED RISK FACTORS DETECTED"
-            : isHighRisk
+            : isGradeD
             ? "⚠ HIGH PROBABILITY OF LIQUIDITY DUMP"
             : "✕ CRITICAL FAILURE: DANGEROUS CONTRACT"}
         </span>
