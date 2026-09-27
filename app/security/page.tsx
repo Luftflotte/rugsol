@@ -130,7 +130,7 @@ export default function SecurityPage() {
                 <div className="flex items-start gap-2.5 bg-[#121622] p-3 rounded-lg border border-[#1e2433]">
                   <span className="text-[#38bdf8] font-bold">[01]</span>
                   <p className="text-[#94a3b8] font-sans">
-                    Submit disclosures via GitHub Security Advisory or direct message to our verified handle on X (@RugSolScanner).
+                    Submit disclosures via direct message to our verified handle on X (@RugSolScanner).
                   </p>
                 </div>
                 <div className="flex items-start gap-2.5 bg-[#121622] p-3 rounded-lg border border-[#1e2433]">

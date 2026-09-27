@@ -5,20 +5,17 @@ import { Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 export default function ThemeToggle() {
-  // Use ref to track mount state without triggering setState in effect
   const mountedRef = useRef(false);
   const [isClient, setIsClient] = useState(false);
   
   useEffect(() => {
     mountedRef.current = true;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsClient(true);
   }, []);
 
-  // Don't render anything until mounted to avoid hydration mismatch
   if (!isClient) {
     return (
-      <div className="p-2 rounded-lg bg-bg-secondary w-9 h-9" />
+      <div className="w-8 h-8 rounded-md bg-bg-card border border-border-color shrink-0" />
     );
   }
 
@@ -27,17 +24,20 @@ export default function ThemeToggle() {
 
 function ThemeToggleInner() {
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
 
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-lg bg-bg-secondary hover:opacity-80 transition-colors"
-      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      className="w-8 h-8 rounded-md bg-bg-card hover:bg-bg-secondary border border-border-color transition-colors flex items-center justify-center cursor-pointer shrink-0 group"
+      aria-label={isDark ? "Switch to Light Theme" : "Switch to Dark Theme"}
+      title={isDark ? "Switch to Light Theme" : "Switch to Dark Theme"}
+      type="button"
     >
-      {theme === "dark" ? (
-        <Sun className="w-5 h-5 text-text-primary" />
+      {isDark ? (
+        <Sun className="w-4 h-4 text-amber-400 group-hover:rotate-45 transition-transform duration-200" />
       ) : (
-        <Moon className="w-5 h-5 text-text-primary" />
+        <Moon className="w-4 h-4 text-slate-700 group-hover:-rotate-12 transition-transform duration-200" />
       )}
     </button>
   );

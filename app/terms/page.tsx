@@ -78,7 +78,7 @@ const sections = [
     index: "12",
     title: "Official Communications",
     content:
-      "Direct technical inquiries, vulnerability disclosures, or terms clarification requests to our verified communications channels via X (@RugSolScanner) or our open source repository on GitHub.",
+      "Direct technical inquiries, vulnerability disclosures, or terms clarification requests to our verified communications channels via X (@RugSolScanner).",
   },
 ];
 
@@ -144,27 +144,18 @@ export default function TermsPage() {
           </div>
 
           {/* Quick Contact & Verification */}
-          <div className="mt-8 p-4 bg-[#0e1118] border border-[#1e2433] rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono text-[#64748b]">
+          <div className="mt-8 p-4 bg-bg-card border border-border-color rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs font-mono text-text-muted">
             <div>
-              <span>OFFICIAL DISCLOSURES & REPOSITORIES</span>
+              <span>OFFICIAL DISCLOSURES & COMMUNICATIONS</span>
             </div>
             <div className="flex items-center gap-4 text-[#38bdf8]">
               <a
                 href="https://x.com/RugSolScanner"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-white transition-colors"
+                className="hover:underline transition-colors"
               >
                 X: @RugSolScanner
-              </a>
-              <span>•</span>
-              <a
-                href="https://github.com/Luftflotte/rugsol"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-white transition-colors"
-              >
-                GitHub
               </a>
             </div>
           </div>

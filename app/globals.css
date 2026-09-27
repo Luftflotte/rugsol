@@ -56,56 +56,56 @@
   --color-secondary-accent: var(--secondary-accent);
 }
 
-:root {
+:root, [data-theme="light"], html.light {
   --radius: 0.5rem;
   
-  /* Light theme - Clean architectural slate */
+  /* Light theme - High-End Fintech / Trading Terminal Paper Aesthetic */
   --bg-main: #f8fafc;
   --bg-card: #ffffff;
   --bg-secondary: #f1f5f9;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-primary: #090d16;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
   --border-color: #e2e8f0;
-  --primary-accent: #0f172a;
-  --secondary-accent: #334155;
-  --silver-accent: #64748b;
-  --silver-light: #94a3b8;
+  --primary-accent: #0284c7;
+  --secondary-accent: #0369a1;
+  --silver-accent: #475569;
+  --silver-light: #64748b;
   
   --background: #f8fafc;
-  --foreground: #0f172a;
+  --foreground: #090d16;
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #090d16;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #0f172a;
+  --popover-foreground: #090d16;
+  --primary: #090d16;
   --primary-foreground: #ffffff;
   --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
+  --secondary-foreground: #090d16;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
+  --accent-foreground: #090d16;
   --destructive: #ef4444;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #64748b;
-  --chart-1: #0f172a;
-  --chart-2: #334155;
-  --chart-3: #64748b;
-  --chart-4: #94a3b8;
-  --chart-5: #cbd5e1;
-  --sidebar: #f8fafc;
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #0f172a;
+  --ring: #0284c7;
+  --chart-1: #059669;
+  --chart-2: #0284c7;
+  --chart-3: #d97706;
+  --chart-4: #dc2626;
+  --chart-5: #64748b;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #090d16;
+  --sidebar-primary: #0284c7;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f1f5f9;
-  --sidebar-accent-foreground: #0f172a;
+  --sidebar-accent-foreground: #090d16;
   --sidebar-border: #e2e8f0;
-  --sidebar-ring: #64748b;
+  --sidebar-ring: #0284c7;
 }
 
-[data-theme="dark"] {
+[data-theme="dark"], html.dark {
   /* Dark theme - High-Density Pro Trading Terminal */
   --bg-main: #08090d;
   --bg-card: #0e1118;
@@ -172,7 +172,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .terminal-card:hover, .glass-card:hover {
@@ -181,7 +181,7 @@
 
 /* Subtle Card Hover */
 .card-hover {
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 .card-hover:hover {
   border-color: #3b455d;
@@ -285,4 +285,203 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ==========================================================================
+   Light Mode Overrides (Fintech Paper Architecture)
+   Enables high-contrast, clean modern light mode across the entire app
+   ========================================================================== */
+html[data-theme="light"],
+html.light {
+  color-scheme: light;
+}
+
+html[data-theme="light"] body,
+html.light body {
+  background-color: #f8fafc;
+  color: #090d16;
+}
+
+/* Background surfaces */
+html[data-theme="light"] .bg-\[\#08090d\],
+html.light .bg-\[\#08090d\] {
+  background-color: #f8fafc !important;
+}
+
+html[data-theme="light"] .bg-\[\#090b10\],
+html.light .bg-\[\#090b10\] {
+  background-color: #f1f5f9 !important;
+}
+
+html[data-theme="light"] .bg-\[\#0e1118\],
+html.light .bg-\[\#0e1118\] {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.05), 0 1px 2px -1px rgba(15, 23, 42, 0.03);
+}
+
+html[data-theme="light"] .bg-\[\#121622\],
+html[data-theme="light"] .bg-\[\#131722\],
+html[data-theme="light"] .bg-\[\#141824\],
+html[data-theme="light"] .bg-\[\#161b26\],
+html.light .bg-\[\#121622\],
+html.light .bg-\[\#131722\],
+html.light .bg-\[\#141824\],
+html.light .bg-\[\#161b26\] {
+  background-color: #f1f5f9 !important;
+}
+
+html[data-theme="light"] .bg-\[\#0a0d14\],
+html.light .bg-\[\#0a0d14\] {
+  background-color: #f8fafc !important;
+}
+
+/* Borders & Dividers */
+html[data-theme="light"] .border-\[\#1e2433\],
+html[data-theme="light"] .border-\[\#161b26\],
+html.light .border-\[\#1e2433\],
+html.light .border-\[\#161b26\] {
+  border-color: #e2e8f0 !important;
+}
+
+html[data-theme="light"] .divide-\[\#1e2433\] > :not([hidden]) ~ :not([hidden]),
+html[data-theme="light"] .divide-\[\#161b26\] > :not([hidden]) ~ :not([hidden]),
+html.light .divide-\[\#1e2433\] > :not([hidden]) ~ :not([hidden]),
+html.light .divide-\[\#161b26\] > :not([hidden]) ~ :not([hidden]) {
+  border-color: #e2e8f0 !important;
+}
+
+/* Typography */
+html[data-theme="light"] .text-\[\#f8fafc\],
+html[data-theme="light"] .text-\[\#f1f5f9\],
+html[data-theme="light"] .text-\[\#f3f4f6\],
+html.light .text-\[\#f8fafc\],
+html.light .text-\[\#f1f5f9\],
+html.light .text-\[\#f3f4f6\] {
+  color: #090d16 !important;
+}
+
+html[data-theme="light"] .text-\[\#94a3b8\],
+html[data-theme="light"] .text-\[\#9ca3af\],
+html.light .text-\[\#94a3b8\],
+html.light .text-\[\#9ca3af\] {
+  color: #334155 !important;
+}
+
+html[data-theme="light"] .text-\[\#64748b\],
+html[data-theme="light"] .text-\[\#6b7280\],
+html.light .text-\[\#64748b\],
+html.light .text-\[\#6b7280\] {
+  color: #64748b !important;
+}
+
+/* Hovers */
+html[data-theme="light"] .hover\:bg-\[\#121622\]:hover,
+html[data-theme="light"] .hover\:bg-\[\#161b26\]:hover,
+html[data-theme="light"] .hover\:bg-\[\#1a2030\]:hover,
+html.light .hover\:bg-\[\#121622\]:hover,
+html.light .hover\:bg-\[\#161b26\]:hover,
+html.light .hover\:bg-\[\#1a2030\]:hover {
+  background-color: #f1f5f9 !important;
+}
+
+html[data-theme="light"] .hover\:border-\[\#38bdf8\]\/40:hover,
+html.light .hover\:border-\[\#38bdf8\]\/40:hover {
+  border-color: #0284c7 !important;
+}
+
+/* Accents tuned for high contrast on light paper */
+html[data-theme="light"] .text-\[\#38bdf8\],
+html.light .text-\[\#38bdf8\] {
+  color: #0284c7 !important;
+}
+
+html[data-theme="light"] .bg-\[\#38bdf8\],
+html.light .bg-\[\#38bdf8\] {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="light"] .bg-\[\#38bdf8\]\/10,
+html.light .bg-\[\#38bdf8\]\/10 {
+  background-color: rgba(2, 132, 199, 0.08) !important;
+}
+
+html[data-theme="light"] .border-\[\#38bdf8\]\/30,
+html.light .border-\[\#38bdf8\]\/30 {
+  border-color: rgba(2, 132, 199, 0.3) !important;
+}
+
+html[data-theme="light"] .text-emerald-400,
+html.light .text-emerald-400 {
+  color: #059669 !important;
+}
+
+html[data-theme="light"] .bg-emerald-500\/10,
+html.light .bg-emerald-500\/10 {
+  background-color: rgba(5, 150, 105, 0.08) !important;
+}
+
+html[data-theme="light"] .border-emerald-500\/30,
+html.light .border-emerald-500\/30 {
+  border-color: rgba(5, 150, 105, 0.25) !important;
+}
+
+html[data-theme="light"] .text-rose-400,
+html.light .text-rose-400 {
+  color: #dc2626 !important;
+}
+
+html[data-theme="light"] .bg-rose-500\/10,
+html.light .bg-rose-500\/10 {
+  background-color: rgba(220, 38, 38, 0.08) !important;
+}
+
+html[data-theme="light"] .border-rose-500\/30,
+html.light .border-rose-500\/30 {
+  border-color: rgba(220, 38, 38, 0.25) !important;
+}
+
+html[data-theme="light"] .text-amber-400,
+html.light .text-amber-400 {
+  color: #d97706 !important;
+}
+
+html[data-theme="light"] .bg-amber-500\/10,
+html.light .bg-amber-500\/10 {
+  background-color: rgba(217, 119, 6, 0.08) !important;
+}
+
+html[data-theme="light"] .border-amber-500\/30,
+html.light .border-amber-500\/30 {
+  border-color: rgba(217, 119, 6, 0.25) !important;
+}
+
+html[data-theme="light"] .text-purple-400,
+html.light .text-purple-400 {
+  color: #7c3aed !important;
+}
+
+html[data-theme="light"] .bg-purple-500\/10,
+html.light .bg-purple-500\/10 {
+  background-color: rgba(124, 58, 237, 0.08) !important;
+}
+
+html[data-theme="light"] .border-purple-500\/30,
+html.light .border-purple-500\/30 {
+  border-color: rgba(124, 58, 237, 0.25) !important;
+}
+
+/* Card hover and interactive states in light mode */
+html[data-theme="light"] .terminal-card:hover,
+html[data-theme="light"] .glass-card:hover,
+html.light .terminal-card:hover,
+html.light .glass-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.05);
+}
+
+/* Light mode card border enhancements */
+html[data-theme="light"] .bg-bg-card,
+html.light .bg-bg-card {
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
 }
