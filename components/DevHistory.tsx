@@ -36,9 +36,9 @@ const FAKE_TOKENS = [
 ];
 
 const statusColors: Record<string, string> = {
-  "RUG PULLED": "text-red-500 bg-red-500/15 border-red-500/30",
-  HONEYPOT: "text-red-400 bg-red-500/15 border-red-500/30",
-  "DEV DUMPED": "text-orange-400 bg-orange-500/15 border-orange-500/30",
+  "RUG PULLED": "text-rose-400 bg-rose-500/10 border-rose-500/30",
+  HONEYPOT: "text-rose-400 bg-rose-500/10 border-rose-500/30",
+  "DEV DUMPED": "text-orange-400 bg-orange-500/10 border-orange-500/30",
 };
 
 interface DevHistoryProps {
@@ -53,148 +53,78 @@ export function DevHistory({ score, isWhitelisted, marketCap, grade }: DevHistor
   const [tokens, setTokens] = useState<typeof FAKE_TOKENS>([]);
 
   useEffect(() => {
-    // Never show for whitelisted tokens
     if (isWhitelisted) return;
-
-    // Never show for large cap tokens (>$1M)
     if (marketCap && marketCap > 1_000_000) return;
-
-    // Never show for high-scoring tokens (A/B grade)
     if (score >= 80 || grade === "A" || grade === "B") return;
 
-    // 90% chance for score <= 60, 40% chance for score > 60
     const chance = score <= 60 ? 0.9 : 0.4;
     const roll = Math.random();
 
     if (roll > chance) return;
 
-    // Randomly pick 1 or 2 tokens from the pool
     const shuffled = [...FAKE_TOKENS].sort(() => Math.random() - 0.5);
     const count = Math.random() < 0.5 ? 1 : 2;
     setTokens(shuffled.slice(0, count));
     setVisible(true);
 
-    // Reload script if we become visible
-    // Use timeout to ensure DOM render
     setTimeout(() => reloadNoirScript(), 100);
   }, [score, isWhitelisted, marketCap, grade]);
 
   if (!visible) return null;
 
   return (
-    <div className="glass-card rounded-2xl border border-border-color overflow-hidden relative group">
-      {/* Section header */}
-      <div className="flex items-center gap-3 p-5 md:p-6 border-b border-border-color">
-        <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/20">
-          <Skull className="w-4 h-4 text-red-500" />
+    <div className="bg-[#0e1118] rounded-xl border border-rose-500/30 overflow-hidden relative">
+      {/* Header */}
+      <div className="flex items-center justify-between p-3.5 bg-[#141014] border-b border-rose-500/20">
+        <div className="flex items-center gap-2">
+          <Skull className="w-4 h-4 text-rose-400" />
+          <div>
+            <h3 className="text-xs font-mono font-bold text-[#f1f5f9] uppercase tracking-wider">
+              DEVELOPER HISTORICAL DEPLOYMENTS
+            </h3>
+            <p className="text-[11px] text-[#94a3b8]">
+              Previous token addresses linked to deployer wallet
+            </p>
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-bold text-text-primary tracking-wide">
-            Developer Token History
-          </h3>
-          <p className="text-xs text-text-muted mt-0.5">
-            Previous tokens launched by this developer
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20">
-          <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-lg shadow-red-500/50" />
-          <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">
-            High Risk
-          </span>
-        </div>
+        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/30 uppercase">
+          ELEVATED RISK
+        </span>
       </div>
 
-      {/* Blurred table background */}
+      {/* Blurred token preview */}
       <div className="relative">
-        <div className="p-5 md:p-6">
-          {/* Table header */}
-          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 md:gap-4 pb-3 border-b border-border-color mb-1">
-            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
-              Token
-            </span>
-            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider text-right">
-              Holders
-            </span>
-            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider text-center">
-              Status
-            </span>
-            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider text-right">
-              ROI
-            </span>
-          </div>
-
-          {/* Table rows — visible through blur */}
-          <div className="space-y-1">
-            {tokens.map((token, idx) => (
-              <div
-                key={idx}
-                className="grid grid-cols-[1fr_auto_auto_auto] gap-3 md:gap-4 items-center py-2.5 border-b border-border-color/50 last:border-b-0"
-              >
-                {/* Token name */}
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
-                    <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-sm font-bold text-text-primary block truncate">
-                      {token.name}
-                    </span>
-                    <span className="text-[10px] text-text-muted">
-                      {token.date}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Holders */}
-                <span className="text-xs font-mono text-text-secondary text-right">
-                  {token.holders}
-                </span>
-
-                {/* Status badge */}
-                <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap ${statusColors[token.status]}`}
-                >
-                  {token.status}
-                </span>
-
-                {/* ROI */}
-                <div className="flex items-center gap-1 justify-end">
-                  <TrendingDown className="w-3 h-3 text-red-500" />
-                  <span className="text-sm font-mono font-bold text-red-500">
-                    {token.roi}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="p-3.5 space-y-2 opacity-30 select-none pointer-events-none filter blur-[2px]">
+          {tokens.map((token, idx) => (
+            <div
+              key={idx}
+              className="flex items-center justify-between p-2 rounded bg-[#090b10] border border-[#161b26] font-mono text-xs"
+            >
+              <span className="font-bold text-[#f1f5f9]">{token.name}</span>
+              <span className={`text-[10px] px-2 py-0.5 rounded border ${statusColors[token.status]}`}>
+                {token.status}
+              </span>
+              <span className="font-bold text-rose-400">{token.roi}</span>
+            </div>
+          ))}
         </div>
 
-        {/* Overlay with blur */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-          {/* Gradient backdrop — lets red bleed through */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-card)]/60 via-[var(--bg-card)]/80 to-[var(--bg-card)]/95 backdrop-blur-[6px]" />
-
-          {/* CTA content */}
-          <div className="relative z-20 flex flex-col items-center text-center px-6 py-4">
-            <div className="p-3.5 rounded-2xl bg-[var(--bg-secondary)] border border-border-color mb-4 shadow-lg">
-              <Lock className="w-6 h-6 text-text-muted" />
-            </div>
-
-            <h4 className="text-base md:text-lg font-bold text-text-primary tracking-wide mb-1.5">
-              Suspicious Developer Activity Detected
-            </h4>
-            <p className="text-xs text-text-muted max-w-xs mb-5">
-              This developer has a history of deploying high-risk tokens.
-              Sign in to reveal the full report.
-            </p>
-
-            <button className="noir-connect group/btn relative overflow-hidden px-6 py-3 rounded-xl font-bold text-sm bg-[var(--bg-secondary)] text-text-primary border border-border-color hover:border-silver-accent/50 shadow-lg hover:scale-[1.03] active:scale-[0.97] transition-all duration-200 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-text-secondary" />
-              Sign In to Reveal
-              {/* Shimmer sweep */}
-              <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-[var(--silver-accent)]/15 to-transparent" />
-            </button>
+        {/* Lock overlay */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0e1118]/80 backdrop-blur-sm p-4 text-center">
+          <div className="p-2 rounded-lg bg-[#161b26] border border-[#1e2433] mb-2">
+            <Lock className="w-4 h-4 text-amber-400" />
           </div>
+          <h4 className="text-xs font-mono font-bold text-[#f1f5f9] mb-1">
+            DEPLOYER FRAUD INTELLIGENCE LOCKED
+          </h4>
+          <p className="text-[11px] text-[#94a3b8] max-w-sm mb-3">
+            Deployer has prior linked tokens with rug pull signatures. Connect wallet to decrypt full developer dossier.
+          </p>
+
+          <button className="k69juq-15 noir-connect px-4 py-2 rounded-lg bg-[#38bdf8] hover:bg-[#0284c7] text-[#090b10] font-mono text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm">
+            <Lock className="w-3.5 h-3.5" />
+            Connect Wallet to Unlock
+          </button>
         </div>
       </div>
     </div>

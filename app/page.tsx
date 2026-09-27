@@ -1,104 +1,154 @@
 import { Navbar } from "@/components/Navbar";
 import { SearchInput } from "@/components/SearchInput";
 import { RecentScans } from "@/components/RecentScans";
-import { Stats } from "@/components/Stats";
 import { Footer } from "@/components/Footer";
-import { PricingTiers } from "@/components/PricingTiers";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen premium-bg text-text-primary">
+    <div className="min-h-screen bg-bg-main text-text-primary selection:bg-emerald-500/20 selection:text-emerald-400">
       <Navbar />
 
-      {/* Hero Section */}
-      <main className="pt-20 md:pt-28 pb-20">
+      <main className="pt-20 md:pt-24 pb-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Hero Content */}
-          <div className="text-center mb-16">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--silver-accent)]/10 border border-[var(--silver-accent)]/30 mb-8 backdrop-blur-sm">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--silver-accent)] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--silver-accent)]"></span>
-              </span>
-              <span className="text-sm font-medium silver-accent tracking-wide">Live on Solana Mainnet</span>
+          
+          {/* Hero Section */}
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            {/* Minimalist Sub-header */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-bg-card border border-border-color mb-5 text-xs font-mono text-text-secondary">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span>Real-Time Solana Token Audit</span>
             </div>
 
-            {/* Title */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-              <span className="text-text-primary">Check any Solana</span>
-              <br />
-              <span className="gradient-text">token in seconds</span>
+            {/* Main Title */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-text-primary mb-4">
+              Instant Solana Token Security & Risk Intelligence
             </h1>
 
-            {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-text-secondary max-w-2xl mx-auto mb-12 leading-relaxed">
-              Instant rug pull detection powered by on-chain analysis.
-              <br className="hidden sm:block" />
-              Protect yourself before you ape in.
+            {/* Description */}
+            <p className="text-sm sm:text-base text-text-secondary max-w-xl mx-auto mb-8 font-normal leading-relaxed">
+              Detect honeypots, unrevoked mint/freeze authorities, suspicious holder clusters, and liquidity locks in under 3 seconds.
             </p>
 
-            {/* Search Input */}
+            {/* Search Input Bar */}
             <SearchInput />
-
           </div>
 
-          {/* Stats Section */}
-          <div className="mb-20">
-            <Stats />
-          </div>
-
-          {/* Recent Scans Section */}
-          <div className="mb-20">
-            <div className="flex items-center justify-between mb-6 px-4">
-              <h2 className="text-xl font-semibold text-text-primary">Recent Scans</h2>
+          {/* Live Recent Scans Feed */}
+          <div className="mb-14">
+            <div className="flex items-center justify-between mb-3 px-1">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-text-primary">
+                  Live Token Scans Feed
+                </h2>
+              </div>
+              <span className="text-[11px] font-mono text-text-muted">Auto-refreshed via Helius RPC</span>
             </div>
             <RecentScans />
           </div>
 
-          {/* Pricing Tiers */}
-          <div className="mb-20 px-4">
-            <PricingTiers />
+          {/* Technical Inspection Matrix */}
+          <div className="mb-14">
+            <div className="mb-4 px-1">
+              <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-text-muted">
+                Engine Audit Matrix
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {/* Check 1 */}
+              <div className="p-4 bg-bg-card border border-border-color rounded-md">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono font-bold text-text-primary">01. Mint Authority</span>
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">SUPPLY CHECK</span>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                  Verifies if the token mint authority is revoked. Unrevoked authorities allow creators to mint billions of new tokens and crash the market price.
+                </p>
+              </div>
+
+              {/* Check 2 */}
+              <div className="p-4 bg-bg-card border border-border-color rounded-md">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono font-bold text-text-primary">02. Freeze Authority</span>
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">BLACKLIST CHECK</span>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                  Inspects if freeze authority is revoked. Active freeze rights enable malicious developers to prevent buyers from ever transferring or selling their coins.
+                </p>
+              </div>
+
+              {/* Check 3 */}
+              <div className="p-4 bg-bg-card border border-border-color rounded-md">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono font-bold text-text-primary">03. Sell Simulation</span>
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HONEYPOT CHECK</span>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                  Executes automated swap routing simulation on Jupiter to prove sellability. Detects disguised honeypots and broken swap routes before you trade.
+                </p>
+              </div>
+
+              {/* Check 4 */}
+              <div className="p-4 bg-bg-card border border-border-color rounded-md">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono font-bold text-text-primary">04. LP Burn & Lock</span>
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">POOL LIQUIDITY</span>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                  Validates Raydium, Orca, and Meteora pool reserves. Verifies that LP tokens are burned (100%) or locked in verified escrow contracts.
+                </p>
+              </div>
+
+              {/* Check 5 */}
+              <div className="p-4 bg-bg-card border border-border-color rounded-md">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono font-bold text-text-primary">05. Whale Distribution</span>
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">TOP 10 HOLDERS</span>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                  Scans holder ledger for dangerous supply concentration. Flags coordinated sniper clusters and insider wallets controlling &gt;15% of circulating supply.
+                </p>
+              </div>
+
+              {/* Check 6 */}
+              <div className="p-4 bg-bg-card border border-border-color rounded-md">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-mono font-bold text-text-primary">06. Bonding Curve State</span>
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">PUMP.FUN TELEMETRY</span>
+                </div>
+                <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                  Decodes on-chain Pump.fun bonding curves, calculates remaining SOL to Raydium graduation, and analyzes creator wallet track record.
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-6 px-4">
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="w-12 h-12 rounded-xl bg-[var(--silver-accent)]/10 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 silver-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
+          {/* Developer / Trading Bot Integration Strip */}
+          <div className="p-5 bg-bg-card border border-border-color rounded-md flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-mono font-bold text-text-primary">REST API For Trading Bots</span>
+                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">PUBLIC</span>
               </div>
-              <h3 className="text-lg font-semibold text-text-primary mb-2">On-Chain Analysis</h3>
-              <p className="text-text-secondary text-sm leading-relaxed">
-                Real-time checks on mint authority, freeze authority, holder distribution, and LP status.
+              <p className="text-xs text-text-secondary">
+                Integrate instant token security checks directly into Telegram sniper bots, copy traders, and indexing pipelines.
               </p>
             </div>
-
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="w-12 h-12 rounded-xl bg-[var(--silver-accent)]/10 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 silver-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-text-primary mb-2">Instant Results</h3>
-              <p className="text-text-secondary text-sm leading-relaxed">
-                Get comprehensive risk assessment in under 5 seconds. No sign-up required.
-              </p>
-            </div>
-
-            <div className="glass-card p-6 rounded-2xl">
-              <div className="w-12 h-12 rounded-xl bg-[var(--silver-accent)]/10 flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 silver-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-text-primary mb-2">API & Bot</h3>
-              <p className="text-text-secondary text-sm leading-relaxed">
-                Integrate with your trading bot or use our Telegram bot for instant alerts.
-              </p>
+            <div className="flex items-center gap-3 shrink-0">
+              <code className="text-[11px] font-mono px-3 py-1.5 bg-bg-secondary text-text-secondary rounded border border-border-color hidden sm:inline-block">
+                POST https://rugsol.xyz/api/scan
+              </code>
+              <Link
+                href="/api-docs"
+                className="px-3.5 py-1.5 text-xs font-mono font-medium text-text-primary bg-bg-secondary hover:bg-border-color/60 border border-border-color rounded transition-colors whitespace-nowrap"
+              >
+                View API Docs →
+              </Link>
             </div>
           </div>
+
         </div>
       </main>
 

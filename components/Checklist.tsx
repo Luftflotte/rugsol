@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, ChevronUp, CheckCircle2, AlertTriangle, XCircle, HelpCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, Check, AlertTriangle, X, HelpCircle } from "lucide-react";
 
 export type CheckStatus = "pass" | "warning" | "fail" | "unknown";
 
@@ -25,48 +25,67 @@ interface ChecklistProps {
   groups: CheckGroup[];
 }
 
-const severityColors = {
-  critical: "border-red-500/30 bg-red-500/5",
-  high: "border-orange-500/30 bg-orange-500/5",
-  medium: "border-yellow-500/30 bg-yellow-500/5",
-  low: "border-blue-500/30 bg-blue-500/5",
-  insider: "border-purple-500/30 bg-purple-500/5",
+const severityMeta = {
+  critical: {
+    label: "CRITICAL CONTRACT SAFETY",
+    color: "text-rose-400",
+    badgeBg: "bg-rose-500/10 text-rose-400 border-rose-500/30",
+    border: "border-rose-500/20",
+  },
+  high: {
+    label: "LIQUIDITY & POOL HEALTH",
+    color: "text-orange-400",
+    badgeBg: "bg-orange-500/10 text-orange-400 border-orange-500/30",
+    border: "border-orange-500/20",
+  },
+  medium: {
+    label: "HOLDER CONCENTRATION",
+    color: "text-amber-400",
+    badgeBg: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+    border: "border-amber-500/20",
+  },
+  insider: {
+    label: "INSIDER & SNIPER ACTIVITY",
+    color: "text-purple-400",
+    badgeBg: "bg-purple-500/10 text-purple-400 border-purple-500/30",
+    border: "border-purple-500/20",
+  },
+  low: {
+    label: "METADATA & SOCIAL VERIFICATION",
+    color: "text-sky-400",
+    badgeBg: "bg-sky-500/10 text-sky-400 border-sky-500/30",
+    border: "border-sky-500/20",
+  },
 };
 
-const severityLabels = {
-  critical: { text: "Critical", color: "text-red-500" },
-  high: { text: "High Risk", color: "text-orange-500" },
-  medium: { text: "Medium Risk", color: "text-yellow-500" },
-  low: { text: "Low Risk", color: "text-blue-400" },
-  insider: { text: "Insider Activity", color: "text-purple-400" },
-};
-
-function StatusIcon({ status }: { status: CheckStatus }) {
-  const baseClasses = "w-7 h-7 rounded-lg flex items-center justify-center transition-colors duration-200";
+function StatusBadge({ status }: { status: CheckStatus }) {
   switch (status) {
     case "pass":
       return (
-        <div className={`${baseClasses} bg-green-500/10 border border-green-500/25`}>
-          <CheckCircle2 className="w-4 h-4 text-green-400" />
-        </div>
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">
+          <Check className="w-3 h-3" />
+          PASS
+        </span>
       );
     case "warning":
       return (
-        <div className={`${baseClasses} bg-yellow-500/10 border border-yellow-500/25`}>
-          <AlertTriangle className="w-4 h-4 text-yellow-400" />
-        </div>
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/25">
+          <AlertTriangle className="w-3 h-3" />
+          WARN
+        </span>
       );
     case "fail":
       return (
-        <div className={`${baseClasses} bg-red-500/10 border border-red-500/25`}>
-          <XCircle className="w-4 h-4 text-red-400" />
-        </div>
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/25">
+          <X className="w-3 h-3" />
+          FAIL
+        </span>
       );
     default:
       return (
-        <div className={`${baseClasses} bg-[var(--bg-secondary)] border border-border-color`}>
-          <HelpCircle className="w-4 h-4 text-text-muted" />
-        </div>
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-[#161b26] text-[#64748b] border border-[#1e2433]">
+          N/A
+        </span>
       );
   }
 }
@@ -87,13 +106,13 @@ function CheckRow({ check }: { check: CheckItem }) {
     const updatePosition = () => {
       if (!buttonRef.current) return;
       const rect = buttonRef.current.getBoundingClientRect();
-      const tooltipWidth = 256;
-      const gap = 8;
+      const tooltipWidth = 280;
+      const gap = 6;
 
       let top = rect.bottom + gap;
       let left = rect.right - tooltipWidth;
 
-      const padding = 16;
+      const padding = 12;
       if (left < padding) left = padding;
       if (left + tooltipWidth > window.innerWidth - padding) {
         left = window.innerWidth - tooltipWidth - padding;
@@ -112,122 +131,104 @@ function CheckRow({ check }: { check: CheckItem }) {
   }, [showTooltip, mounted]);
 
   return (
-    <div className="py-2 sm:py-2.5 md:py-3 px-2 sm:px-3 md:px-4 hover:bg-bg-secondary/50 rounded-xl transition-all duration-200 group overflow-visible hover:shadow-sm border border-transparent hover:border-border-color">
-      {/* Mobile: Stack vertically, Desktop: Side by side */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
-        {/* Name and status */}
-        <div className="flex items-center gap-2 md:gap-3">
-          <div className="transition-transform duration-200 group-hover:scale-110">
-            <StatusIcon status={check.status} />
-          </div>
-          <span className="text-xs md:text-sm text-text-secondary font-medium group-hover:text-text-primary transition-colors">{check.name}</span>
-        </div>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2.5 px-3 border-b border-[#161b26] last:border-b-0 hover:bg-[#121620] transition-colors">
+      {/* Check Name + Status Badge */}
+      <div className="flex items-center gap-2.5 min-w-0">
+        <StatusBadge status={check.status} />
+        <span className="text-xs sm:text-sm font-medium text-[#e2e8f0] truncate">
+          {check.name}
+        </span>
+      </div>
 
-        {/* Value, penalty, tooltip */}
-        <div className="flex items-center gap-2 pl-7 md:pl-0 flex-wrap">
-          <span
-            className={`text-xs md:text-sm font-mono font-semibold break-all ${
-              check.status === "pass"
-                ? "text-green-400"
-                : check.status === "fail"
-                ? "text-red-400"
-                : check.status === "warning"
-                ? "text-yellow-400"
-                : "text-text-muted"
-            }`}
-          >
-            {check.value}
+      {/* Value + Penalty + Info */}
+      <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+        <span
+          className={`text-xs font-mono font-medium ${
+            check.status === "pass"
+              ? "text-emerald-400"
+              : check.status === "fail"
+              ? "text-rose-400"
+              : check.status === "warning"
+              ? "text-amber-400"
+              : "text-[#64748b]"
+          }`}
+        >
+          {check.value}
+        </span>
+
+        {check.penalty && check.penalty > 0 ? (
+          <span className="text-[10px] font-mono font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded">
+            -{check.penalty} PTS
           </span>
+        ) : null}
 
-          {check.penalty && check.penalty > 0 ? (
-            <span className="text-[10px] md:text-xs font-bold text-red-400 bg-red-500/15 border border-red-500/20 px-1.5 md:px-2 py-0.5 rounded-md">
-              -{check.penalty}
-            </span>
-          ) : null}
+        <button
+          ref={buttonRef}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+          onClick={() => setShowTooltip(!showTooltip)}
+          className="p-1 text-[#64748b] hover:text-[#94a3b8] transition-colors rounded"
+          title="Details"
+        >
+          <HelpCircle className="w-3.5 h-3.5" />
+        </button>
 
-          <button
-            ref={buttonRef}
-            onMouseEnter={() => setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
-            onClick={() => setShowTooltip(!showTooltip)}
-            className="p-1.5 text-text-muted hover:text-text-primary transition-all duration-200 hover:bg-bg-secondary rounded-lg"
-          >
-            <HelpCircle className="w-3.5 h-3.5 md:w-4 md:h-4" />
-          </button>
-
-          {showTooltip && mounted &&
-            createPortal(
-              <div
-                className="fixed z-[9999] w-48 md:w-64 p-3 md:p-4 bg-bg-card border border-border-color rounded-xl shadow-2xl text-xs text-text-secondary animate-fade-in-up"
-                style={tooltipStyle}
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
-              >
-                <div className="absolute -top-1 right-4 w-2 h-2 bg-bg-card border-t border-l border-border-color rotate-45" />
-                <div className="relative z-10">{check.tooltip}</div>
-              </div>,
-              document.body
-            )}
-        </div>
+        {showTooltip && mounted &&
+          createPortal(
+            <div
+              className="fixed z-[9999] w-64 p-3 bg-[#0e1118] border border-[#1e2433] rounded-lg shadow-2xl text-xs text-[#94a3b8] leading-relaxed font-sans"
+              style={tooltipStyle}
+              onMouseEnter={() => setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+            >
+              {check.tooltip}
+            </div>,
+            document.body
+          )}
       </div>
     </div>
   );
 }
 
-function CheckGroupAccordion({ group }: { group: CheckGroup }) {
+function CheckGroupSection({ group }: { group: CheckGroup }) {
   const [isOpen, setIsOpen] = useState(true);
+  const meta = severityMeta[group.severity] || severityMeta.critical;
 
   const failedCount = group.checks.filter(
     (c) => c.status === "fail" || c.status === "warning"
   ).length;
 
   return (
-    <div
-      className={`rounded-2xl border ${severityColors[group.severity]} overflow-hidden transition-colors duration-300`}
-    >
+    <div className={`rounded-xl border border-[#1e2433] bg-[#0e1118] overflow-hidden`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 md:p-5 hover:bg-bg-secondary/50 transition-all duration-200 group"
+        className="w-full flex items-center justify-between p-3 sm:p-3.5 bg-[#121622] hover:bg-[#161b2a] transition-colors border-b border-[#1e2433] text-left"
       >
-        <div className="flex items-center gap-3 md:gap-4">
-          {/* Severity indicator dot */}
-          <div className={`w-2 h-2 rounded-full ${
-            group.severity === 'critical' ? 'bg-red-500 md:animate-pulse shadow-lg shadow-red-500/50' :
-            group.severity === 'high' ? 'bg-orange-500 shadow-lg shadow-orange-500/50' :
-            group.severity === 'medium' ? 'bg-yellow-500 shadow-lg shadow-yellow-500/50' :
-            group.severity === 'low' ? 'bg-blue-400 shadow-lg shadow-blue-400/50' :
-            'bg-purple-400 shadow-lg shadow-purple-400/50'
-          }`} />
-          <span className={`text-sm md:text-base font-bold ${severityLabels[group.severity].color}`}>
-            {severityLabels[group.severity].text}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <span className={`text-xs font-mono font-bold tracking-wider ${meta.color}`}>
+            // {meta.label}
           </span>
-          <span className="text-[10px] md:text-xs text-text-muted font-medium bg-bg-secondary/50 px-2 py-0.5 rounded-full">
-            {group.checks.length} checks
+          <span className="text-[10px] font-mono text-[#64748b] bg-[#090b10] px-2 py-0.5 rounded border border-[#1e2433]">
+            {group.checks.length} CHECKS
           </span>
           {failedCount > 0 && (
-            <span className="text-[10px] md:text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 px-2 md:px-2.5 py-0.5 rounded-full md:animate-pulse">
-              {failedCount} {failedCount === 1 ? 'issue' : 'issues'}
+            <span className="text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/25 px-2 py-0.5 rounded">
+              {failedCount} {failedCount === 1 ? "FLAG" : "FLAGS"}
             </span>
           )}
         </div>
-        <div className="transition-transform duration-300 group-hover:scale-110">
-          {isOpen ? (
-            <ChevronUp className="w-5 h-5 text-text-muted" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-text-muted" />
-          )}
+        <div className="text-[#64748b] hover:text-[#f1f5f9] transition-colors">
+          {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </div>
       </button>
 
-      <div className={`transition-all duration-300 ease-in-out ${
-        isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
-      } overflow-hidden`}>
-        <div className="border-t border-border-color p-2">
+      {isOpen && (
+        <div className="divide-y divide-[#161b26]">
           {group.checks.map((check) => (
             <CheckRow key={check.id} check={check} />
           ))}
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -236,7 +237,7 @@ export function Checklist({ groups }: ChecklistProps) {
   return (
     <div className="space-y-3">
       {groups.map((group, index) => (
-        <CheckGroupAccordion key={index} group={group} />
+        <CheckGroupSection key={index} group={group} />
       ))}
     </div>
   );

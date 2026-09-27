@@ -7,124 +7,166 @@ import { InfoTooltip } from "@/components/InfoTooltip";
 interface HolderChartProps {
   holders: HolderInfo[];
   devAddress?: string;
-  snipers?: string[]; // List of sniper addresses
-  linkedWallets?: Record<string, string>; // address -> clusterId (color code by cluster)
+  snipers?: string[];
+  linkedWallets?: Record<string, string>;
   className?: string;
 }
 
-export function HolderChart({ holders, devAddress, snipers = [], linkedWallets = {}, className }: HolderChartProps) {
-  // Normalize holders to max 10 for display
+export function HolderChart({
+  holders,
+  devAddress,
+  snipers = [],
+  linkedWallets = {},
+  className,
+}: HolderChartProps) {
   const displayHolders = holders.slice(0, 10);
-  
-  // Find max percent to scale bars
-  const maxPercent = Math.max(...displayHolders.map(h => h.percent), 10); // at least 10% scale
+  const top10Total = displayHolders.reduce((acc, h) => acc + h.percent, 0);
 
-  const getBarColor = (holder: HolderInfo) => {
-    if (holder.isLpPool) return "bg-blue-500";
-    if (devAddress && holder.owner === devAddress) return "bg-purple-500"; // Dev
-    if (snipers.includes(holder.owner)) return "bg-red-500"; // Sniper
-    if (linkedWallets[holder.owner]) return "bg-orange-500"; // Linked Cluster (generic color for now)
-    
-    // Fallback: Whale warning
-    if (holder.percent > 20) return "bg-red-500"; 
-    return "bg-text-secondary";
-  };
-
-  const getLabel = (holder: HolderInfo) => {
-    if (holder.isLpPool) return "Liquidity Pool";
-    if (devAddress && holder.owner === devAddress) return "Dev Wallet";
-    if (snipers.includes(holder.owner)) return "Sniper";
-    if (linkedWallets[holder.owner]) return `Cluster ${linkedWallets[holder.owner]}`;
-    return `${holder.owner.slice(0, 4)}...${holder.owner.slice(-4)}`;
+  const getHolderMeta = (holder: HolderInfo) => {
+    if (holder.isLpPool) {
+      return {
+        label: "LP POOL",
+        color: "text-sky-400 bg-sky-500/10 border-sky-500/25",
+        barColor: "bg-sky-500",
+      };
+    }
+    if (devAddress && holder.owner === devAddress) {
+      return {
+        label: "DEV WALLET",
+        color: "text-purple-400 bg-purple-500/10 border-purple-500/25",
+        barColor: "bg-purple-500",
+      };
+    }
+    if (snipers.includes(holder.owner)) {
+      return {
+        label: "SNIPER",
+        color: "text-rose-400 bg-rose-500/10 border-rose-500/25",
+        barColor: "bg-rose-500",
+      };
+    }
+    if (linkedWallets[holder.owner]) {
+      return {
+        label: `CLUSTER ${linkedWallets[holder.owner]}`,
+        color: "text-amber-400 bg-amber-500/10 border-amber-500/25",
+        barColor: "bg-amber-500",
+      };
+    }
+    if (holder.percent > 15) {
+      return {
+        label: "WHALE",
+        color: "text-orange-400 bg-orange-500/10 border-orange-500/25",
+        barColor: "bg-orange-500",
+      };
+    }
+    return {
+      label: "HOLDER",
+      color: "text-[#94a3b8] bg-[#161b26] border-[#1e2433]",
+      barColor: "bg-[#38bdf8]",
+    };
   };
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Legend with color explanations */}
-      <div className="flex items-start gap-2 p-3 bg-bg-secondary/50 rounded-lg border border-border-color">
-        <div className="flex-1">
-          <div className="grid grid-cols-2 gap-2 text-[10px]">
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-              <span className="text-text-secondary">Liquidity Pool</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-              <span className="text-text-secondary">Dev Wallet</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-red-500"></div>
-              <span className="text-text-secondary">Sniper/Whale</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-              <span className="text-text-secondary">Linked Cluster</span>
-            </div>
-          </div>
+      {/* Top 10 Summary Telemetry */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-[#121622] rounded-lg border border-[#1e2433]">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-mono text-[#64748b]">TOP 10 CONCENTRATION:</span>
+          <span
+            className={`text-sm font-mono font-bold tabular-nums ${
+              top10Total > 60
+                ? "text-rose-400"
+                : top10Total > 40
+                ? "text-amber-400"
+                : "text-emerald-400"
+            }`}
+          >
+            {top10Total.toFixed(2)}%
+          </span>
+          <span className="text-[10px] font-mono text-[#64748b]">
+            ({top10Total > 50 ? "HIGH CONCENTRATION" : "HEALTHY SPREAD"})
+          </span>
         </div>
-        <InfoTooltip
-          content={
-            <div className="space-y-2">
-              <p className="font-bold text-text-primary">Holder Chart Legend</p>
-              <div className="space-y-1.5 text-[11px]">
-                <p><span className="text-blue-400">●</span> <strong>Liquidity Pool:</strong> DEX trading pool</p>
-                <p><span className="text-purple-400">●</span> <strong>Dev Wallet:</strong> Token creator's address</p>
-                <p><span className="text-red-400">●</span> <strong>Sniper/Whale:</strong> Bought at launch or holds &gt;20%</p>
-                <p><span className="text-orange-400">●</span> <strong>Linked Cluster:</strong> Connected wallets (potential coordination)</p>
-              </div>
-              <p className="text-[10px] opacity-70 mt-2">Hover over bars for detailed wallet information</p>
-            </div>
-          }
-          position="left"
-        />
+
+        {/* Legend pills */}
+        <div className="flex items-center gap-2 text-[10px] font-mono flex-wrap">
+          <span className="inline-flex items-center gap-1 text-sky-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-400" /> LP
+          </span>
+          <span className="inline-flex items-center gap-1 text-purple-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-400" /> Dev
+          </span>
+          <span className="inline-flex items-center gap-1 text-rose-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-400" /> Sniper
+          </span>
+          <span className="inline-flex items-center gap-1 text-amber-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Cluster
+          </span>
+          <span className="inline-flex items-center gap-1 text-[#38bdf8]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]" /> Whale
+          </span>
+        </div>
       </div>
 
-      {displayHolders.map((holder, idx) => (
-        <div key={holder.owner} className="group relative">
-          <div className="flex items-center justify-between text-xs mb-1">
-            <a 
-                href={`https://solscan.io/account/${holder.owner}`} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="font-mono text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1.5"
-            >
-              <span className="opacity-50 text-[10px]">{idx + 1}.</span> 
-              {getLabel(holder)}
-              <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </a>
-            <span className="font-bold text-text-primary font-mono">{holder.percent.toFixed(2)}%</span>
-          </div>
-          
-          {/* Bar Background */}
-          <div className="h-2 w-full bg-bg-secondary rounded-full overflow-hidden">
-            {/* Bar Fill */}
-            <div 
-              className={`h-full ${getBarColor(holder)} rounded-full transition-all duration-500`}
-              style={{ width: `${Math.min(100, (holder.percent / maxPercent) * 100)}%` }}
-            />
-          </div>
+      {/* Holder Table / Rows */}
+      <div className="space-y-2">
+        {displayHolders.map((holder, idx) => {
+          const meta = getHolderMeta(holder);
+          const shortAddr = `${holder.owner.slice(0, 4)}...${holder.owner.slice(-4)}`;
 
-          {/* Tooltip on Hover */}
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full left-0 mb-2 p-3 bg-bg-card border border-border-color shadow-xl rounded-lg z-10 pointer-events-none w-max max-w-[240px]">
-            <div className="text-[10px] text-text-secondary uppercase tracking-wider mb-1">Wallet Details</div>
-            <div className="text-xs font-mono text-text-primary break-all mb-2">{holder.owner}</div>
-            
-            <div className="flex justify-between items-center text-xs">
-                 <span className="text-text-secondary">Amount:</span>
-                 <span className="font-bold text-text-primary">{parseInt(holder.amount).toLocaleString()}</span>
+          return (
+            <div
+              key={holder.owner}
+              className="p-2.5 rounded-lg bg-[#0e1118] border border-[#1e2433] hover:border-[#2a3449] transition-colors"
+            >
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="font-mono text-[11px] text-[#64748b] w-5">
+                    #{idx + 1}
+                  </span>
+                  <a
+                    href={`https://solscan.io/account/${holder.owner}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono text-xs text-[#94a3b8] hover:text-[#f1f5f9] transition-colors flex items-center gap-1"
+                    title={holder.owner}
+                  >
+                    <span>{shortAddr}</span>
+                    <ExternalLink className="w-3 h-3 opacity-60" />
+                  </a>
+                  <span
+                    className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${meta.color}`}
+                  >
+                    {meta.label}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-[11px] text-[#64748b] hidden sm:inline tabular-nums">
+                    {parseInt(holder.amount).toLocaleString()}
+                  </span>
+                  <span className="font-mono font-bold text-xs text-[#f8fafc] tabular-nums">
+                    {holder.percent.toFixed(2)}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress bar track */}
+              <div className="h-1.5 w-full bg-[#161b26] rounded-full overflow-hidden">
+                <div
+                  className={`h-full ${meta.barColor} rounded-full transition-all duration-300`}
+                  style={{ width: `${Math.min(100, Math.max(1, holder.percent))}%` }}
+                />
+              </div>
             </div>
-            
-            {(devAddress === holder.owner) && <div className="mt-2 text-[10px] text-purple-400 font-bold">● Developer Wallet</div>}
-            {snipers.includes(holder.owner) && <div className="mt-1 text-[10px] text-red-400 font-bold">● Detected Sniper</div>}
+          );
+        })}
+
+        {displayHolders.length === 0 && (
+          <div className="text-center py-6 text-xs font-mono text-[#64748b]">
+            NO ON-CHAIN HOLDER DATA AVAILABLE FOR THIS TOKEN
           </div>
-        </div>
-      ))}
-      
-      {displayHolders.length === 0 && (
-        <div className="text-center py-4 text-text-muted text-sm">
-          No holder data available
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

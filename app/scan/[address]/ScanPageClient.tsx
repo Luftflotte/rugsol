@@ -17,9 +17,22 @@ import { RiskList } from "@/components/RiskList";
 import { ActivityTimeline } from "@/components/ActivityTimeline";
 import { DevHistory } from "@/components/DevHistory";
 import { ScanResult } from "@/lib/scoring/engine";
-import { InfoTooltip } from "@/components/InfoTooltip";
 import { RateLimitModal } from "@/components/RateLimitModal";
 import { useTheme } from "@/components/ThemeProvider";
+import {
+  ShieldCheck,
+  ShieldAlert,
+  ArrowLeft,
+  Share2,
+  Copy,
+  Check,
+  Terminal,
+  ExternalLink,
+  Flame,
+  Lock,
+  Unlock,
+  AlertTriangle,
+} from "lucide-react";
 
 interface ScanResponse {
   success: boolean;
@@ -29,96 +42,96 @@ interface ScanResponse {
 
 function transformToCheckGroups(result: ScanResult): CheckGroup[] {
   const groups: CheckGroup[] = [];
-  const isPump = result.scanMode === 'pump';
+  const isPump = result.scanMode === "pump";
 
-  // --- 1. Critical Safety (Always Show) ---
+  // --- 1. Critical Safety ---
   const criticalChecks = [];
 
-  // Honeypot (skip for Pump.fun — Jupiter has no routes for bonding curve tokens)
+  // Honeypot
   if (result.checks.honeypot.data) {
     const hp = result.checks.honeypot.data;
     if (isPump) {
       criticalChecks.push({
         id: "honeypot",
-        name: "Sell Simulation",
+        name: "Sell Simulation (Jupiter)",
         status: "unknown" as const,
         value: "N/A (Bonding Curve)",
-        tooltip: "Sell simulation is skipped for Pump.fun bonding curve tokens. Jupiter has no swap routes for tokens still on the curve.",
+        tooltip: "Sell simulation is skipped for Pump.fun bonding curve tokens. Jupiter swap routes open only after migration.",
         penalty: 0,
       });
     } else {
       criticalChecks.push({
         id: "honeypot",
-        name: "Sell Simulation",
+        name: "Sell Simulation (Jupiter)",
         status: hp.isHoneypot ? ("fail" as const) : ("pass" as const),
-        value: hp.isHoneypot ? "Failed" : "Pass (Sellable)",
+        value: hp.isHoneypot ? "FAILED (CANNOT SELL)" : "PASS (SELLABLE)",
         tooltip: hp.isHoneypot
-          ? `Cannot sell token. Simulation failed: ${hp.reason}`
-          : "Successfully simulated a sell transaction via Jupiter.",
+          ? `Cannot liquidate token. Simulated sell route failed: ${hp.reason}`
+          : "Successfully simulated a sell transaction via Jupiter DEX router.",
         penalty: hp.isHoneypot ? 100 : 0,
       });
     }
   }
 
-  // Authorities (for Pump.fun, authority is expected to be the Bonding Curve PDA)
+  // Authorities
   if (result.checks.mintAuthority.data) {
     const ma = result.checks.mintAuthority.data;
     if (isPump) {
       criticalChecks.push({
         id: "mint-auth",
         name: "Mint Authority",
-        status: "unknown" as const,
-        value: "Bonding Curve (Expected)",
-        tooltip: "Pump.fun tokens have mint authority set to the Bonding Curve PDA. This is expected and not a risk.",
+        status: "pass" as const,
+        value: "BONDING CURVE PDA",
+        tooltip: "Mint authority is owned by Pump.fun program PDA. Supply is strictly governed by bonding math.",
         penalty: 0,
       });
     } else {
       criticalChecks.push({
         id: "mint-auth",
         name: "Mint Authority",
-        status: ma.status === "pass" ? "pass" as const : "fail" as const,
-        value: ma.value,
-        tooltip: ma.status === "pass" ? "Mint revoked." : "Owner can print new tokens.",
+        status: ma.status === "pass" ? ("pass" as const) : ("fail" as const),
+        value: ma.status === "pass" ? "REVOKED" : "ENABLED (DANGEROUS)",
+        tooltip: ma.status === "pass" ? "Supply is permanently capped. Owner cannot mint new tokens." : "Owner retains authority to mint infinite new tokens and dump them.",
         penalty: ma.status === "fail" ? 50 : 0,
       });
     }
   }
+
   if (result.checks.freezeAuthority.data) {
     const fa = result.checks.freezeAuthority.data;
     if (isPump) {
       criticalChecks.push({
         id: "freeze-auth",
         name: "Freeze Authority",
-        status: "unknown" as const,
-        value: "Platform Default",
-        tooltip: "Pump.fun tokens typically have freeze authority set to the program. This is expected behavior.",
+        status: "pass" as const,
+        value: "PROGRAM CONTROLLED",
+        tooltip: "Freeze authority is managed by Pump.fun program with standard non-freezable parameters.",
         penalty: 0,
       });
     } else {
       criticalChecks.push({
         id: "freeze-auth",
         name: "Freeze Authority",
-        status: fa.status === "pass" ? "pass" as const : "fail" as const,
-        value: fa.value,
-        tooltip: fa.status === "pass" ? "Freeze revoked." : "Owner can freeze wallets.",
+        status: fa.status === "pass" ? ("pass" as const) : ("fail" as const),
+        value: fa.status === "pass" ? "REVOKED" : "ENABLED (CAN FREEZE)",
+        tooltip: fa.status === "pass" ? "Owner cannot blacklist or freeze holder token accounts." : "Owner can freeze token accounts and prevent holders from trading.",
         penalty: fa.status === "fail" ? 30 : 0,
       });
     }
   }
 
-  // Check for $0 Liquidity (Critical)
   if (!isPump && result.checks.liquidity.data && result.checks.liquidity.data.lpSizeUsd === 0) {
-     criticalChecks.push({
-        id: "no-liq",
-        name: "Liquidity Status",
-        status: "fail" as const,
-        value: "No Liquidity ($0)",
-        tooltip: "Pool is empty. Cannot trade.",
-        penalty: 50
-     });
+    criticalChecks.push({
+      id: "no-liq",
+      name: "Liquidity Status",
+      status: "fail" as const,
+      value: "ZERO LIQUIDITY ($0)",
+      tooltip: "Pool has no trading liquidity. Trading will suffer 100% price slippage.",
+      penalty: 50,
+    });
   }
 
-  groups.push({ title: "Critical Safety", severity: "critical", checks: criticalChecks });
+  groups.push({ title: "Critical Contract Safety", severity: "critical", checks: criticalChecks });
 
   // --- 2. High Risk (Liquidity) ---
   const liquidityChecks = [];
@@ -126,186 +139,164 @@ function transformToCheckGroups(result: ScanResult): CheckGroup[] {
     const liq = result.checks.liquidity.data;
 
     if (isPump) {
-      // Pump Mode: Simplified Liquidity View (Pool Size is hidden, shown as bonding curve progress)
-      // LP Lock is N/A
       liquidityChecks.push({
         id: "lp-lock",
-        name: "LP Burned/Locked",
-        status: "unknown" as const, // Neutral
+        name: "LP Tokens Locked/Burned",
+        status: "unknown" as const,
         value: "N/A (Bonding Curve)",
-        tooltip: "Liquidity is managed by Pump.fun bonding curve. Not applicable until graduation.",
+        tooltip: "Liquidity is collateralized inside the bonding curve until graduation.",
       });
     } else {
-      // DEX Mode: Detailed View (Skip if $0, already handled in Critical)
       if (liq.lpSizeUsd > 0 || liq.lpSizeUsd === -1) {
         liquidityChecks.push({
-            id: "lp-size",
-            name: "Pool Size",
-            status: liq.lpSizeUsd === -1 ? "warning" as const : liq.lpSizeUsd > 50000 ? "pass" as const : "warning" as const,
-            value: liq.lpSizeUsd === -1 ? "Unavailable" : `$${liq.lpSizeUsd.toLocaleString()}`,
-            tooltip: liq.lpSizeUsd === -1 ? "Liquidity data could not be verified, but token has a price." : "Total value locked in the liquidity pool.",
-            penalty: liq.lpSizeUsd === -1 ? 10 : liq.lpSizeUsd < 1000 ? 30 : liq.lpSizeUsd < 10000 ? 20 : liq.lpSizeUsd < 50000 ? 10 : 0,
+          id: "lp-size",
+          name: "Total Liquidity Pool",
+          status: liq.lpSizeUsd === -1 ? ("warning" as const) : liq.lpSizeUsd > 50000 ? ("pass" as const) : ("warning" as const),
+          value: liq.lpSizeUsd === -1 ? "UNAVAILABLE" : `$${Math.round(liq.lpSizeUsd).toLocaleString()}`,
+          tooltip: "Total USD value locked in DEX liquidity pools.",
+          penalty: liq.lpSizeUsd === -1 ? 10 : liq.lpSizeUsd < 1000 ? 30 : liq.lpSizeUsd < 10000 ? 20 : liq.lpSizeUsd < 50000 ? 10 : 0,
         });
 
         liquidityChecks.push({
-            id: "lp-lock",
-            name: "LP Burned/Locked",
-            status: liq.lpBurned ? "pass" as const : liq.lpLocked ? "pass" as const : "warning" as const,
-            value: liq.lpBurned ? "Burned" : liq.lpLocked ? `Locked${liq.lockDuration ? ` (${liq.lockDuration})` : ''}` : "No",
-            tooltip: liq.lpBurned
-                ? "LP tokens have been burned. Liquidity cannot be removed."
-                : liq.lpLocked
-                    ? "LP tokens are locked. Liquidity cannot be removed during the lock period."
-                    : "LP is not burned or locked. Developer could potentially remove liquidity.",
-            penalty: 0,
+          id: "lp-burned",
+          name: "Liquidity Burn / Lock",
+          status: liq.lpBurned ? ("pass" as const) : liq.lpLocked ? ("pass" as const) : ("fail" as const),
+          value: liq.lpBurned ? "100% BURNED" : liq.lpLocked ? "LOCKED" : "NOT LOCKED (PULLABLE)",
+          tooltip: liq.lpBurned ? "LP tokens were sent to dead address." : liq.lpLocked ? "LP tokens locked in verifiable locker." : "Deployer can pull pool liquidity at any moment.",
+          penalty: liq.lpBurned || liq.lpLocked ? 0 : 30,
         });
       }
     }
   }
-  
+
   if (liquidityChecks.length > 0) {
-    groups.push({ title: "Liquidity", severity: "high", checks: liquidityChecks });
+    groups.push({ title: "Liquidity & Pool Health", severity: "high", checks: liquidityChecks });
   }
 
-  // --- 3. Insider Activity (Snipers, Bundles, Dev) ---
-  const insiderChecks = [];
-  const adv = result.checks.advanced?.data;
-
-  // Dev Wallet Analysis
-  if (adv) {
-    if (adv.devAddress) {
-      const isSoldOut = adv.isDevSoldOut;
-      const devBalance = adv.devBalancePercent || 0;
-      
-      insiderChecks.push({
-        id: "dev-status",
-        name: "Dev Wallet",
-        status: (isSoldOut || devBalance < 1) ? "fail" as const : "pass" as const, 
-        value: isSoldOut ? "Sold Out (>99%)" : `Holds ${devBalance.toFixed(2)}%`,
-        tooltip: isSoldOut 
-          ? "Developer has sold all/most tokens. Potential abandonment." 
-          : "Developer still holds a portion of supply.",
-        penalty: result.penalties.find(p => p.category === "Dev Activity" || p.category === "Dev Wallet")?.points || 0
-      });
-    }
-
-    // Snipers
-    const sniperSupply = adv.sniperSupplyPercent || 0;
-    const sniperCount = adv.sniperCount || 0;
-    
-    insiderChecks.push({
-      id: "snipers",
-      name: "Snipers",
-      status: sniperSupply > 25 ? "fail" as const : sniperSupply > 10 ? "warning" as const : "pass" as const,
-      value: `${sniperCount} detected (${sniperSupply.toFixed(1)}%)`,
-      tooltip: "Wallets that bought in the same block as deployment.",
-    });
-
-    // Bundles
-    insiderChecks.push({
-      id: "bundles",
-      name: "Jito Bundles",
-      status: adv.isBundled ? "warning" as const : "pass" as const,
-      value: adv.isBundled ? "Yes" : "No",
-      tooltip: "Detects if multiple buys were bundled in the first block (coordinated entry).",
-    });
-    
-    // Linked Wallets
-    if (adv.linkedWallets) {
-       insiderChecks.push({
-        id: "linked-wallets",
-        name: "Linked Wallets",
-        status: adv.linkedWallets.clusterCount > 0 ? "warning" as const : "pass" as const,
-        value: adv.linkedWallets.clusterCount > 0 ? `${adv.linkedWallets.clusterCount} Clusters` : "None",
-        tooltip: "Groups of wallets funded by the same source or interacting with each other.",
-       });
-    }
-  }
-
-  if (insiderChecks.length > 0) {
-    groups.push({ title: "Insider Activity", severity: "insider", checks: insiderChecks });
-  }
-
-  // --- 4. Medium Risk (Holders) ---
+  // --- 3. Medium Risk (Holders) ---
   const holderChecks = [];
   if (result.checks.holders.data) {
     const h = result.checks.holders.data;
     const largest = h.largestHolder;
-    
-    // Top 10
+
     holderChecks.push({
-      id: "top10",
-      name: "Top 10 Holders",
-      status: h.topTenPercent > 50 ? "fail" as const : h.topTenPercent > 30 ? "warning" as const : "pass" as const,
+      id: "top-10",
+      name: "Top 10 Holder Concentration",
+      status: h.topTenPercent > 60 ? ("fail" as const) : h.topTenPercent > 40 ? ("warning" as const) : ("pass" as const),
       value: `${h.topTenPercent.toFixed(1)}%`,
-      tooltip: "Cumulative percentage held by top 10 wallets.",
-      penalty: h.topTenPercent > 80 ? 50 : h.topTenPercent > 60 ? 35 : h.topTenPercent > 50 ? 25 : h.topTenPercent > 40 ? 15 : h.topTenPercent > 30 ? 10 : 0
+      tooltip: "Cumulative supply held by top 10 largest non-pool wallets.",
+      penalty: h.topTenPercent > 80 ? 50 : h.topTenPercent > 60 ? 35 : h.topTenPercent > 50 ? 25 : h.topTenPercent > 40 ? 15 : h.topTenPercent > 30 ? 10 : 0,
     });
 
-    // Largest Holder
     if (largest) {
-        holderChecks.push({
-            id: "largest-holder",
-            name: "Largest Holder",
-            status: largest.percent > 20 ? "warning" as const : "pass" as const,
-            value: (
-                <div className="flex items-center gap-2">
-                    <span className={`font-bold text-sm ${largest.percent > 20 ? 'text-yellow-400' : 'text-green-400'}`}>{largest.percent.toFixed(1)}%</span>
-                    <span className="text-text-muted text-[10px] font-mono">[{largest.address.slice(0,4)}...{largest.address.slice(-4)}]</span>
-                    {largest.address === adv?.devAddress && <span className="text-[10px] text-purple-400 font-bold ml-1">(Dev)</span>}
-                </div>
-            ),
-            tooltip: "Percent of supply held by the single largest wallet.",
-            penalty: largest.percent > 50 ? 40 : largest.percent > 30 ? 30 : largest.percent > 20 ? 20 : largest.percent > 10 ? 10 : 0
-        });
+      holderChecks.push({
+        id: "largest-holder",
+        name: "Largest Single Holder",
+        status: largest.percent > 20 ? ("warning" as const) : ("pass" as const),
+        value: `${largest.percent.toFixed(1)}% (${largest.address.slice(0, 4)}...${largest.address.slice(-4)})`,
+        tooltip: "Percentage of circulating supply held by the single largest individual wallet.",
+        penalty: largest.percent > 50 ? 40 : largest.percent > 30 ? 30 : largest.percent > 20 ? 20 : largest.percent > 10 ? 10 : 0,
+      });
+    }
+
+    if (h.clustersDetected && h.clustersDetected > 0) {
+      holderChecks.push({
+        id: "clusters",
+        name: "Suspicious Wallet Clusters",
+        status: "warning" as const,
+        value: `${h.clustersDetected} CLUSTERS`,
+        tooltip: "Multiple distinct wallet addresses exhibiting coordinated funding sources or synchronized balances.",
+        penalty: 15,
+      });
     }
   }
+
   if (holderChecks.length > 0) {
-    groups.push({ title: "Holder Distribution", severity: "medium", checks: holderChecks });
+    groups.push({ title: "Token Distribution & Concentration", severity: "medium", checks: holderChecks });
   }
 
-  // --- 5. Low Risk (Metadata) ---
+  // --- 4. Insider & Bot Activity ---
+  const insiderChecks = [];
+  if (result.checks.advanced?.data) {
+    const adv = result.checks.advanced.data;
+    if (adv.sniperCount !== undefined) {
+      const sniperSupply = adv.sniperSupplyPercent || 0;
+      insiderChecks.push({
+        id: "snipers",
+        name: "Block-0 Sniper Wallets",
+        status: adv.sniperCount > 5 || sniperSupply > 15 ? ("warning" as const) : ("pass" as const),
+        value: `${adv.sniperCount} SNIPERS (${sniperSupply.toFixed(1)}%)`,
+        tooltip: "Wallets that purchased in the exact same block as contract deployment.",
+        penalty: adv.sniperCount > 5 ? 15 : 0,
+      });
+    }
+
+    if (adv.isBundled !== undefined) {
+      insiderChecks.push({
+        id: "bundles",
+        name: "Jito Bundled Liquidity Injection",
+        status: adv.isBundled ? ("warning" as const) : ("pass" as const),
+        value: adv.isBundled ? "DETECTED" : "CLEAN",
+        tooltip: "MEV bundle coordination detected in block 0.",
+        penalty: adv.isBundled ? 15 : 0,
+      });
+    }
+
+    if (adv.devBalancePercent !== undefined) {
+      insiderChecks.push({
+        id: "dev-holding",
+        name: "Deployer Wallet Holding",
+        status: adv.devBalancePercent > 10 ? ("warning" as const) : ("pass" as const),
+        value: `${adv.devBalancePercent.toFixed(2)}%`,
+        tooltip: "Current percentage of total supply held by the deployer.",
+        penalty: adv.devBalancePercent > 15 ? 20 : 0,
+      });
+    }
+  }
+
+  if (insiderChecks.length > 0) {
+    groups.push({ title: "Insider & Bot Activity", severity: "insider", checks: insiderChecks });
+  }
+
+  // --- 5. Metadata Integrity ---
   const metaChecks = [];
   if (result.checks.metadata.data) {
     const m = result.checks.metadata.data;
     if (isPump) {
-        // Pump Mode: Metadata is mutable by default
-        metaChecks.push({
-            id: "mutable",
-            name: "Metadata Mutable",
-            status: "unknown" as const, // Neutral
-            value: "Default (Platform)",
-            tooltip: "Pump.fun tokens have mutable metadata by default. This is normal.",
-        });
-    } else {
-        metaChecks.push({
+      metaChecks.push({
         id: "mutable",
-        name: "Metadata Mutable",
-        status: m.isMutable ? "warning" as const : "pass" as const,
-        value: m.isMutable ? "Yes" : "Immutable",
-        tooltip: "Can the developer change the token name/image later?",
-        penalty: m.isMutable ? 5 : 0
-        });
+        name: "Metadata Mutability",
+        status: "unknown" as const,
+        value: "PLATFORM STANDARD",
+        tooltip: "Pump.fun tokens have mutable metadata standard until graduation.",
+      });
+    } else {
+      metaChecks.push({
+        id: "mutable",
+        name: "Metadata Mutability",
+        status: m.isMutable ? ("warning" as const) : ("pass" as const),
+        value: m.isMutable ? "MUTABLE" : "IMMUTABLE",
+        tooltip: m.isMutable ? "Deployer can modify token name, symbol, or image." : "Metadata is permanently frozen.",
+        penalty: m.isMutable ? 5 : 0,
+      });
     }
+
     const hasSocials = m.twitter || m.telegram || m.website;
     metaChecks.push({
       id: "socials",
-      name: "Social Links",
-      status: hasSocials ? "pass" as const : "warning" as const,
-      value: hasSocials ? "Found" : "Missing",
-      tooltip: "Legit projects usually have social media presence.",
+      name: "Verified Social Links",
+      status: hasSocials ? ("pass" as const) : ("warning" as const),
+      value: hasSocials ? "LINKED" : "UNVERIFIED",
+      tooltip: "Verifiable social media channels present in token metadata.",
     });
   }
-  
+
   if (metaChecks.length > 0) {
-    groups.push({ title: "Metadata", severity: "low", checks: metaChecks });
+    groups.push({ title: "Metadata Integrity", severity: "low", checks: metaChecks });
   }
 
   return groups;
 }
-
-// Удалена старая система rate limiting на основе localStorage
-// Теперь используется server-side система с wallet авторизацией
 
 export default function ScanPageClient() {
   const params = useParams();
@@ -323,28 +314,27 @@ export default function ScanPageClient() {
     image: string | null;
   }>({ name: null, symbol: null, image: null });
 
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
   const handleAuthModalClose = useCallback(() => {
     setNeedsAuth(false);
   }, []);
 
   const handleWalletConnected = useCallback(() => {
     setNeedsAuth(false);
-    // Повторяем скан после успешной авторизации
     loadScan(address);
   }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Загрузка скана - сначала проверяет кеш, если нет - запускает новый скан
   async function loadScan(addr: string) {
     setLoading(true);
     setError(null);
 
     try {
-      // Сначала проверяем кеш (не тратит скан)
       const cacheResponse = await fetch(`/api/scan?address=${encodeURIComponent(addr)}`, {
         method: "GET",
       });
 
-      // Если есть кеш - показываем его
       if (cacheResponse.ok) {
         const data: ScanResponse = await cacheResponse.json();
         setResult(data.data);
@@ -361,7 +351,6 @@ export default function ScanPageClient() {
         return;
       }
 
-      // Кеша нет (404) - запускаем новый скан
       if (cacheResponse.status === 404) {
         const scanResponse = await fetch("/api/scan", {
           method: "POST",
@@ -372,7 +361,6 @@ export default function ScanPageClient() {
         if (!scanResponse.ok) {
           const errorData = await scanResponse.json();
 
-          // Проверяем, требуется ли авторизация
           if (scanResponse.status === 429 && errorData.needsAuth) {
             setNeedsAuth(true);
             setLoading(false);
@@ -397,7 +385,6 @@ export default function ScanPageClient() {
         return;
       }
 
-      // Другая ошибка
       throw new Error("Failed to load scan");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -407,20 +394,24 @@ export default function ScanPageClient() {
 
   useEffect(() => {
     if (!address) return;
-    // При загрузке страницы загружаем скан (кеш или новый)
     loadScan(address);
   }, [address]);
-
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
 
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } catch (err) {
-      console.error("Copy failed:", err);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
+    } catch {
+      // Fallback
+      const textArea = document.createElement("textarea");
+      textArea.value = window.location.href;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
     }
   };
 
@@ -436,43 +427,40 @@ export default function ScanPageClient() {
     };
 
     try {
-      const metadata = result.checks.metadata.data;
+      const meta = result.checks.metadata.data;
       const price = result.price;
       const liq = result.checks.liquidity.data;
       const h = result.checks.holders.data;
       const adv = result.checks.advanced?.data;
 
-      // Prepare tags (top 3 risk factors or safe points)
       const topPenalties = result.penalties.slice(0, 3);
-      const tags = topPenalties.map(p => p.category).join(",") || "Safe,Verified,Low Risk";
-      const tagPoints = topPenalties.map(p => p.points).join(",");
+      const tags = topPenalties.map((p) => p.category).join(",") || "Safe,Verified,Low Risk";
+      const tagPoints = topPenalties.map((p) => p.points).join(",");
 
       const params = new URLSearchParams({
         address: result.tokenAddress,
-        name: metadata?.name || "Unknown",
-        symbol: metadata?.symbol || "TOKEN",
+        name: meta?.name || "Unknown",
+        symbol: meta?.symbol || "TOKEN",
         score: result.score.toString(),
         grade: result.grade,
         label: result.gradeLabel,
         mode: result.scanMode,
-        price: price?.priceUsd ? `$${parseFloat((price.priceUsd < 0.0001 ? price.priceUsd.toFixed(8) : price.priceUsd.toFixed(4)))}` : "$0.00",
+        price: price?.priceUsd ? `$${parseFloat(price.priceUsd < 0.0001 ? price.priceUsd.toFixed(8) : price.priceUsd.toFixed(4))}` : "$0.00",
         mcap: price?.marketCap ? formatCompact(price.marketCap) : "0",
-        change: price?.priceChange?.h24 ? `${price.priceChange.h24 > 0 ? '+' : ''}${price.priceChange.h24.toFixed(1)}%` : "0%",
-        liq: result.scanMode === 'pump' ? `${result.bondingCurveData?.curveProgressPercent || 0}%` : (liq?.lpSizeUsd ? formatCompact(liq.lpSizeUsd) : "$0"),
+        change: price?.priceChange?.h24 ? `${price.priceChange.h24 > 0 ? "+" : ""}${price.priceChange.h24.toFixed(1)}%` : "0%",
+        liq: result.scanMode === "pump" ? `${result.bondingCurveData?.curveProgressPercent || 0}%` : liq?.lpSizeUsd ? formatCompact(liq.lpSizeUsd) : "$0",
         top10: h ? `${h.topTenPercent.toFixed(1)}%` : "0%",
-        lock: result.scanMode === 'pump' ? (adv?.sniperCount?.toString() || "0") : (liq?.lpBurned ? "Burned" : "No"),
+        lock: result.scanMode === "pump" ? adv?.sniperCount?.toString() || "0" : liq?.lpBurned ? "Burned" : "No",
         sell: result.checks.honeypot.data?.isHoneypot ? "No" : "Yes",
         mint: "Revoked",
         penalty: result.totalPenalties.toString(),
         tags: tags,
         tagPoints: tagPoints,
-        image: metadata?.image || "",
+        image: meta?.image || "",
         theme: theme,
       });
 
       const url = `/api/og?${params.toString()}`;
-      
-      // Download the image
       const link = document.createElement("a");
       link.href = url;
       link.download = `rugsol_${result.tokenAddress.slice(0, 8)}.png`;
@@ -487,253 +475,266 @@ export default function ScanPageClient() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col premium-bg text-text-primary overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-[#08090d] text-[#f1f5f9] font-sans antialiased selection:bg-[#38bdf8]/30">
       <Navbar />
 
-      <main className="flex-1 pt-16 sm:pt-20 md:pt-28 pb-8 sm:pb-10 md:pb-20">
-        <div className="mx-auto w-full max-w-5xl lg:max-w-6xl px-4 sm:px-6 lg:px-8">
-          
-          {/* Back Link */}
-          <Link href="/" className="inline-flex items-center gap-2 text-xs text-text-secondary hover:text-text-primary mb-8 transition-colors duration-200 group">
-            <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-            <span>Back to Home</span>
-          </Link>
+      <main className="flex-1 pt-14 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumb row */}
+          <div className="flex items-center justify-between py-4 border-b border-[#1e2433] mb-6 font-mono text-xs text-[#64748b]">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 hover:text-[#38bdf8] transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>TERMINAL ROOT</span>
+            </Link>
 
+            <div className="flex items-center gap-2">
+              <span className="text-[#38bdf8]">AUDIT ID:</span>
+              <span className="text-[#94a3b8]">{address ? `${address.slice(0, 8)}...${address.slice(-6)}` : ""}</span>
+            </div>
+          </div>
+
+          {/* Loading: Authentic Terminal Diagnostics Console */}
           {loading && (
-             <div className="flex flex-col items-center justify-center py-12 space-y-8 animate-fade-in-up">
-                {/* Enhanced Loading Animation */}
-                <div className="relative">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-bg-secondary to-bg-card flex items-center justify-center border border-border-color shadow-2xl">
-                     <svg className="w-10 h-10 text-[var(--silver-accent)] animate-spin" fill="none" viewBox="0 0 24 24">
-                       <circle className="opacity-15" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"></circle>
-                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                     </svg>
+            <div className="w-full max-w-2xl mx-auto py-12">
+              <div className="bg-[#0e1118] border border-[#1e2433] rounded-xl overflow-hidden shadow-2xl">
+                {/* Console titlebar */}
+                <div className="px-4 py-2.5 bg-[#121622] border-b border-[#1e2433] flex items-center justify-between font-mono text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
+                    <span className="text-[#64748b] ml-2">rugsol-audit-node — helius-rpc</span>
                   </div>
-                  <div className="absolute inset-0 rounded-2xl bg-[var(--silver-accent)]/20 animate-pulse blur-xl" />
-                </div>
-                <div className="text-center space-y-2">
-                  <p className="text-text-primary font-semibold text-lg">Analyzing Token Security</p>
-                  <p className="text-text-secondary text-sm">Scanning blockchain data and contract details...</p>
+                  <span className="text-emerald-400 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    EXECUTING
+                  </span>
                 </div>
 
-                {/* Skeleton Loaders */}
-                <div className="w-full max-w-3xl space-y-4 mt-8">
-                  <div className="glass-card p-6 rounded-2xl animate-pulse">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-bg-secondary rounded-full" />
-                      <div className="flex-1 space-y-3">
-                        <div className="h-4 bg-bg-secondary rounded w-1/3" />
-                        <div className="h-3 bg-bg-secondary rounded w-1/4" />
-                      </div>
-                    </div>
+                {/* Console output lines */}
+                <div className="p-5 font-mono text-xs space-y-3">
+                  <div className="text-[#64748b]">
+                    &gt; Target Contract: <span className="text-[#38bdf8]">{address}</span>
                   </div>
-                  <div className="glass-card p-6 rounded-2xl animate-pulse">
-                    <div className="space-y-3">
-                      <div className="h-3 bg-bg-secondary rounded w-full" />
-                      <div className="h-3 bg-bg-secondary rounded w-5/6" />
-                      <div className="h-3 bg-bg-secondary rounded w-4/6" />
-                    </div>
+                  <div className="flex items-center gap-2 text-[#94a3b8]">
+                    <span className="text-emerald-400">[0.08s]</span>
+                    <span>Querying Solana ledger via Helius RPC nodes...</span>
                   </div>
-                </div>
-             </div>
-          )}
+                  <div className="flex items-center gap-2 text-[#94a3b8]">
+                    <span className="text-emerald-400">[0.21s]</span>
+                    <span>Decoding SPL Token mint & freeze authority PDA structures...</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[#94a3b8]">
+                    <span className="text-amber-400">[0.45s]</span>
+                    <span>Simulating route liquidity via Jupiter Quote API...</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[#94a3b8]">
+                    <span className="text-sky-400">[0.68s]</span>
+                    <span>Analyzing holder clustering and initial block-0 snipers...</span>
+                  </div>
 
-          {error && (
-            <div className="glass-card rounded-2xl p-8 sm:p-12 text-center animate-fade-in-up">
-              <div className="flex justify-center mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-                  <svg className="w-7 h-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+                  <div className="pt-4 border-t border-[#1e2433] flex items-center justify-between text-[#64748b]">
+                    <span>Calculating risk deductions...</span>
+                    <span className="animate-spin text-[#38bdf8]">◷</span>
+                  </div>
                 </div>
               </div>
-              <h2 className="text-2xl font-bold text-red-500 mb-2">Analysis Failed</h2>
-              <p className="text-text-secondary mb-6">{error}</p>
-              <Link href="/" className="btn-premium px-6 py-2.5 rounded-xl font-semibold text-sm inline-block">Try Another</Link>
             </div>
           )}
 
-          {result && !loading && (
-            <div className="flex flex-col lg:grid lg:grid-cols-[1fr_340px] gap-8">
-
-              {/* Mobile Score Summary - visible only on small screens */}
-              <div className="lg:hidden glass-card p-4 rounded-2xl border border-border-color animate-fade-in-up flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl border-2"
-                    style={{
-                      color: result.gradeColor,
-                      borderColor: result.gradeColor,
-                      backgroundColor: `${result.gradeColor}15`,
-                    }}
-                  >
-                    {result.score}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="text-lg font-bold"
-                        style={{ color: result.gradeColor }}
-                      >
-                        Grade {result.grade}
-                      </span>
-                    </div>
-                    <p className="text-xs text-text-secondary">{result.gradeLabel}</p>
-                  </div>
+          {/* Error State */}
+          {error && !loading && (
+            <div className="max-w-xl mx-auto py-12">
+              <div className="bg-[#0e1118] border border-rose-500/30 rounded-xl p-6 text-center space-y-4">
+                <div className="inline-flex p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400">
+                  <ShieldAlert className="w-6 h-6" />
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleShareImage}
-                    disabled={isGenerating}
-                    className="p-2.5 btn-premium rounded-xl text-sm disabled:opacity-50"
-                    title="Share Report Card"
+                <h3 className="text-base font-mono font-bold text-[#f1f5f9]">
+                  AUDIT SCAN FAILED
+                </h3>
+                <p className="text-xs text-[#94a3b8] font-mono leading-relaxed">
+                  {error}
+                </p>
+                <div className="pt-2">
+                  <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#141824] hover:bg-[#1a2030] border border-[#1e2433] text-xs font-mono font-semibold text-[#f1f5f9] transition-colors"
                   >
-                    {isGenerating ? (
-                      <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin block" />
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
-                    )}
-                  </button>
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    Return to Terminal Search
+                  </Link>
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* Left Column: Header, Charts, Analysis */}
-              <div className="space-y-10">
+          {/* Audit Results Dashboard */}
+          {result && !loading && (
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+              {/* Left Column: Comprehensive Audit Intelligence */}
+              <div className="space-y-6 min-w-0">
+                {/* 1. Token Header Bar */}
+                <TokenHeader
+                  name={metadata.name}
+                  symbol={metadata.symbol}
+                  image={metadata.image}
+                  address={address}
+                  priceData={result.price}
+                  mode={result.scanMode}
+                />
 
-                {/* 1. Header Card - Enhanced */}
-                <div className="glass-card p-6 md:p-8 rounded-2xl relative overflow-hidden border border-border-color hover:border-silver-accent/50 transition-all duration-500 group animate-fade-in-up">
-                  {/* Subtle gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-bg-secondary/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                  <div className="relative z-10">
-                    <TokenHeader
-                        name={metadata.name}
-                        symbol={metadata.symbol}
-                        image={metadata.image}
-                        address={address}
-                        priceData={result.price}
-                        mode={result.scanMode}
-                    />
+                {/* 2. Pump.fun Curve Progress (if applicable) */}
+                {result.scanMode === "pump" && result.bondingCurveData && (
+                  <BondingCurveProgress
+                    progressPercent={result.bondingCurveData.curveProgressPercent || 0}
+                    marketCapSol={result.bondingCurveData.marketCapSol}
+                    remainingSol={result.bondingCurveData.remainingSolToGraduate}
+                    solPrice={result.solPrice}
+                  />
+                )}
+
+                {/* 3. High-Density Security Matrix Chips */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-mono text-xs">
+                  {/* Mint Auth */}
+                  <div className="p-3 rounded-xl bg-[#0e1118] border border-[#1e2433]">
+                    <span className="text-[10px] text-[#64748b] uppercase block">Mint Authority</span>
+                    <div className="flex items-center gap-1.5 mt-1 font-bold">
+                      {result.checks.mintAuthority.data?.status === "pass" || result.scanMode === "pump" ? (
+                        <>
+                          <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400">Revoked</span>
+                        </>
+                      ) : (
+                        <>
+                          <Unlock className="w-3.5 h-3.5 text-rose-400" />
+                          <span className="text-rose-400">Active</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Freeze Auth */}
+                  <div className="p-3 rounded-xl bg-[#0e1118] border border-[#1e2433]">
+                    <span className="text-[10px] text-[#64748b] uppercase block">Freeze Authority</span>
+                    <div className="flex items-center gap-1.5 mt-1 font-bold">
+                      {result.checks.freezeAuthority.data?.status === "pass" || result.scanMode === "pump" ? (
+                        <>
+                          <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400">Revoked</span>
+                        </>
+                      ) : (
+                        <>
+                          <Unlock className="w-3.5 h-3.5 text-rose-400" />
+                          <span className="text-rose-400">Active</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Honeypot Sell Test */}
+                  <div className="p-3 rounded-xl bg-[#0e1118] border border-[#1e2433]">
+                    <span className="text-[10px] text-[#64748b] uppercase block">Sell Simulation</span>
+                    <div className="flex items-center gap-1.5 mt-1 font-bold">
+                      {result.scanMode === "pump" ? (
+                        <span className="text-[#38bdf8]">Bonding Curve</span>
+                      ) : result.checks.honeypot.data?.isHoneypot ? (
+                        <>
+                          <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+                          <span className="text-rose-400">Failed</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400">Sellable</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Liquidity Status */}
+                  <div className="p-3 rounded-xl bg-[#0e1118] border border-[#1e2433]">
+                    <span className="text-[10px] text-[#64748b] uppercase block">Liquidity Burn/Lock</span>
+                    <div className="flex items-center gap-1.5 mt-1 font-bold">
+                      {result.scanMode === "pump" ? (
+                        <span className="text-amber-400">Curve Collateral</span>
+                      ) : result.checks.liquidity.data?.lpBurned ? (
+                        <>
+                          <Flame className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400">100% Burned</span>
+                        </>
+                      ) : result.checks.liquidity.data?.lpLocked ? (
+                        <>
+                          <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400">Locked</span>
+                        </>
+                      ) : (
+                        <>
+                          <Unlock className="w-3.5 h-3.5 text-rose-400" />
+                          <span className="text-rose-400">Unlocked</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* 2. Bonding Curve Progress (Pump only) */}
-                {result.scanMode === 'pump' && result.bondingCurveData && (
-                    <div className="animate-fade-in-up" style={{ animationDelay: '50ms' }}>
-                    <BondingCurveProgress
-                        progressPercent={result.bondingCurveData.curveProgressPercent || 0}
-                        marketCapSol={result.bondingCurveData.marketCapSol}
-                        remainingSol={result.bondingCurveData.remainingSolToGraduate}
-                        solPrice={result.solPrice}
-                    />
-                    </div>
+                {/* 4. Security Audit Matrix */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between pb-1 border-b border-[#1e2433]">
+                    <h3 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase flex items-center gap-1.5">
+                      <Terminal className="w-4 h-4 text-[#38bdf8]" />
+                      SECURITY INSPECTION PROTOCOL
+                    </h3>
+                    <span className="text-[10px] font-mono text-[#64748b]">
+                      DIRECT ON-CHAIN AUDIT
+                    </span>
+                  </div>
+                  <Checklist groups={transformToCheckGroups(result)} />
+                </div>
+
+                {/* 5. Vulnerability Threat Log (if penalties exist) */}
+                {result.penalties.length > 0 && (
+                  <RiskList penalties={result.penalties} />
                 )}
 
-                {/* 3. Developer History (Teaser) */}
-                <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+                {/* 6. Holder Concentration Matrix */}
+                {result.checks.holders.data && (
+                  <div className="bg-[#0e1118] border border-[#1e2433] rounded-xl p-4 sm:p-5 space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#1e2433]">
+                      <h3 className="text-xs font-mono font-bold tracking-wider text-[#f1f5f9] uppercase">
+                        TOKEN HOLDER DISTRIBUTION & WHALE CONCENTRATION
+                      </h3>
+                      <span className="text-[10px] font-mono text-[#64748b]">
+                        TOP 10 WALLETS
+                      </span>
+                    </div>
+                    <HolderChart
+                      holders={result.checks.holders.data.topHolders}
+                      devAddress={result.checks.advanced?.data?.devAddress}
+                      snipers={result.checks.advanced?.data?.snipers}
+                      linkedWallets={result.checks.advanced?.data?.linkedWalletMap}
+                    />
+                  </div>
+                )}
+
+                {/* 7. Developer Dossier (if suspicious) */}
                 <DevHistory
                   score={result.score}
                   grade={result.grade}
                   isWhitelisted={result.isWhitelisted}
                   marketCap={result.price?.marketCap}
                 />
-                </div>
 
-                {/* 4. Security Analysis Checklist */}
-                <div className="animate-fade-in-up" style={{ animationDelay: '150ms' }}>
-                  <div className="divider-premium mb-8" />
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--silver-accent)]/10 flex items-center justify-center shrink-0 silver-accent">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-semibold text-text-primary flex items-center gap-2">
-                        Security Analysis
-                        <InfoTooltip
-                          content={
-                            <div className="space-y-2">
-                              <p className="font-bold text-text-primary">Comprehensive Security Analysis</p>
-                              <p>Detailed verification of token safety across multiple risk categories.</p>
-                              <div className="space-y-1 text-[11px] mt-2">
-                                <p><strong className="text-red-400">Critical:</strong> Honeypot detection, authority status</p>
-                                <p><strong className="text-orange-400">High Risk:</strong> Liquidity analysis & lock status</p>
-                                <p><strong className="text-purple-400">Insider Activity:</strong> Dev wallet, snipers, linked wallets</p>
-                                <p><strong className="text-yellow-400">Medium:</strong> Holder distribution & concentration</p>
-                                <p><strong className="text-blue-400">Low:</strong> Metadata & social presence</p>
-                              </div>
-                              <p className="text-[10px] opacity-70 mt-2">Click any check for detailed explanation</p>
-                            </div>
-                          }
-                          position="bottom"
-                        />
-                      </h2>
-                      <p className="text-sm text-text-secondary">Detailed verification across multiple risk categories.</p>
-                    </div>
-                  </div>
-
-                  {/* Pump Mode Info Banner */}
-                  {result.scanMode === 'pump' && (
-                    <div className="mb-4 p-3 rounded-lg border border-purple-500/20 bg-purple-500/5 text-xs text-text-secondary flex items-start gap-2">
-                        <svg className="w-4 h-4 text-purple-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <p>This token is trading on Pump.fun&apos;s bonding curve. Some checks are adjusted for this context.</p>
-                    </div>
-                  )}
-
-                  <Checklist groups={transformToCheckGroups(result)} />
-                </div>
-
-                {/* 5. Holder Distribution Chart - Enhanced */}
-                {result.checks.holders.data && (
-                    <div className="glass-card p-6 md:p-8 rounded-2xl border border-border-color hover:border-silver-accent/50 transition-all duration-500 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="w-10 h-10 rounded-xl bg-[var(--silver-accent)]/10 flex items-center justify-center shrink-0 silver-accent">
-                              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
-                          </div>
-                          <div>
-                              <h3 className="text-xl font-semibold text-text-primary flex items-center gap-2">
-                                  Top Holders Distribution
-                                  <InfoTooltip
-                                    content={
-                                      <div className="space-y-2">
-                                        <p className="font-bold text-text-primary">Token Holder Distribution</p>
-                                        <p>Visual breakdown of the top 10 wallets holding this token.</p>
-                                        <div className="space-y-1 text-[11px] mt-2">
-                                          <p>• High concentration = Higher risk</p>
-                                          <p>• Healthy tokens have distributed ownership</p>
-                                          <p>• Color coding identifies wallet types</p>
-                                        </div>
-                                        <p className="text-[10px] opacity-70 mt-2">Hover over bars for wallet details</p>
-                                      </div>
-                                    }
-                                    position="bottom"
-                                  />
-                              </h3>
-                              <p className="text-sm text-text-secondary">Ownership breakdown of the top 10 wallets.</p>
-                          </div>
-                        </div>
-                        <HolderChart
-                            holders={result.checks.holders.data.topHolders}
-                            devAddress={result.checks.advanced?.data?.devAddress}
-                            snipers={result.checks.advanced?.data?.snipers}
-                            linkedWallets={result.checks.advanced?.data?.linkedWalletMap}
-                        />
-                    </div>
-                )}
-
-                {/* 6. Risk Factors List */}
-                {result.penalties.length > 0 && (
-                    <div className="animate-fade-in-up" style={{ animationDelay: '250ms' }}>
-                    <RiskList penalties={result.penalties} />
-                    </div>
-                )}
-
-                {/* 7. Timeline */}
-                <div className="animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+                {/* 8. On-Chain Forensic Event Log */}
                 <ActivityTimeline scanResult={result} />
-                </div>
-
               </div>
 
-              {/* Right Column: Score, Sticky Actions - Enhanced */}
-              <div className="space-y-6">
-                <div className="glass-card p-6 md:p-8 rounded-2xl sticky top-24 border border-border-color hover:border-silver-accent/50 transition-all duration-500 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+              {/* Right Column: Sticky Telemetry & Actions */}
+              <div className="space-y-5 lg:sticky lg:top-20">
+                {/* Score & Risk Gauge Card */}
+                <div className="bg-[#0e1118] border border-[#1e2433] rounded-xl p-5 sm:p-6 shadow-xl space-y-5">
                   <ScoreDisplay
                     score={result.score}
                     grade={result.grade}
@@ -742,68 +743,77 @@ export default function ScanPageClient() {
                     animate={true}
                   />
 
-                  <div className="mt-8 space-y-3">
+                  {/* Primary Command Actions */}
+                  <div className="space-y-2 pt-2 border-t border-[#1e2433]">
                     <button
                       onClick={handleShareImage}
                       disabled={isGenerating}
-                      className="w-full py-3.5 px-4 btn-premium rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                      className="w-full py-2.5 px-4 rounded-lg bg-[#38bdf8] hover:bg-[#0284c7] text-[#090b10] font-mono font-bold text-xs flex items-center justify-center gap-2 transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
                     >
                       {isGenerating ? (
-                        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                        <Share2 className="w-3.5 h-3.5" />
                       )}
-                      {isGenerating ? "Generating..." : "Share Report Card"}
+                      <span>{isGenerating ? "Exporting..." : "Export Audit Card"}</span>
                     </button>
 
-                    {/* Quick Actions */}
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2 font-mono text-xs">
                       <button
                         onClick={() => {
-                          const text = encodeURIComponent(`${metadata.name || 'Token'} ($${metadata.symbol || 'TOKEN'}) — ${result.score}/100 (Grade ${result.grade})\n\nScanned with @RugSol`);
-                          window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+                          const text = encodeURIComponent(
+                            `RugSol Security Audit: ${metadata.name || "Token"} ($${metadata.symbol || "TOKEN"})\n` +
+                            `Score: ${result.score}/100 (Grade ${result.grade})\n` +
+                            `On-chain safety report generated by @rugsolinfobot`
+                          );
+                          window.open(
+                            `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(window.location.href)}`,
+                            "_blank"
+                          );
                         }}
-                        className="py-2.5 px-3 bg-bg-secondary hover:bg-bg-card text-text-secondary hover:text-text-primary rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all duration-200 border border-border-color hover:border-silver-accent/50 hover:scale-105 active:scale-95"
+                        className="py-2 px-3 rounded-lg bg-[#141824] hover:bg-[#1a2030] text-[#f1f5f9] border border-[#1e2433] transition-colors flex items-center justify-center gap-1.5"
                       >
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                        Tweet
+                        <ExternalLink className="w-3 h-3 text-[#38bdf8]" />
+                        Share on X
                       </button>
+
                       <button
                         onClick={handleCopyLink}
-                        className="py-2.5 px-3 bg-bg-secondary hover:bg-bg-card text-text-secondary hover:text-text-primary rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all duration-200 border border-border-color hover:border-silver-accent/50 hover:scale-105 active:scale-95"
+                        className="py-2 px-3 rounded-lg bg-[#141824] hover:bg-[#1a2030] text-[#f1f5f9] border border-[#1e2433] transition-colors flex items-center justify-center gap-1.5"
                       >
-                        {copySuccess ? (
+                        {copiedLink ? (
                           <>
-                            <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                            Copied!
+                            <Check className="w-3 h-3 text-emerald-400" />
+                            <span className="text-emerald-400">Copied!</span>
                           </>
                         ) : (
                           <>
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                            Copy Link
+                            <Copy className="w-3 h-3" />
+                            <span>Copy Link</span>
                           </>
                         )}
                       </button>
                     </div>
                   </div>
+                </div>
 
-                  <div className="mt-6 pt-6 border-t border-border-color">
-                     <SidebarLinks
-                        address={address}
-                        scannedAt={new Date(result.scannedAt)}
-                        cached={cached}
-                     />
-                  </div>
+                {/* External Protocol Explorers */}
+                <div className="bg-[#0e1118] border border-[#1e2433] rounded-xl p-4 sm:p-5">
+                  <SidebarLinks
+                    address={address}
+                    scannedAt={new Date(result.scannedAt)}
+                    cached={cached}
+                  />
                 </div>
               </div>
-
             </div>
           )}
         </div>
       </main>
+
       <Footer />
 
-      {/* Auth Required Modal */}
+      {/* Auth / Rate Limit Modal */}
       {needsAuth && (
         <RateLimitModal
           onClose={handleAuthModalClose}

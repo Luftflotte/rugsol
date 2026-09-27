@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Check, ExternalLink } from "lucide-react";
+import { Copy, Check, ExternalLink, ShieldCheck, Flame, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface TokenPrice {
@@ -30,7 +30,6 @@ export function TokenHeader({ name, symbol, image, address, priceData, mode }: T
     try {
       await navigator.clipboard.writeText(address);
     } catch {
-      // Fallback for environments where clipboard API is blocked
       const textArea = document.createElement("textarea");
       textArea.value = address;
       textArea.style.position = "fixed";
@@ -44,134 +43,147 @@ export function TokenHeader({ name, symbol, image, address, priceData, mode }: T
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const formatUsd = (num: number) => {
+    if (num < 0.000001) return `$${num.toExponential(4)}`;
+    if (num < 0.01) return `$${num.toFixed(8).replace(/0+$/, "").replace(/\.$/, "")}`;
+    if (num < 1) return `$${num.toFixed(4)}`;
+    return `$${num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
+  };
+
+  const formatCompact = (num: number) => {
+    if (num >= 1_000_000_000) return `$${(num / 1_000_000_000).toFixed(2)}B`;
+    if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(2)}M`;
+    if (num >= 1_000) return `$${(num / 1_000).toFixed(1)}K`;
+    return `$${Math.round(num).toLocaleString()}`;
+  };
+
+  const h24 = priceData?.priceChange?.h24 ?? 0;
+  const isPositive = h24 >= 0;
+
   return (
-    <div className="flex flex-col gap-5 w-full">
-      {/* Top row: token identity + price */}
-      <div className="flex items-start justify-between gap-4">
-        {/* Left: Image + Name */}
-        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-          {/* Token Image */}
+    <div className="w-full bg-[#0e1118] border border-[#1e2433] rounded-xl p-4 sm:p-5">
+      {/* Top row: identity + quick links + price */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Token Info */}
+        <div className="flex items-center gap-3.5 min-w-0">
           {image ? (
             <img
               src={image}
               alt={symbol || "Token"}
-              className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-bg-secondary object-cover shadow-lg ring-1 ring-black/20 shrink-0"
+              className="w-12 h-12 rounded-lg bg-[#141824] border border-[#1e2433] object-cover shrink-0"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = "none";
               }}
             />
           ) : (
-            <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-bg-secondary border border-border-color flex items-center justify-center shadow-md shrink-0">
-              <span className="text-base sm:text-lg md:text-xl font-bold text-text-primary">
-                {symbol?.slice(0, 2) || "??"}
-              </span>
+            <div className="w-12 h-12 rounded-lg bg-[#141824] border border-[#1e2433] flex items-center justify-center font-mono font-bold text-sm text-[#94a3b8] shrink-0">
+              {symbol?.slice(0, 3) || "??"}
             </div>
           )}
 
           <div className="min-w-0">
-            {/* Name + Badge */}
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-text-primary truncate leading-tight">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-lg sm:text-xl font-bold text-[#f1f5f9] truncate tracking-tight font-sans">
                 {name || "Unknown Token"}
               </h1>
+              {symbol && (
+                <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-[#141824] text-[#38bdf8] border border-[#1e2433]">
+                  ${symbol}
+                </span>
+              )}
               {mode && (
-                <div className="flex items-center gap-1 shrink-0">
-                  <span className={`px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold border uppercase tracking-wider backdrop-blur-sm ${
-                    mode === 'pump'
-                      ? 'bg-orange-500/10 text-orange-400 border-orange-500/30'
-                      : 'bg-green-500/10 text-green-400 border-green-500/30'
-                  }`}>
-                    {mode === 'pump' ? 'Pump.fun' : 'DEX'}
-                  </span>
-                  <InfoTooltip
-                    content={
-                      mode === 'pump'
-                        ? "Token is trading on Pump.fun bonding curve. Price determined by bonding curve formula until graduation to Raydium."
-                        : "Token is listed on a decentralized exchange (DEX) with traditional liquidity pools."
-                    }
-                    position="bottom"
-                  />
-                </div>
+                <span
+                  className={`text-[10px] font-mono uppercase font-bold tracking-wider px-2 py-0.5 rounded border flex items-center gap-1 ${
+                    mode === "pump"
+                      ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                      : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                  }`}
+                >
+                  {mode === "pump" ? <Flame className="w-3 h-3 text-amber-400" /> : <ShieldCheck className="w-3 h-3 text-emerald-400" />}
+                  {mode === "pump" ? "Pump.fun Curve" : "DEX Pool"}
+                </span>
               )}
             </div>
 
-            {/* Symbol + Address row */}
-            <div className="flex items-center gap-2 mt-1.5">
-              {symbol && (
-                <span className="text-xs sm:text-sm text-text-secondary font-medium shrink-0">${symbol}</span>
-              )}
-              {symbol && <span className="text-text-muted/30 text-xs">|</span>}
-              <code className="text-[11px] sm:text-xs text-text-muted font-mono truncate">{shortAddress}</code>
-              <button
-                onClick={copyAddress}
-                className="p-1 rounded-md hover:bg-bg-secondary transition-colors group shrink-0"
-                title="Copy address"
-              >
-                {copied ? (
-                  <Check className="w-3.5 h-3.5 text-green-500" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5 text-text-muted group-hover:text-text-secondary" />
+            {/* Address bar & quick explorers */}
+            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#090b10] border border-[#1e2433]">
+                <code className="text-[11px] font-mono text-[#94a3b8]">{shortAddress}</code>
+                <button
+                  onClick={copyAddress}
+                  className="p-1 hover:text-[#f1f5f9] text-[#64748b] transition-colors"
+                  title="Copy full mint address"
+                >
+                  {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                </button>
+              </div>
+
+              {/* Direct Quick Launch Links */}
+              <div className="flex items-center gap-1 text-[11px] font-mono text-[#64748b]">
+                <a
+                  href={`https://dexscreener.com/solana/${address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2 py-0.5 rounded bg-[#141824] hover:bg-[#1a2030] hover:text-[#f1f5f9] border border-[#1e2433] transition-colors flex items-center gap-1"
+                >
+                  DexScreener
+                  <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                </a>
+                <a
+                  href={`https://solscan.io/token/${address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2 py-0.5 rounded bg-[#141824] hover:bg-[#1a2030] hover:text-[#f1f5f9] border border-[#1e2433] transition-colors flex items-center gap-1"
+                >
+                  Solscan
+                  <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                </a>
+                {mode === "pump" && (
+                  <a
+                    href={`https://pump.fun/coin/${address}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2 py-0.5 rounded bg-[#141824] hover:bg-[#1a2030] text-amber-400/90 border border-amber-500/20 transition-colors flex items-center gap-1"
+                  >
+                    Pump.fun
+                    <ExternalLink className="w-2.5 h-2.5 opacity-60" />
+                  </a>
                 )}
-              </button>
-              <a
-                href={`https://solscan.io/token/${address}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1 rounded-md hover:bg-bg-secondary transition-colors group shrink-0"
-                title="View on Solscan"
-              >
-                <ExternalLink className="w-3.5 h-3.5 text-text-muted group-hover:text-text-secondary" />
-              </a>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right: Price */}
+        {/* Right side: Real-time price telemetry */}
         {priceData && (
-          <div className="flex flex-col items-end gap-2 shrink-0">
-            <div className={`font-extrabold text-text-primary font-mono tracking-tight leading-none sm:text-3xl md:text-4xl ${priceData.priceUsd < 0.01 ? 'text-lg' : 'text-2xl'}`}>
-              {priceData.priceUsd < 0.01
-                ? `$${priceData.priceUsd.toFixed(10).replace(/0+$/, "").replace(/\.$/, "")}`
-                : `$${priceData.priceUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`}
+          <div className="flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 border-[#1e2433] pt-3 md:pt-0">
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-xl sm:text-2xl font-bold text-[#f8fafc] tabular-nums tracking-tight">
+                {formatUsd(priceData.priceUsd)}
+              </span>
+              <div
+                className={`flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-mono font-bold ${
+                  isPositive ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                }`}
+              >
+                {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                <span>{isPositive ? "+" : ""}{h24.toFixed(2)}%</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              {(() => {
-                const h24 = priceData.priceChange?.h24 ?? 0;
-                const isPositive = h24 >= 0;
-                return (
-                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-semibold text-xs sm:text-sm ${
-                    isPositive
-                      ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                      : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                  }`}>
-                    <span className="text-[10px]">{isPositive ? '▲' : '▼'}</span>
-                    <span>{isPositive ? '+' : ''}{Number(h24.toFixed(2))}%</span>
-                    <span className="text-text-muted/60 text-[11px] font-normal">24h</span>
-                  </div>
-                );
-              })()}
-              <InfoTooltip
-                content="Price change in the last 24 hours."
-                position="bottom"
-              />
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="text-xs text-text-muted font-mono bg-bg-secondary/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-border-color">
-                <span className="opacity-60 mr-1">MC:</span>
-                <span className="font-semibold text-text-secondary">
-                  ${(priceData.marketCap).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+
+            <div className="flex items-center gap-3 mt-1 text-xs font-mono text-[#94a3b8]">
+              <div>
+                <span className="text-[#64748b] mr-1">MCAP:</span>
+                <span className="text-[#f1f5f9] font-semibold">{formatCompact(priceData.marketCap)}</span>
+              </div>
+              <span className="text-[#1e2433]">|</span>
+              <div className="flex items-center gap-1">
+                <span className="text-[#64748b]">NETWORK:</span>
+                <span className="text-emerald-400 flex items-center gap-1 font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Solana
                 </span>
               </div>
-              <InfoTooltip
-                content={
-                  <div className="space-y-1">
-                    <p className="font-bold text-text-primary">Market Cap (MC)</p>
-                    <p>Total value of all tokens in circulation.</p>
-                    <p className="text-[11px] opacity-70 mt-1">Formula: Current Price × Circulating Supply</p>
-                  </div>
-                }
-                position="bottom"
-              />
             </div>
           </div>
         )}
