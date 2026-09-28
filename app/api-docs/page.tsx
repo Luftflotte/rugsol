@@ -24,7 +24,7 @@ export default function ApiDocsPage() {
               <span>//</span>
               <span>FORMAT: JSON</span>
               <span>//</span>
-              <span className="text-[#38bdf8]">PUBLIC ACCESS (NO AUTH REQUIRED)</span>
+              <span className="text-[#38bdf8]">$49/MONTH SUBSCRIPTION REQUIRED</span>
             </div>
             <p className="text-sm text-[#94a3b8] max-w-2xl leading-relaxed mt-3">
               Integrate RugSol deterministic token audits directly into your sniper bots, MEV routers, and trading dashboards.
@@ -73,7 +73,7 @@ export default function ApiDocsPage() {
                   </span>
                   <code className="text-sm font-mono font-semibold text-[#f8fafc]">/scan</code>
                 </div>
-                <span className="text-[10px] font-mono text-[#64748b]">RATE: 30 REQ/MIN</span>
+                <span className="text-[10px] font-mono text-[#64748b]">RATE: 500 REQ/MIN</span>
               </div>
 
               <div className="p-5 sm:p-6 space-y-6">
@@ -136,7 +136,7 @@ export default function ApiDocsPage() {
                       { code: "200", color: "text-emerald-400", desc: "Scan completed successfully with full audit telemetry payload." },
                       { code: "400", color: "text-amber-400", desc: "Invalid Solana address format or malformed JSON payload." },
                       { code: "404", color: "text-amber-400", desc: "Token mint address does not exist on Solana mainnet-beta." },
-                      { code: "429", color: "text-rose-400", desc: "Rate quota exceeded (30 requests/minute). Throttled." },
+                      { code: "429", color: "text-rose-400", desc: "Rate quota exceeded (500 requests/minute). Throttled." },
                       { code: "500", color: "text-rose-400", desc: "RPC node timeout or upstream infrastructure failure." },
                     ].map((s) => (
                       <div key={s.code} className="flex items-center gap-3 px-3.5 py-2 text-xs font-mono">
@@ -222,20 +222,20 @@ print(f"Verdict: Grade {data['grade']} ({data['score']}/100)")`}
             <div className="bg-[#0e1118] border border-[#1e2433] p-5 rounded-xl">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                 <div className="p-4 bg-[#121622] border border-[#1e2433] rounded-lg">
-                  <p className="text-2xl font-mono font-bold text-[#f8fafc] mb-1">30</p>
+                  <p className="text-2xl font-mono font-bold text-[#f8fafc] mb-1">500</p>
                   <p className="text-[10px] font-mono text-[#64748b] uppercase tracking-wider">Requests / Minute</p>
                 </div>
                 <div className="p-4 bg-[#121622] border border-[#1e2433] rounded-lg">
-                  <p className="text-2xl font-mono font-bold text-[#f8fafc] mb-1">500</p>
-                  <p className="text-[10px] font-mono text-[#64748b] uppercase tracking-wider">Requests / Day</p>
+                  <p className="text-2xl font-mono font-bold text-[#f8fafc] mb-1">&lt;100ms</p>
+                  <p className="text-[10px] font-mono text-[#64748b] uppercase tracking-wider">Response Time</p>
                 </div>
                 <div className="p-4 bg-[#121622] border border-[#1e2433] rounded-lg">
-                  <p className="text-2xl font-mono font-bold text-emerald-400 mb-1">FREE</p>
-                  <p className="text-[10px] font-mono text-[#64748b] uppercase tracking-wider">No API Key Required</p>
+                  <p className="text-2xl font-mono font-bold text-[#38bdf8] mb-1">$49</p>
+                  <p className="text-[10px] font-mono text-[#64748b] uppercase tracking-wider">Per Month</p>
                 </div>
               </div>
               <p className="text-xs text-[#94a3b8] mt-4 text-center">
-                Need high-throughput enterprise limits? Reach out via official X (@RugSolScanner) for whitelisted node allocations.
+                Production-grade API access with dedicated rate limits and priority routing.
               </p>
             </div>
           </section>

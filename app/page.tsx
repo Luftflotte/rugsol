@@ -124,7 +124,7 @@ export default function Home() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-mono font-bold text-text-primary">REST API For Trading Bots</span>
-                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">PUBLIC</span>
+                <span className="text-[10px] font-mono text-[#38bdf8] bg-[#38bdf8]/10 px-1.5 py-0.2 rounded border border-[#38bdf8]/20">$49/MO</span>
               </div>
               <p className="text-xs text-text-secondary">
                 Integrate instant token security checks directly into automated trading bots, copy trading systems, and execution pipelines.

@@ -56,7 +56,7 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
     return () => window.removeEventListener("keydown", handleEscape);
   }, [onClose]);
 
-  // Focus trap
+  // Focus trap - но без автофокуса
   useEffect(() => {
     const modalElement = document.querySelector('[data-modal="rate-limit"]');
     if (!modalElement) return;
@@ -84,7 +84,7 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
     };
 
     window.addEventListener("keydown", handleTab);
-    firstElement?.focus();
+    // Убрали автофокус: firstElement?.focus();
 
     return () => window.removeEventListener("keydown", handleTab);
   }, []);
@@ -217,9 +217,7 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
           initial="hidden"
           animate="visible"
           exit="exit"
-          className={`fixed inset-0 ${
-            isDark ? "bg-black/60" : "bg-gray-900/20 backdrop-blur-sm"
-          }`}
+          className="fixed inset-0 bg-black/40 backdrop-blur-md"
           onClick={onClose}
         />
 
@@ -244,25 +242,25 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
           animate="visible"
           exit="exit"
           data-modal="rate-limit"
-          className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6"
+          className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4"
           onClick={(e) => e.stopPropagation()}
         >
           {/* ========== Header Section ========== */}
-          <div className="text-center mb-6">
+          <div className="text-center mb-3">
             {/* Icon */}
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="inline-flex mb-4"
+              className="inline-flex mb-2"
             >
-              <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                 isDark
                   ? "bg-bg-card border border-border-color"
                   : "bg-white border border-gray-200 shadow-sm"
               }`}>
-                <Shield className={`w-7 h-7 ${
-                  isDark ? "text-emerald-500" : "text-emerald-600"
+                <Shield className={`w-5 h-5 ${
+                  isDark ? "text-cyan-400" : "text-cyan-600"
                 }`} />
               </div>
             </motion.div>
@@ -272,11 +270,11 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.25 }}
-              className={`text-2xl sm:text-3xl font-bold tracking-tight mb-2 ${
+              className={`text-xl sm:text-2xl font-bold tracking-tight mb-1.5 ${
                 isDark ? "text-text-primary" : "text-gray-900"
               }`}
             >
-              Free Scans Exhausted
+              Out of Free Scans
             </motion.h2>
 
             {/* Subtitle */}
@@ -284,38 +282,12 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.3 }}
-              className={`text-sm sm:text-base max-w-lg mx-auto leading-relaxed ${
+              className={`text-sm max-w-lg mx-auto leading-relaxed ${
                 isDark ? "text-text-secondary" : "text-gray-600"
               }`}
             >
-              Choose a tier below to continue scanning.
+              Choose a tier below to continue
             </motion.p>
-
-            {/* Trust Badges */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.35 }}
-              className="flex flex-wrap items-center justify-center gap-3 mt-4"
-            >
-              {[
-                { icon: <CheckCircle2 className="w-3 h-3" />, text: "Free forever" },
-                { icon: <Lock className="w-3 h-3" />, text: "No payment required" },
-                { icon: <Zap className="w-3 h-3" />, text: "Instant access" },
-              ].map((badge, i) => (
-                <span
-                  key={i}
-                  className={`inline-flex items-center gap-1.5 text-xs font-medium ${
-                    isDark ? "text-text-muted" : "text-gray-500"
-                  }`}
-                >
-                  <span className="text-emerald-500">
-                    {badge.icon}
-                  </span>
-                  {badge.text}
-                </span>
-              ))}
-            </motion.div>
           </div>
 
           {/* ========== Pricing Section ========== */}
@@ -326,6 +298,18 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
           >
             <PricingTiers compact />
           </motion.div>
+
+          {/* Disclaimer text */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
+            className={`text-xs text-center mt-3.5 max-w-2xl mx-auto leading-relaxed ${
+              isDark ? "text-text-muted" : "text-gray-500"
+            }`}
+          >
+            Connecting your wallet proves ownership via a signed message — no transactions, no gas fees.
+          </motion.p>
         </motion.div>
       </div>
     </AnimatePresence>

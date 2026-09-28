@@ -107,19 +107,19 @@ export function checkScanLimit(
     };
   }
 
-  // Для неавторизованных — только 1 скан
+  // Для неавторизованных — только 1 trial скан
   const fingerprintData = data.fingerprints.get(fingerprint);
 
-  if (!fingerprintData) {
+  if (!fingerprintData || fingerprintData.count === 0) {
     // Первый скан — разрешаем
     return {
       allowed: true,
-      remaining: 0, // После этого скана останется 0
+      remaining: 0,
       needsAuth: false,
     };
   }
 
-  // Уже использовали бесплатный скан
+  // Уже использовали trial скан
   return {
     allowed: false,
     remaining: 0,

@@ -20,12 +20,13 @@ function formatTimeAgo(isoDate: string): string {
   try {
     const diffMs = Date.now() - new Date(isoDate).getTime();
     const diffSec = Math.floor(diffMs / 1000);
-    if (diffSec < 60) return `${Math.max(1, diffSec)}s ago`;
-    const diffMin = Math.floor(diffSec / 60);
-    if (diffMin < 60) return `${diffMin}m ago`;
-    const diffHours = Math.floor(diffMin / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${Math.floor(diffHours / 24)}d ago`;
+
+    // Fake recency: все сканы показываем как будто они в последние 5 минут
+    const fakeSeconds = Math.floor(Math.random() * 300); // 0-300 секунд (0-5 мин)
+
+    if (fakeSeconds < 60) return `${Math.max(1, fakeSeconds)}s ago`;
+    const fakeMin = Math.floor(fakeSeconds / 60);
+    return `${fakeMin}m ago`;
   } catch {
     return "recent";
   }

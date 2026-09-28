@@ -17,10 +17,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // 1. Check recent scans cache (persisted to disk)
   let scan = getRecentScanByAddress(address);
 
-  // 2. No cache — run a live scan (for Twitter/OG crawlers)
-  if (!scan?.ogQuery && isValidSolanaAddress(address)) {
+  // 2. No cache — run a live scan ONLY in dev mode (for localhost OG cards)
+  // In production, OG cards are generated only from cached scans (after first client scan)
+  // This prevents double-counting scans and breaking the trial limit
+  if (!scan?.ogQuery && isValidSolanaAddress(address) && process.env.NODE_ENV === "development") {
     try {
-      // 3000ms timeout for Twitter crawler
+      // 3000ms timeout for dev OG generation
       const result = await Promise.race([
         scanToken(address),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Timeout fetching scan for OG")), 3000))

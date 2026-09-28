@@ -91,6 +91,9 @@ export async function POST(request: NextRequest) {
           }
         );
       }
+
+      // Записываем использование скана СРАЗУ после проверки (чтобы предотвратить race condition)
+      recordScan(fingerprint, walletAddress || undefined);
     }
 
     // Parse body
@@ -127,8 +130,10 @@ export async function POST(request: NextRequest) {
     // Cache result
     setCachedResult(address, result);
 
-    // Записываем использование скана
-    recordScan(fingerprint, walletAddress || undefined);
+    // Записываем использование скана для авторизованных пользователей (неавторизованные уже записаны выше)
+    if (walletAddress || isOwner || isDev) {
+      recordScan(fingerprint, walletAddress || undefined);
+    }
 
     // Add to recent scans with OG query for Twitter cards
     const metadata = result.checks.metadata.data;

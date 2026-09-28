@@ -149,7 +149,7 @@ export default function DocsPage() {
               {[
                 {
                   q: "Is RugSol completely free to use?",
-                  a: "Yes. Both the web terminal and the public REST API (/api/scan) are freely accessible without account registration or API keys.",
+                  a: "The web interface is free with wallet authentication. The REST API (/api/scan) requires a $49/month subscription for production use.",
                 },
                 {
                   q: "How does the honeypot detection work?",
