@@ -43,7 +43,7 @@
   --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
-  
+
   /* Custom theme colors */
   --color-bg-main: var(--bg-main);
   --color-bg-card: var(--bg-card);
@@ -54,7 +54,12 @@
   --color-border-color: var(--border-color);
   --color-primary-accent: var(--primary-accent);
   --color-secondary-accent: var(--secondary-accent);
+
+  /* Custom breakpoint */
+  --breakpoint-xs: 475px;
 }
+
+@custom-media --xs (width >= 475px);
 
 :root, [data-theme="light"], html.light {
   --radius: 0.5rem;

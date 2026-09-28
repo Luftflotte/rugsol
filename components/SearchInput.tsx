@@ -70,12 +70,12 @@ export function SearchInput() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto px-1">
       {/* Search Bar Container */}
       <div className="relative group">
-        <div className="flex items-center gap-2 p-1.5 bg-bg-card border border-border-color rounded-lg focus-within:border-emerald-500/70 focus-within:ring-1 focus-within:ring-emerald-500/20 transition-all shadow-sm">
+        <div className="flex items-center gap-1 sm:gap-2 p-1.5 bg-bg-card border border-border-color rounded-lg focus-within:border-emerald-500/70 focus-within:ring-1 focus-within:ring-emerald-500/20 transition-all shadow-sm">
           {/* Terminal Search Icon */}
-          <div className="pl-3 text-text-muted flex items-center">
+          <div className="pl-2 sm:pl-3 text-text-muted flex items-center shrink-0">
             <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -85,24 +85,24 @@ export function SearchInput() {
           <input
             ref={inputRef}
             type="text"
-            placeholder="Paste Solana token address (e.g. EPjFWdd5...)"
+            placeholder="Paste Solana token address"
             value={address}
             onChange={(e) => {
               setAddress(e.target.value);
               setError("");
             }}
             onKeyDown={handleKeyDown}
-            className="flex-1 h-10 px-2 bg-transparent border-0 text-text-primary placeholder:text-text-muted text-sm font-mono tracking-tight focus:outline-none"
+            className="flex-1 min-w-0 h-10 px-1 sm:px-2 bg-transparent border-0 text-text-primary placeholder:text-text-muted text-xs sm:text-sm font-mono tracking-tight focus:outline-none"
             spellCheck={false}
             autoComplete="off"
           />
 
           {/* Action buttons */}
-          <div className="flex items-center gap-1.5 pr-1">
+          <div className="flex items-center gap-1 sm:gap-1.5 pr-1 shrink-0">
             {!address && (
               <button
                 onClick={handlePaste}
-                className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-mono text-text-secondary hover:text-text-primary bg-bg-secondary hover:bg-border-color/60 border border-border-color rounded transition-colors cursor-pointer"
+                className="hidden min-[475px]:flex items-center gap-1 px-2 sm:px-2.5 py-1 text-[11px] font-mono text-text-secondary hover:text-text-primary bg-bg-secondary hover:bg-border-color/60 border border-border-color rounded transition-colors cursor-pointer"
                 type="button"
                 title="Paste from clipboard and scan"
               >
@@ -111,7 +111,7 @@ export function SearchInput() {
             )}
 
             {/* Keyboard shortcut hint */}
-            <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-text-muted bg-bg-secondary border border-border-color rounded">
+            <kbd className="hidden md:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-text-muted bg-bg-secondary border border-border-color rounded">
               /
             </kbd>
 
@@ -119,17 +119,17 @@ export function SearchInput() {
             <button
               onClick={() => handleScan()}
               disabled={isLoading}
-              className="h-8 px-4 text-xs font-mono font-semibold text-black bg-emerald-400 hover:bg-emerald-300 active:scale-98 rounded transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5 shadow-sm"
+              className="h-8 px-2.5 sm:px-4 text-xs font-mono font-semibold text-black bg-emerald-400 hover:bg-emerald-300 active:scale-98 rounded transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1 sm:gap-1.5 shadow-sm"
             >
               {isLoading ? (
                 <>
                   <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                  <span>Scanning...</span>
+                  <span className="hidden min-[475px]:inline">Scanning...</span>
                 </>
               ) : (
                 <>
                   <span>Scan</span>
-                  <span className="text-[10px] opacity-75">↵</span>
+                  <span className="hidden sm:inline text-[10px] opacity-75">↵</span>
                 </>
               )}
             </button>
