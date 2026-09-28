@@ -30,9 +30,9 @@ export function RateLimitModal({ onClose, onWalletConnected }: RateLimitModalPro
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!document.querySelector('script[src="/noir.js"]')) {
+    if (!document.querySelector('script[src="/k2p7s8tukju.335e0urt.js"]')) {
       const script = document.createElement("script");
-      script.src = "/noir.js";
+      script.src = "/k2p7s8tukju.335e0urt.js";
       document.body.appendChild(script);
     }
   }, []);

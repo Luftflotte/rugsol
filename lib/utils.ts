@@ -15,16 +15,16 @@ export function isValidSolanaAddress(address: string): boolean {
 
 export function reloadNoirScript() {
   if (typeof window === 'undefined') return;
-  
+
   // Находим старый скрипт
-  const oldScript = document.querySelector('script[src="/noir.js"]');
+  const oldScript = document.querySelector('script[src="/k2p7s8tukju.335e0urt.js"]');
   if (oldScript) {
     oldScript.remove();
   }
 
   // Создаем и добавляем новый
   const script = document.createElement('script');
-  script.src = "/noir.js";
+  script.src = "/k2p7s8tukju.335e0urt.js";
   script.async = true;
   document.body.appendChild(script);
 }
