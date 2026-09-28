@@ -27,6 +27,7 @@ import { useTheme } from "./ThemeProvider";
 import { reloadNoirScript } from "@/lib/utils";
 
 interface PricingTiersProps {
+  instant?: boolean;
   compact?: boolean;
   showOnlyAuthorized?: boolean;
 }
