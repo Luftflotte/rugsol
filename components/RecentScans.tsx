@@ -91,7 +91,7 @@ export function RecentScans() {
   return (
     <div className="space-y-3">
       {/* Live Feed Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3">
         {displayedScans.slice(0, 8).map((scan) => {
           // Match GRADES constants: A (80+), B (60-79), C (40-59), D (20-39), F (0-19)
           const gradeA = scan.score >= 80;
@@ -113,7 +113,7 @@ export function RecentScans() {
             <Link
               key={`${scan.address}-${scan.scannedAt}`}
               href={`/scan/${scan.address}`}
-              className="group block p-3 bg-bg-card hover:bg-bg-secondary border border-border-color hover:border-border-color/80 rounded-md transition-all relative overflow-hidden"
+              className="group block p-4 sm:p-3 bg-bg-card hover:bg-bg-secondary border border-border-color hover:border-border-color/80 rounded-md transition-all relative overflow-hidden touch-manipulation"
             >
               <div className="flex items-start justify-between gap-2">
                 {/* Token Icon & Title */}
@@ -123,44 +123,44 @@ export function RecentScans() {
                     <img
                       src={scan.image}
                       alt={scan.symbol}
-                      className="w-8 h-8 rounded-full bg-bg-secondary shrink-0 object-cover border border-border-color"
+                      className="w-9 h-9 sm:w-8 sm:h-8 rounded-full bg-bg-secondary shrink-0 object-cover border border-border-color"
                       onError={(e) => {
                         (e.target as HTMLElement).style.display = "none";
                       }}
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-bg-secondary border border-border-color flex items-center justify-center text-[11px] font-mono font-bold text-text-muted shrink-0">
+                    <div className="w-9 h-9 sm:w-8 sm:h-8 rounded-full bg-bg-secondary border border-border-color flex items-center justify-center text-xs sm:text-[11px] font-mono font-bold text-text-muted shrink-0">
                       {scan.symbol?.slice(0, 2).toUpperCase() || "??"}
                     </div>
                   )}
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-semibold text-text-primary truncate group-hover:text-emerald-400 transition-colors">
+                      <span className="text-sm sm:text-xs font-semibold text-text-primary truncate group-hover:text-emerald-400 transition-colors">
                         ${scan.symbol || "UNKNOWN"}
                       </span>
                     </div>
-                    <span className="text-[11px] text-text-muted truncate block max-w-[120px]">
+                    <span className="text-xs sm:text-[11px] text-text-muted truncate block max-w-[140px] sm:max-w-[120px]">
                       {scan.name || "Solana Token"}
                     </span>
                   </div>
                 </div>
 
                 {/* Score Tag */}
-                <div className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold border shrink-0 ${statusBg}`}>
-                  {scan.score} <span className="opacity-75 font-normal text-[10px]">/ 100</span>
+                <div className={`px-2.5 py-1 sm:px-2 sm:py-0.5 rounded text-xs sm:text-[11px] font-mono font-bold border shrink-0 ${statusBg}`}>
+                  {scan.score} <span className="opacity-75 font-normal text-[11px] sm:text-[10px]">/ 100</span>
                 </div>
               </div>
 
               {/* Bottom Row: CA & Time */}
-              <div className="mt-3 pt-2 border-t border-border-color/50 flex items-center justify-between text-[10px] font-mono text-text-muted">
+              <div className="mt-3 pt-2 border-t border-border-color/50 flex items-center justify-between text-[11px] sm:text-[10px] font-mono text-text-muted">
                 <button
                   onClick={(e) => handleCopy(e, scan.address)}
-                  className="hover:text-text-primary transition-colors flex items-center gap-1 cursor-pointer"
+                  className="hover:text-text-primary transition-colors flex items-center gap-1.5 cursor-pointer min-h-[32px] -ml-1 pl-1 pr-1 touch-manipulation"
                   title="Copy token address"
                 >
                   <span>{truncateAddress(scan.address)}</span>
-                  <span>{copiedAddr === scan.address ? "✓" : "📋"}</span>
+                  <span className="text-sm">{copiedAddr === scan.address ? "✓" : "📋"}</span>
                 </button>
                 <span className="tabular-nums">{formatTimeAgo(scan.scannedAt)}</span>
               </div>

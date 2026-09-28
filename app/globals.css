@@ -550,3 +550,31 @@ html.light .h-1\.5[class*="bg-[#161b26]"],
 html.light .h-3[class*="bg-[#161b26]"] {
   background-color: #e2e8f0 !important;
 }
+
+/* Ellipsis loading animation */
+@keyframes ellipsis1 {
+  0%, 100% { opacity: 0; }
+  25% { opacity: 1; }
+}
+
+@keyframes ellipsis2 {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@keyframes ellipsis3 {
+  0%, 100% { opacity: 0; }
+  75% { opacity: 1; }
+}
+
+.animate-ellipsis1 {
+  animation: ellipsis1 1.4s infinite;
+}
+
+.animate-ellipsis2 {
+  animation: ellipsis2 1.4s infinite;
+}
+
+.animate-ellipsis3 {
+  animation: ellipsis3 1.4s infinite;
+}

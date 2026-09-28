@@ -156,8 +156,8 @@ export function TokenHeader({ name, symbol, image, address, priceData, mode }: T
 
         {/* Right side: Real-time price telemetry */}
         {priceData && (
-          <div className="flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 border-[#1e2433] pt-3 md:pt-0">
-            <div className="flex items-baseline gap-2">
+          <div className="flex flex-col items-start md:items-end gap-2 border-t md:border-t-0 border-[#1e2433] pt-3 md:pt-0">
+            <div className="flex items-baseline gap-2 flex-wrap">
               <span className="font-mono text-xl sm:text-2xl font-bold text-[#f8fafc] tabular-nums tracking-tight">
                 {formatUsd(priceData.priceUsd)}
               </span>
@@ -171,12 +171,12 @@ export function TokenHeader({ name, symbol, image, address, priceData, mode }: T
               </div>
             </div>
 
-            <div className="flex items-center gap-3 mt-1 text-xs font-mono text-[#94a3b8]">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 text-xs font-mono text-[#94a3b8] w-full md:w-auto">
               <div>
-                <span className="text-[#64748b] mr-1">MCAP:</span>
+                <span className="text-[#64748b] mr-1">MC/LP:</span>
                 <span className="text-[#f1f5f9] font-semibold">{formatCompact(priceData.marketCap)}</span>
               </div>
-              <span className="text-border-color">|</span>
+              <span className="text-border-color hidden sm:inline">|</span>
               <div className="flex items-center gap-1">
                 <span className="text-[#64748b]">NETWORK:</span>
                 <span className="text-emerald-400 flex items-center gap-1 font-semibold">

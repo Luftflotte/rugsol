@@ -85,14 +85,14 @@ export function SearchInput() {
           <input
             ref={inputRef}
             type="text"
-            placeholder="Paste Solana token address"
+            placeholder="Paste token address"
             value={address}
             onChange={(e) => {
               setAddress(e.target.value);
               setError("");
             }}
             onKeyDown={handleKeyDown}
-            className="flex-1 min-w-0 h-10 px-1 sm:px-2 bg-transparent border-0 text-text-primary placeholder:text-text-muted text-xs sm:text-sm font-mono tracking-tight focus:outline-none"
+            className="flex-1 min-w-0 h-10 px-2 sm:px-2 bg-transparent border-0 text-text-primary placeholder:text-text-muted text-xs sm:text-sm font-mono tracking-tight focus:outline-none"
             spellCheck={false}
             autoComplete="off"
           />
@@ -102,7 +102,7 @@ export function SearchInput() {
             {!address && (
               <button
                 onClick={handlePaste}
-                className="hidden min-[475px]:flex items-center gap-1 px-2 sm:px-2.5 py-1 text-[11px] font-mono text-text-secondary hover:text-text-primary bg-bg-secondary hover:bg-border-color/60 border border-border-color rounded transition-colors cursor-pointer"
+                className="hidden min-[475px]:flex items-center gap-1 px-2.5 sm:px-2.5 py-1.5 text-[11px] font-mono text-text-secondary hover:text-text-primary bg-bg-secondary hover:bg-border-color/60 border border-border-color rounded transition-colors cursor-pointer touch-manipulation"
                 type="button"
                 title="Paste from clipboard and scan"
               >
@@ -119,7 +119,7 @@ export function SearchInput() {
             <button
               onClick={() => handleScan()}
               disabled={isLoading}
-              className="h-8 px-2.5 sm:px-4 text-xs font-mono font-semibold text-black bg-emerald-400 hover:bg-emerald-300 active:scale-98 rounded transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1 sm:gap-1.5 shadow-sm"
+              className="h-9 min-w-[44px] px-3 sm:px-4 text-xs font-mono font-semibold text-black bg-emerald-400 hover:bg-emerald-300 active:scale-98 rounded transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1 sm:gap-1.5 shadow-sm touch-manipulation"
             >
               {isLoading ? (
                 <>

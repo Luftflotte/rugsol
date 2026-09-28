@@ -537,8 +537,15 @@ export default function ScanPageClient() {
                   </div>
 
                   <div className="pt-4 border-t border-[#1e2433] flex items-center justify-between text-[#64748b]">
-                    <span>Calculating risk deductions...</span>
-                    <span className="animate-spin text-[#38bdf8]">◷</span>
+                    <span className="flex items-center">
+                      Calculating risk deductions
+                      <span className="inline-flex ml-0.5">
+                        <span className="animate-ellipsis1">.</span>
+                        <span className="animate-ellipsis2">.</span>
+                        <span className="animate-ellipsis3">.</span>
+                      </span>
+                    </span>
+                    <span className="animate-spin text-[#38bdf8] text-lg">◷</span>
                   </div>
                 </div>
               </div>

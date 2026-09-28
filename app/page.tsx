@@ -10,17 +10,17 @@ export default function Home() {
       <Navbar />
 
       <main className="pt-20 md:pt-24 pb-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
           
           {/* Hero Section */}
-          <div className="text-center max-w-3xl mx-auto mb-14">
+          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-14">
             {/* Main Title */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-text-primary mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-text-primary mb-4 px-2 sm:px-0">
               Instant Solana Token Security & Risk Intelligence
             </h1>
 
             {/* Description */}
-            <p className="text-sm sm:text-base text-text-secondary max-w-xl mx-auto mb-8 font-normal leading-relaxed">
+            <p className="text-sm sm:text-base text-text-secondary max-w-xl mx-auto mb-8 font-normal leading-relaxed px-4 sm:px-0">
               Detect honeypots, unrevoked mint/freeze authorities, suspicious holder clusters, and liquidity locks in under 3 seconds.
             </p>
 
@@ -50,69 +50,69 @@ export default function Home() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-3">
               {/* Check 1 */}
-              <div className="p-4 bg-bg-card border border-border-color rounded-md">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-mono font-bold text-text-primary">01. Mint Authority</span>
-                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">SUPPLY CHECK</span>
+              <div className="p-5 sm:p-4 bg-bg-card border border-border-color rounded-md hover:border-border-color/60 transition-colors">
+                <div className="flex items-center justify-between mb-2.5 sm:mb-2">
+                  <span className="text-sm sm:text-xs font-mono font-bold text-text-primary">01. Mint Authority</span>
+                  <span className="text-[11px] sm:text-[10px] font-mono font-semibold px-2 sm:px-1.5 py-1 sm:py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap">SUPPLY CHECK</span>
                 </div>
-                <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                <p className="text-sm sm:text-xs text-text-secondary leading-relaxed font-normal">
                   Verifies if the token mint authority is revoked. Unrevoked authorities allow creators to mint billions of new tokens and crash the market price.
                 </p>
               </div>
 
               {/* Check 2 */}
-              <div className="p-4 bg-bg-card border border-border-color rounded-md">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-mono font-bold text-text-primary">02. Freeze Authority</span>
-                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">BLACKLIST CHECK</span>
+              <div className="p-5 sm:p-4 bg-bg-card border border-border-color rounded-md hover:border-border-color/60 transition-colors">
+                <div className="flex items-center justify-between mb-2.5 sm:mb-2">
+                  <span className="text-sm sm:text-xs font-mono font-bold text-text-primary">02. Freeze Authority</span>
+                  <span className="text-[11px] sm:text-[10px] font-mono font-semibold px-2 sm:px-1.5 py-1 sm:py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap">BLACKLIST CHECK</span>
                 </div>
-                <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                <p className="text-sm sm:text-xs text-text-secondary leading-relaxed font-normal">
                   Inspects if freeze authority is revoked. Active freeze rights enable malicious developers to prevent buyers from ever transferring or selling their coins.
                 </p>
               </div>
 
               {/* Check 3 */}
-              <div className="p-4 bg-bg-card border border-border-color rounded-md">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-mono font-bold text-text-primary">03. Sell Simulation</span>
-                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">HONEYPOT CHECK</span>
+              <div className="p-5 sm:p-4 bg-bg-card border border-border-color rounded-md hover:border-border-color/60 transition-colors">
+                <div className="flex items-center justify-between mb-2.5 sm:mb-2">
+                  <span className="text-sm sm:text-xs font-mono font-bold text-text-primary">03. Sell Simulation</span>
+                  <span className="text-[11px] sm:text-[10px] font-mono font-semibold px-2 sm:px-1.5 py-1 sm:py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap">HONEYPOT CHECK</span>
                 </div>
-                <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                <p className="text-sm sm:text-xs text-text-secondary leading-relaxed font-normal">
                   Executes automated swap routing simulation on Jupiter to prove sellability. Detects disguised honeypots and broken swap routes before you trade.
                 </p>
               </div>
 
               {/* Check 4 */}
-              <div className="p-4 bg-bg-card border border-border-color rounded-md">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-mono font-bold text-text-primary">04. LP Burn & Lock</span>
-                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">POOL LIQUIDITY</span>
+              <div className="p-5 sm:p-4 bg-bg-card border border-border-color rounded-md hover:border-border-color/60 transition-colors">
+                <div className="flex items-center justify-between mb-2.5 sm:mb-2">
+                  <span className="text-sm sm:text-xs font-mono font-bold text-text-primary">04. LP Burn & Lock</span>
+                  <span className="text-[11px] sm:text-[10px] font-mono font-semibold px-2 sm:px-1.5 py-1 sm:py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap">POOL LIQUIDITY</span>
                 </div>
-                <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                <p className="text-sm sm:text-xs text-text-secondary leading-relaxed font-normal">
                   Validates Raydium, Orca, and Meteora pool reserves. Verifies that LP tokens are burned (100%) or locked in verified escrow contracts.
                 </p>
               </div>
 
               {/* Check 5 */}
-              <div className="p-4 bg-bg-card border border-border-color rounded-md">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-mono font-bold text-text-primary">05. Whale Distribution</span>
-                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">TOP 10 HOLDERS</span>
+              <div className="p-5 sm:p-4 bg-bg-card border border-border-color rounded-md hover:border-border-color/60 transition-colors">
+                <div className="flex items-center justify-between mb-2.5 sm:mb-2">
+                  <span className="text-sm sm:text-xs font-mono font-bold text-text-primary">05. Whale Distribution</span>
+                  <span className="text-[11px] sm:text-[10px] font-mono font-semibold px-2 sm:px-1.5 py-1 sm:py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap">TOP 10 HOLDERS</span>
                 </div>
-                <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                <p className="text-sm sm:text-xs text-text-secondary leading-relaxed font-normal">
                   Scans holder ledger for dangerous supply concentration. Flags coordinated sniper clusters and insider wallets controlling &gt;15% of circulating supply.
                 </p>
               </div>
 
               {/* Check 6 */}
-              <div className="p-4 bg-bg-card border border-border-color rounded-md">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-mono font-bold text-text-primary">06. Bonding Curve State</span>
-                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">PUMP.FUN TELEMETRY</span>
+              <div className="p-5 sm:p-4 bg-bg-card border border-border-color rounded-md hover:border-border-color/60 transition-colors">
+                <div className="flex items-center justify-between mb-2.5 sm:mb-2">
+                  <span className="text-sm sm:text-xs font-mono font-bold text-text-primary">06. Bonding Curve State</span>
+                  <span className="text-[11px] sm:text-[10px] font-mono font-semibold px-2 sm:px-1.5 py-1 sm:py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 whitespace-nowrap">PUMP.FUN TELEMETRY</span>
                 </div>
-                <p className="text-xs text-text-secondary leading-relaxed font-normal">
+                <p className="text-sm sm:text-xs text-text-secondary leading-relaxed font-normal">
                   Decodes on-chain Pump.fun bonding curves, calculates remaining SOL to Raydium graduation, and analyzes creator wallet track record.
                 </p>
               </div>
