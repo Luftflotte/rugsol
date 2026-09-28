@@ -32,7 +32,7 @@ export function Logo({ size = "md", showText = true }: LogoProps) {
       <div className="flex items-center gap-1.5">
         <div className="bg-[var(--silver-accent)]/30 rounded" style={{ width: icon, height: icon }} />
         {showText && (
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center pb-1">
             <span className={`${textSize} font-bold tracking-tight text-text-primary leading-tight`}>
               RugSol
             </span>
@@ -88,10 +88,10 @@ export function Logo({ size = "md", showText = true }: LogoProps) {
           fill="none"
         />
       </svg>
-      
+
       {/* Text */}
       {showText && (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center pb-1">
           <span
             className={`${textSize} font-bold tracking-tight leading-tight bg-gradient-to-r from-text-primary via-[var(--silver-accent)] to-[var(--silver-light)] bg-clip-text text-transparent group-hover:opacity-90 transition-opacity`}
             style={{
